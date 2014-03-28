@@ -1,4 +1,4 @@
-# adm-client
+#  OpenEMap-Admin-WebUserInterface
 
 Administrative client for map-client
 
