@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>adm-client</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
+
+    <link rel="stylesheet" type="text/css" href="http://riges.swecosundsvall.se/ext-4.2.1/resources/css/ext-all-neptune.css">
+    <link rel="steylsheet" type="text/css" href="oeadmin.css" />
+    <script type="text/javascript" src="/ext-4.2.1/ext-debug.js"></script>
+    <script type="text/javascript" src="/ext-4.2.1/ext-theme-neptune.js"></script>
+    <script type="text/javascript" src="/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
+    <script type="text/javascript" src="/OpenLayers-2.13.1/OpenLayers.js"></script>
+    <script type="text/javascript" src="/geoext2-all.js"></script>
+    
+    <script type="text/javascript">
+        var appPath = '/openemapadmin'; 
+        //var defaultWMSServer = 'http://www.corsproxy.com/extmaptest.sundsvall.se/geoserver/wms?request=GetCapabilities&version=1.1.0';
+        //var defaultWMSServer = 'http://www.corsproxy.com/nomad.swecosundsvall.se/geoserver/wms?request=GetCapabilities&version=1.1.0';
+        var defaultWMSServer = 'gwc.xml'; 
+        Ext.Loader.setConfig({
+            disableCaching: false,
+            paths: {
+                AdmClient: 'src/main/javascript',
+                OpenEMap: '../map-client/src/main/javascript'
+            }
+          });
+          
+    </script> 
+    <script type="text/javascript" src="src/main/javascript/App.js"></script>
+</head>
+<body>
+</body>
+</html>

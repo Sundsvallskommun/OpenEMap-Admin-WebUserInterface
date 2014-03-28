@@ -1,0 +1,62 @@
+{
+    "name": "Extent",
+    "maxExtent": [
+    	487000.0,
+    	6887000.0,
+    	749144.0,
+    	7149144.0
+    ],
+    "attribution" : "Copyright",
+    "autoClearDrawLayer": true,
+    "extent": [
+        487000.0,
+    	6887000.0,
+    	749144.0,
+    	7149144.0
+    ],
+    "units" : "m",
+    "projection" : "EPSG:3006",
+     /*"resolutions": [
+            480,
+            280,
+            140,
+            70,
+            28,
+            14,
+            7,
+            4.2,
+            2.8,
+            1.4,
+            0.56,
+            0.28,
+            0.14,
+            0.112
+        ],*/
+    "resolutions": [256.0, 128.0, 36.0, 12.0, 4.0, 2.0, 1.0, 0.5, 0.25, 0.125],
+    "layers": [
+        {
+            "name": "Karta",
+            "wms": {
+                "url": "http://extmaptest.sundsvall.se/geoserver/gwc/service/wms",
+                "params": {
+                    "layers": "Lantmateriet:topowebbkartan_nedtonad",
+                    "format": "image/png"
+                },
+                "options": {
+                    "isBaseLayer": true,
+                    "displayInLayerSwitcher": false
+                }
+            }
+        }
+    ],
+    "tools": [ {
+            "type": "DrawObject",
+            "objectConfig": {
+                "type": "R"
+            },
+            "tooltip": "Draw extent"
+        }, {
+        	"type": "ModifyGeometry"
+        }
+    ]
+}
