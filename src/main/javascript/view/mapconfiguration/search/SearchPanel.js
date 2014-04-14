@@ -1,15 +1,22 @@
 Ext.define('AdmClient.view.mapconfiguration.search.SearchPanel', {
-	extend : 'Ext.panel.Panel',
+	extend : 'Ext.grid.Panel',
 	alias : 'widget.searchPanel',
 
 	initComponent : function() {
+		
+		Ext.applyIf(this, {
 
-		this.items = [{
-			xtype: 'checkbox',
-			width : 500,
-			itemId: 'searchLM',
-            fieldLabel: 'S&ouml;k mot lantm&auml;teri (address, ort, fastighet)'
-		}];
+			columns : [ {
+				text : 'Municipality',
+				dataIndex : 'Municipality',
+				width : 200
+			}, {
+				xtype : 'checkcolumn',
+				dataIndex : 'selected'
+			} ]
+		});
+
+		this.store = new AdmClient.store.Municipalities();
 		this.callParent(arguments);
 	}
 });
