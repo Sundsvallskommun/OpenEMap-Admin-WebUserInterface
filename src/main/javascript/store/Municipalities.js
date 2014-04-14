@@ -18,5 +18,4 @@ Ext.define('AdmClient.store.Municipalities', {
 	         [ 'Örnskoldsvik', false ],
 	         [ 'Nordmaling', false ]
 	]
-	
 });
