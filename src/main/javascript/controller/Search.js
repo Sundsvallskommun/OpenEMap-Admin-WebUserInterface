@@ -59,11 +59,12 @@ Ext.define('AdmClient.controller.Search', {
 		var store = this.getSearchGrid().getStore();
 		store.sync();
 		
-		AdmClient.app.config.municipalities = [];
+		AdmClient.app.config.options = AdmClient.app.config.options || {};
+		AdmClient.app.config.options.municipalities = [];
 		
 		var municipalities = store.data.items.forEach(function(m){
 			if (m.data.selected){
-				AdmClient.app.config.municipalities.push(m.data.Municipality);
+				AdmClient.app.config.options.municipalities.push(m.data.Municipality);
 			}
 		});
 		
