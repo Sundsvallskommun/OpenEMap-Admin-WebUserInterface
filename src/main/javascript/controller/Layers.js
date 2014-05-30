@@ -31,6 +31,7 @@ Ext.define('AdmClient.controller.Layers', {
             }
         });
     },
+
     onSaveClick: function() {
         var layers = this.getLayersStore();
         layers.sync();

@@ -66,13 +66,33 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		            }
 		        }),
 		        displayField: 'name',
-		        hideHeaders: true,
-
+		        hideHeaders: false,
+		        tbar : [{
+		        	text : 'Nytt grupplager',
+		        	itemId : 'newGroupLayer'
+		    	}],
 		        columns: [
 		            {
-		                xtype: 'gx_treecolumn',
+		                xtype: 'treecolumn',
 		                flex: 1,
-		                dataIndex: 'name'
+		                dataIndex: 'name',
+		                text : 'Lagernamn'
+		            },
+		            {
+		                xtype: 'actioncolumn',
+		                width: 40,
+		                icon: 'resources/images/edit.png',	
+		                tooltip: '&Auml;ndra namn',
+		                handler: function(grid, rowIndex, colIndex) {
+		                	var node = grid.getStore().getAt(rowIndex);
+		                	Ext.Msg.prompt('Name', 'Nytt lagernamn:', function(btn, text){
+    							if (btn == 'ok'){
+    								debugger;
+        							node.set('name', text.trim());
+        							node.store.save();
+    							}
+							});
+						}
 		            },
 		            {
 		                xtype: 'checkcolumn',

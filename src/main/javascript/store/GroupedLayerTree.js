@@ -23,8 +23,8 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
     listeners: {
         beforeinsert: function(store, node, refNode, eOpts) { return this.onBeforeInsert(store, node, refNode); },
         beforeappend: function(store, node, eOpts) { return this.onBeforeAppend(store, node); },
-        insert: function(store, node, refNode, eOpts) { this.onInsertAndAppend(node); },
-        append: function(store, node, index, eOpts) { this.onInsertAndAppend(node); },
+        //insert: function(store, node, refNode, eOpts) { this.onInsertAndAppend(node); },
+        //append: function(store, node, index, eOpts) { this.onInsertAndAppend(node); },
         remove: function(store, node, isMove, eOpts) { this.onRemove(store, node, isMove); },
         datachanged: function() { this.onUpdate(); }
     },
@@ -66,7 +66,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         	     "isBaseLayer": false,
         	     "visibility": false
         	    };
-        	if (node.raw.options.metadata.metadataURLs && node.raw.options.metadata.metadataURLs.length > 0){
+        	if (node.raw.options && node.raw.options.metadata.metadataURLs && node.raw.options.metadata.metadataURLs.length > 0){
         		attr.metadataUrl = node.raw.options.metadata.metadataURLs[0].href;
         	}
         }
@@ -83,15 +83,19 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
     nodeToLayerConfig: function(node, data) {
         var attributeList = ['name','wms','wfs','metadataUrl'];
         var layer = {};
+
+        if(node.hasChildNodes()) {
+            layer.layers = [];
+            return layer;
+        }
+        
         attributeList.forEach(function(attributeName) {
             var attr = this.tryToGetRecordAttribute(node, attributeName);
             if(attr) {
                 layer[attributeName] = attr;
             }
         }, this);
-        if(node.hasChildNodes()) {
-            layer.layers = [];
-        }
+
         if(layer.wms && layer.wms.options) {
             var isBaseLayer = this.tryToGetRecordAttribute(node, 'isBaseLayer');
             if(!isBaseLayer) {
@@ -200,7 +204,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
                     return this.get('layer');
                 };
                 // Add WMS legened 
-                //this.addWMSLegend(subnode);
+                this.addWMSLegend(subnode);
 
                 // If store is connected to a map, add layer to map
                 if(layer && layer !== '' && this.map) {

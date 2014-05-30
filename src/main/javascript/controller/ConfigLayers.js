@@ -29,6 +29,10 @@ Ext.define('AdmClient.controller.ConfigLayers', {
                     this.loadWMSCapabilities(field.getValue());
                 }
             },
+            '#newGroupLayer' :{
+                click: this.onNewGrouplayer,
+                scope: this
+            },
             'checkcolumn' : {
             	checkchange : this.onBaseLayer
             }
@@ -40,6 +44,19 @@ Ext.define('AdmClient.controller.ConfigLayers', {
         });
 
         
+    },
+
+    onNewGrouplayer : function(){
+        var self = this;
+        Ext.Msg.prompt('Name', 'Nytt grupplagernamn:', function(btn, text){
+            if (btn == 'ok'){
+                var tree = self.getMapConfigLayerTree();
+                var root = tree.getRootNode();
+                root.appendChild({
+                    name : text
+                });
+            }
+        });
     },
     
     onBaseLayer : function(chkBox, rowIndex, checked, eOpts){
@@ -188,7 +205,7 @@ Ext.define('AdmClient.controller.ConfigLayers', {
 
     iterateLayers: function(layer) {
         // Is node checked?
-        layer.checked = layer.wms && layer.wms.options ? layer.wms.options.visibility : false;
+        //layer.checked = layer.wms && layer.wms.options ? layer.wms.options.visibility : false;
         // Get url from Server and set to layer
         if(typeof layer.serverId !== 'undefined' && layer.serverId !== '') {
             var server = Ext.StoreManager.get('servers').getById(layer.serverId);

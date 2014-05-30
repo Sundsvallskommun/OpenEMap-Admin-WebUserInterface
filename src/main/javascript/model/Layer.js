@@ -12,7 +12,7 @@ Ext.define('AdmClient.model.Layer', {
     	'isSearchable',
     	'urlToMetadata',
     	'serverId',
-    	{name: 'isBaseLayer', mapping: 'wms.options.isBaseLayer',  type : 'boolean'},
+    	//{name: 'isBaseLayer', mapping: 'wms.options.isBaseLayer',  type : 'boolean'},
     	'layer' // OpenLayers reference
     ],
     proxy: {
