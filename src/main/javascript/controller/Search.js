@@ -36,11 +36,6 @@ Ext.define('AdmClient.controller.Search', {
 			panel.store.data.items[i].save();
 		}
 		
-		AdmClient.app.config.municipalities = [];
-		AdmClient.app.config.municipalities.push("Sundsvall");
-		AdmClient.app.config.municipalities.push("Kramfors");
-		AdmClient.app.config.municipalities.push("Örnskoldsvik");
-		
 		AdmClient.app.config.municipalities.forEach(function(m){
 			for (var i = 0; i < panel.store.data.items.length; i++){
 				if (m === panel.store.data.items[i].data.Municipality){
@@ -54,19 +49,29 @@ Ext.define('AdmClient.controller.Search', {
 	
 	municipalityChanged : function(chkBox, rowIndex, checked, eOpts){
 
-		var municipalityName = 'sundsvall';
-		
 		var store = this.getSearchGrid().getStore();
 		store.sync();
 		
-		AdmClient.app.config.options = AdmClient.app.config.options || {};
-		AdmClient.app.config.options.municipalities = [];
+		AdmClient.app.config.search = AdmClient.app.config.search || {};
+		AdmClient.app.config.search.searchEstates = {};
+		AdmClient.app.config.search.searchEstates.options = {};
+		AdmClient.app.config.search.searchEstates.options.municipalities = [];
+
+		AdmClient.app.config.search.searchAddresses = {};
+		AdmClient.app.config.search.searchAddresses.options = {};
+		AdmClient.app.config.search.searchAddresses.options.municipalities = [];
+		
+		AdmClient.app.config.search.searchPlacenames = {};
+		AdmClient.app.config.search.searchPlacenames.options = {};
+		AdmClient.app.config.search.searchPlacenames.options.municipalities = [];
+
 		
 		var municipalities = store.data.items.forEach(function(m){
 			if (m.data.selected){
-				AdmClient.app.config.options.municipalities.push(m.data.Municipality);
+				AdmClient.app.config.search.searchEstates.options.municipalities.push(m.data.Municipality);
+				AdmClient.app.config.search.searchAddresses.options.municipalities.push(m.data.Municipality);
+				AdmClient.app.config.search.searchPlacenames.options.municipalities.push(m.data.municipalityCode);
 			}
 		});
-		
 	}
 });
