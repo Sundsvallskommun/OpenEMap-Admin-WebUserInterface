@@ -129,6 +129,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
             
             node.childNodes.forEach(function(subnode) {
                 if(layerConfig[index].layers) {
+                    layerConfig[index].name = subnode.parentNode.get('name');
                     layerConfig[index].layers.push(this.nodeToLayerConfig(subnode));
                 }
             }, this);
