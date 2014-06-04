@@ -11,6 +11,10 @@ Ext.define('AdmClient.controller.Search', {
 	
 	init : function() {
 		this.control({
+			'#searchGridConfig' :{
+				render : this.markGrid
+
+			},
 			'#searchGridConfig checkcolumn' : {
 				checkchange : this.municipalityChanged
 			},
@@ -23,6 +27,31 @@ Ext.define('AdmClient.controller.Search', {
 				select : this.selectConfiguration
 			}
 		});
+	},
+
+	markGrid : function(){
+
+		var panel = this.getSearchGrid();
+		for (var i = 0; i < panel.store.data.items.length; i++){
+			panel.store.data.items[i].data.selected = false;
+			panel.store.data.items[i].save();
+		}
+
+		for (var i = 0; i < panel.store.data.items.length; i++){
+			panel.store.data.items[i].data.selected = false;
+			var municipality = panel.store.data.items[i];
+			for (var j = 0; j < AdmClient.app.config.search.searchAddresses.options.municipalities.length; j++){
+				var searchMunicipality = AdmClient.app.config.search.searchAddresses.options.municipalities[j];
+				if (searchMunicipality.constructor === String){
+					if (searchMunicipality === municipality.data.Municipality){
+						municipality.data.selected = true;
+						municipality.save();
+					}
+				}
+			}
+		}
+		panel.updateLayout();
+
 	},
 	
 	selectConfiguration : function(){

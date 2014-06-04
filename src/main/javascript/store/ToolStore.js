@@ -18,6 +18,7 @@ Ext.define('AdmClient.store.ToolStore', {
 	         [ 'DrawGeometry', 'Path', 'Action for draw line tool.', false ],
 	         [ 'DrawGeometry', 'Polygon', 'Action for draw polygon tool.', false ],
 			[ 'DeleteGeometry', 'Delete geometry', 'Tool for delete geometry.', false ],
+			[ 'DeleteAllGeometry', 'Delete all geometry', 'Tool for delete all geometries on map.', false ],
 			//[ 'DrawObject', 'Draw object', 'Tool for draw object i e, square, L-shape, hexagon-shape etc.', false ],
 			[ 'FullExtent', 'Full extent', 'Zoom to full extent.', false ],
 			[ 'Identify', 'Identify', 'Identify features.', false ],
