@@ -40,12 +40,14 @@ Ext.define('AdmClient.controller.Search', {
 		for (var i = 0; i < panel.store.data.items.length; i++){
 			panel.store.data.items[i].data.selected = false;
 			var municipality = panel.store.data.items[i];
-			for (var j = 0; j < AdmClient.app.config.search.searchAddresses.options.municipalities.length; j++){
-				var searchMunicipality = AdmClient.app.config.search.searchAddresses.options.municipalities[j];
-				if (searchMunicipality.constructor === String){
-					if (searchMunicipality === municipality.data.Municipality){
-						municipality.data.selected = true;
-						municipality.save();
+			if (AdmClient.app.config.search){
+				for (var j = 0; j < AdmClient.app.config.search.searchAddresses.options.municipalities.length; j++){
+					var searchMunicipality = AdmClient.app.config.search.searchAddresses.options.municipalities[j];
+					if (searchMunicipality.constructor === String){
+						if (searchMunicipality === municipality.data.Municipality){
+							municipality.data.selected = true;
+							municipality.save();
+						}
 					}
 				}
 			}
@@ -64,15 +66,16 @@ Ext.define('AdmClient.controller.Search', {
 			panel.store.data.items[i].data.selected = false;
 			panel.store.data.items[i].save();
 		}
-		
-		AdmClient.app.config.municipalities.forEach(function(m){
-			for (var i = 0; i < panel.store.data.items.length; i++){
-				if (m === panel.store.data.items[i].data.Municipality){
-					panel.store.data.items[i].data.selected = true;
-					panel.store.data.items[i].save();
+		if (AdmClient.app.config.municipalities){
+			AdmClient.app.config.municipalities.forEach(function(m){
+				for (var i = 0; i < panel.store.data.items.length; i++){
+					if (m === panel.store.data.items[i].data.Municipality){
+						panel.store.data.items[i].data.selected = true;
+						panel.store.data.items[i].save();
+					}
 				}
-			}
-		});
+			});
+		}
 		panel.updateLayout();
 	},
 	

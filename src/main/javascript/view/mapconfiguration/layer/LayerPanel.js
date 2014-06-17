@@ -3,10 +3,12 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 	alias : 'widget.layerPanel',
 
 	requires: [
+		'Ext.panel.Panel',
 		'Ext.tree.Panel',
 		'GeoExt.data.WmsCapabilitiesLayerStore',
 		'GeoExt.tree.Column',
-		'Ext.tree.plugin.TreeViewDragDrop'
+		'Ext.tree.plugin.TreeViewDragDrop',
+		'AdmClient.view.mapconfiguration.layer.LayerDetails'
 	],
 
 	layout : {
@@ -81,13 +83,12 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		            {
 		                xtype: 'actioncolumn',
 		                width: 40,
-		                icon: 'resources/images/edit.png',	
+		                icon: '/openemap-admin/font-awesome/black/png/16/pencil.png',
 		                tooltip: '&Auml;ndra namn',
 		                handler: function(grid, rowIndex, colIndex) {
 		                	var node = grid.getStore().getAt(rowIndex);
 		                	Ext.Msg.prompt('Name', 'Nytt lagernamn:', function(btn, text){
     							if (btn == 'ok'){
-    								debugger;
         							node.set('name', text.trim());
         							node.store.save();
     							}
@@ -103,7 +104,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		            {
 		                xtype: 'actioncolumn',
 		                width: 40,
-		                icon: 'resources/images/cross.png',	
+		                icon: '/openemap-admin/font-awesome/black/png/16/times.png',
 		                tooltip: 'Ta bort',
 		                handler: function(grid, rowIndex, colIndex) {
 		                	var node = grid.getStore().getAt(rowIndex);
@@ -111,8 +112,15 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		                	for (var i = 0; i < node.childNodes.length; i++) {
 		                		node.removeChild(node.childNodes[i]);
 		                	};
-						    node.remove()
+						    node.remove();
 						}
+		            },{
+		            	xtype: 'actioncolumn',
+		            	with: 40,
+		            	tooltip: 'Alias kolumner, sökbart etc',
+		            	icon: '/openemap-admin/font-awesome/black/png/16/table.png',
+		            	handler : function(grid, rowIdex, colIndex){
+		            	}
 		            }
 	        	]
 			}

@@ -1,5 +1,5 @@
 Ext.application({
-	requires: ['Ext.container.Viewport',
+	requires: ['Ext.container.Container',
 	           'AdmClient.controller.Main',
 	           'AdmClient.controller.MainToolbar',
 	           'AdmClient.controller.MapConfiguration',
@@ -26,25 +26,25 @@ Ext.application({
 	           'AdmClient.store.ToolStore',
 	           'AdmClient.store.Layers',
 	           'AdmClient.store.SearchServer',
-	           'AdmClient.store.GroupedLayerTree',
 	           'AdmClient.store.Municipalities',
 	           
-               'AdmClient.view.main.MainToolbar',
-               'AdmClient.view.Main',
-               'AdmClient.view.mapconfiguration.tools.ToolsGrid',
-               'AdmClient.view.mapconfiguration.tools.details.General',
-               'AdmClient.view.mapconfiguration.tools.details.DrawGeometry',
-               'AdmClient.view.mapconfiguration.tools.details.DeleteGeometry',
-               'AdmClient.view.mapconfiguration.tools.details.DrawObject',
-               'AdmClient.view.mapconfiguration.tools.details.FullExtent',
-               'AdmClient.view.mapconfiguration.tools.details.Identify',
-               'AdmClient.view.mapconfiguration.tools.details.MeasureArea',
-               'AdmClient.view.mapconfiguration.tools.details.MeasureLine',
-               'AdmClient.view.mapconfiguration.tools.details.Print',
-               'AdmClient.view.mapconfiguration.tools.details.ModifyGeometry',
-               'AdmClient.view.mapconfiguration.map.PreviewMap',
+             'AdmClient.view.main.MainToolbar',
+             'AdmClient.view.Main',
+             'AdmClient.view.mapconfiguration.tools.ToolsGrid',
+             'AdmClient.view.mapconfiguration.tools.details.General',
+             'AdmClient.view.mapconfiguration.tools.details.DrawGeometry',
+             'AdmClient.view.mapconfiguration.tools.details.DeleteGeometry',
+             'AdmClient.view.mapconfiguration.tools.details.DrawObject',
+             'AdmClient.view.mapconfiguration.tools.details.FullExtent',
+             'AdmClient.view.mapconfiguration.tools.details.Identify',
+             'AdmClient.view.mapconfiguration.tools.details.MeasureArea',
+             'AdmClient.view.mapconfiguration.tools.details.MeasureLine',
+             'AdmClient.view.mapconfiguration.tools.details.Print',
+             'AdmClient.view.mapconfiguration.tools.details.ModifyGeometry',
+             'AdmClient.view.mapconfiguration.map.PreviewMap',
+             'AdmClient.view.mapconfiguration.layer.LayerDetails',
                
-               'AdmClient.view.mapconfiguration.search.SearchPanel',
+             'AdmClient.view.mapconfiguration.search.SearchPanel',
                
                'AdmClient.view.MapConfiguration',
                'AdmClient.view.Settings',
@@ -61,7 +61,7 @@ Ext.application({
                'AdmClient.model.Config'
                ],
     name: 'AdmClient',
-    appFolder: 'src/main/javascript',
+    appFolder: '/OpenEMap-Admin-WebUserInterface/src/main/javascript',
     controllers: ['Main', 
                   'Layers', 
                   'MainToolbar', 
@@ -83,16 +83,16 @@ Ext.application({
                   'toolDetails.DeleteGeometry',
                   'toolDetails.ModifyGeometry',
                   'toolDetails.SelectGeometry',
-                  'toolDetails.DetailReport',
+                  'toolDetails.DetailReport'
                 ],
     models : ['SettingBase','Server', 'SearchServer', 'Layer', 'Config'],
     launch: function() {
-        
-
+      defaultWMSServer = 'http://www.corsproxy.com/nomad.swecosundsvall.se/geoserver/wms?request=GetCapabilities&version=1.1.0';
     	this.config = Ext.create('AdmClient.model.Config');
-        Ext.create('Ext.container.Viewport', {
+      this.admClient =  Ext.create('Ext.container.Container', {
         	layout: 'border',
-//        	height : 800,
+          renderTo: 'contentitem',
+        	height : 800,
         	items : [{xtype: 'main'}]
         });
     }

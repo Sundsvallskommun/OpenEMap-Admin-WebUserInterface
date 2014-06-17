@@ -1,15 +1,19 @@
 #!/bin/sh
-sencha compile --classpath=src/main/javascript,ext-4.2.1/src,geoext2/src,../map-client/src/main/javascript exclude -all and include -namespace AdmClient,OpenEMap and include -file ../map-client/src/main/javascript/OpenEMap.js and concat -closure adm-client-all.js
-sencha compile --classpath=src/main/javascript,ext-4.2.1/src,geoext2/src,../map-client/src/main/javascript exclude -all and include -namespace AdmClient,OpenEMap and include -file ../map-client/src/main/javascript/OpenEMap.js and concat adm-client-debug-all.js
-#cp geoext2/geoext2-all.js geoext2-all.js
-cp adm-client-all.js src/main/webapp/adm-client-all.js
-cp adm-client-all.js ../../
-cp adm-client-debug-all.js ../../
+ZIPFILE="OpenEMap-Admin.zip"
+OPENEMAP="OpenEMap-Admin.js"
+OPENEMAP_DEBUG="OpenEMap-Admin-debug.js"
+
+#sencha compile --classpath=src/main/javascript,../ext-4.2.1/src,../geoext2/src,../OpenEMap-WebUserInterface/src/main/javascript exclude -all and include -namespace AdmClient,OpenEMap and include -file ../OpenEMap-WebUserInterface/src/main/javascript/OpenEMap.js and concat -closure $OPENEMAP
+sencha compile --classpath=src/main/javascript,../ext-4.2.1/src,../geoext2/src,../OpenEMap-WebUserInterface/src/main/javascript exclude -all and include -namespace AdmClient,OpenEMap and include -file ../OpenEMap-WebUserInterface/src/main/javascript/OpenEMap.js and concat $OPENEMAP_DEBUG
+#cp ../geoext2-2.0.0/geoext2-all.js geoext2-all.js
+cp $OPENEMAP src/main/webapp/$OPENEMAP
+cp $OPENEMAP ../../
+cp $OPENEMAP_DEBUG ../../
 cp -r src/main/webapp/resources ./
 rm adm-client-0.1.0-SNAPSHOT.zip
-zip -r -q adm-client-0.1.0-SNAPSHOT.zip \
-  adm-client-all.js \
-  adm-client-debug-all.js \
+zip -r -q $ZIPFILE \
+  $OPENEMAP \
+  $OPENEMAP_DEBUG \
   es5-shim.min.js \
   OpenLayers-2.13.1/OpenLayers.js \
   OpenLayers-2.13.1/theme/* \
@@ -21,5 +25,6 @@ zip -r -q adm-client-0.1.0-SNAPSHOT.zip \
   ext-4.2.1/locale/ext-lang-sv_SE.js \
   geoext2-all.js \
   resources/* \
+  index.html \
   README.md
   

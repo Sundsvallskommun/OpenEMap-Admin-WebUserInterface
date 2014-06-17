@@ -8,6 +8,7 @@ Ext.define('AdmClient.view.Main', {
 	border : false,
 	header : false,
 	bodyPadding : 3,
+	renderTo: 'contentitem',
 	region : 'center',
 
 	initComponent : function() {
