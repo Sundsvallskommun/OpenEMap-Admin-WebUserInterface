@@ -71,7 +71,8 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		        hideHeaders: false,
 		        tbar : [{
 		        	text : 'Nytt grupplager',
-		        	itemId : 'newGroupLayer'
+		        	itemId : 'newGroupLayer',
+		        	icon : '/openemap-admin/font-awesome/black/png/16/plus.png'
 		    	}],
 		        columns: [
 		            {
@@ -120,6 +121,13 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		            	tooltip: 'Alias kolumner, sökbart etc',
 		            	icon: '/openemap-admin/font-awesome/black/png/16/table.png',
 		            	handler : function(grid, rowIdex, colIndex){
+		            		var selectedLayer = null;
+		            		if (grid.getStore().data.items[rowIdex].childNodes.length === 0){
+		            				selectedLayer = grid.getStore().data.items[rowIdex].data;
+		            		}
+		            		Ext.create('AdmClient.view.mapconfiguration.layer.LayerDetails',{
+		            			selectedLayer : selectedLayer
+		            		}).show();
 		            	}
 		            }
 	        	]

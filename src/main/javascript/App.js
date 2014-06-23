@@ -21,6 +21,7 @@ Ext.application({
 	           'AdmClient.controller.toolDetails.DeleteGeometry',
 	           'AdmClient.controller.toolDetails.ModifyGeometry',
 	           'AdmClient.controller.toolDetails.SelectGeometry',
+             'AdmClient.controller.LayerDetails',
 	           
 	           'AdmClient.store.Servers',
 	           'AdmClient.store.ToolStore',
@@ -72,6 +73,7 @@ Ext.application({
                   'Search', 
                   'PreviewMap', 
                   'ConfigLayers',
+                  'LayerDetails',
                   'toolDetails.DrawPoint', 
                   'toolDetails.DrawPath',
                   'toolDetails.DrawPolygon',
