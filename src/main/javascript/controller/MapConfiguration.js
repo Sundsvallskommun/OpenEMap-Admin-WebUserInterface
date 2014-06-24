@@ -213,6 +213,9 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 		this.getMapPanel().setDisabled(false);
 		this.getSearchGrid().setDisabled(false);
 		this.getPreviewMap().setDisabled(false);
+		if (this.getPreviewMap().isVisible()) {
+    		AdmClient.app.getPreviewMapController().previewRender(this.getPreviewMap());
+		}
 		this.getLayerTab().setDisabled(false);
 		this.getConfigurationPreview().setDisabled(false);
 		this.getAutoClearDrawLayer().setValue(AdmClient.app.config.autoClearDrawLayer || false); 
