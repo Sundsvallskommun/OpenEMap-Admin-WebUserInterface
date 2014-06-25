@@ -83,7 +83,9 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		            },
 		            {
 		                xtype: 'actioncolumn',
-		                width: 40,
+		                width: 70,
+		                text: '&Auml;ndra <br /> lagernamn',
+		                align: 'center',
 		                icon: '/openemap-admin/font-awesome/black/png/16/pencil.png',
 		                tooltip: '&Auml;ndra namn',
 		                handler: function(grid, rowIndex, colIndex) {
@@ -98,13 +100,23 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		            },
 		            {
 		                xtype: 'checkcolumn',
-		                width: 40,
 		                tooltip: 'Baslager',
+		                text: 'Baslager',
+		                width: 70,
 		               	dataIndex: 'isBaseLayer'
 		            },
 		            {
+		                xtype: 'checkcolumn',
+		                width: 70,
+		                tooltip: 'Synlig',
+		                text: 'Synlig',
+		                dataIndex: 'visibility'
+		            },
+		            {
 		                xtype: 'actioncolumn',
-		                width: 40,
+		                width: 70,
+		                text: 'Ta bort',
+		                align: 'center',
 		                icon: '/openemap-admin/font-awesome/black/png/16/times.png',
 		                tooltip: 'Ta bort',
 		                handler: function(grid, rowIndex, colIndex) {
@@ -117,8 +129,10 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 						}
 		            },{
 		            	xtype: 'actioncolumn',
-		            	with: 40,
+		            	with: 70,
 		            	tooltip: 'Alias kolumner, sökbart etc',
+		            	align: 'center',
+		            	text: 'Inst&auml;llningar',
 		            	icon: '/openemap-admin/font-awesome/black/png/16/table.png',
 		            	handler : function(grid, rowIdex, colIndex){
 		            		var selectedLayer = null;
