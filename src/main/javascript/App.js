@@ -28,6 +28,7 @@ Ext.application({
 	           'AdmClient.store.Layers',
 	           'AdmClient.store.SearchServer',
 	           'AdmClient.store.Municipalities',
+             'AdmClient.store.LayerDetails',
 	           
              'AdmClient.view.main.MainToolbar',
              'AdmClient.view.Main',

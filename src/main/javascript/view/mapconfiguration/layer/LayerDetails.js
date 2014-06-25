@@ -36,20 +36,29 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 	initComponent : function() {
 
 		var self = this;
-		this.x = Math.ceil(window.innerWidth / 2 - this.innerWidth / 2),
-		this.y = Math.ceil(window.innerHeight / 2 - this.innerHeight / 2),
+		this.x = Math.ceil(window.innerWidth / 2 - this.innerWidth / 2);
+		this.y = Math.ceil(window.innerHeight / 2 - this.innerHeight / 2);
 
-		this.modal = true,
+		this.modal = true;
+		var pathArray = this.layer.wms.url.split('/');
+		var wfsUrl = 'adminproxy?url=' + pathArray[0] + '//' + pathArray[2] + (this.layer.wfs.url || '/geoserver/wfs') + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + this.layer.name;
 		this.store = Ext.create('AdmClient.store.LayerDetails');
-		this.store.setUrl('apa');
+		this.store.setUrl(wfsUrl);
+		this.store.load({
+			scope: this,
+			callback: function(records, operation, success){
+				console.log(records);
+			}
+		});
 
 		this.items = [{
 			region: 'center',
 			xtype: 'grid',
 			itemId: 'layerDetailsGrid',
-			store: store,
+			store: this.store,
 			columns: [{
-				text: 'Kolumn'
+				text: 'Kolumn',
+				dataIndex : 'name'
 			},{
 				text: 'Alias'
 			},{
@@ -74,7 +83,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 				}
 			}
 			]
-		}],
+		}]
 
 		this.callParent(arguments);
 	}

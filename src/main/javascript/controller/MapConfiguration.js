@@ -151,7 +151,7 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 			Ext.MessageBox.alert('"Default" is an invalid configuration name.', 'You are trying to write to a write protected template. Choose another template name');
 			return;
 		}
-		var url = appPath + '/configurations/config';
+		var url = appPath + '/adminconfigs/config';
 		url += AdmClient.app.config.configId === undefined ? '' : ('/' + AdmClient.app.config.configId);
 		var method = AdmClient.app.config.configId === undefined ? 'POST' : 'PUT';
 		Ext.Ajax.request({
@@ -180,7 +180,7 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 	renderConfiguration : function(){
 		var self = this;
 		Ext.Ajax.request({
-			url : appPath + '/configurations',
+			url : appPath + '/adminconfigs',
 			method : 'GET',
 			success : function(evt){
 				var configs = JSON.parse(evt.responseText);
@@ -230,7 +230,7 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 
 	loadConfiguration: function(id) {
 		Ext.Ajax.request({
-			url : appPath + '/configurations/config/' + id,
+			url : appPath + '/adminconfigs/config/' + id,
 			method : 'GET',
 			success : function(evt){
 				var config = JSON.parse(evt.responseText);
