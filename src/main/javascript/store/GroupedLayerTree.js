@@ -102,10 +102,11 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
                 isBaseLayer = false;
             }
             layer.wms.options.isBaseLayer = isBaseLayer;
-
-            if (data && data.name && node.get('name') === data.name){ // handle visibility
+            layer.wms.options.visibility = this.tryToGetRecordAttribute(node, 'visibility');
+            
+            /*if (data && data.name && node.get('name') === data.name){ // handle visibility
             	layer.wms.options.visibility = data.checked;
-            }
+            }*/
         }
         
         return layer;
