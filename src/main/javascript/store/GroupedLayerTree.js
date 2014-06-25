@@ -66,7 +66,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         	     "isBaseLayer": false,
         	     "visibility": false
         	    };
-        	if (node.raw.options && node.raw.options.metadata.metadataURLs && node.raw.options.metadata.metadataURLs.length > 0){
+        	if (node.raw.options && node.raw.options.metadata && node.raw.options.metadata.metadataURLs && node.raw.options.metadata.metadataURLs.length > 0){
         		attr.metadataUrl = node.raw.options.metadata.metadataURLs[0].href;
         	}
         }
