@@ -14,6 +14,7 @@ Ext.define('AdmClient.model.Layer', {
     	'serverId',
     	{name: 'isBaseLayer', mapping: 'wms.options.isBaseLayer',  type : 'boolean'},
         {name: 'visibility', mapping: 'wms.options.visibility', type: 'boolean'},
+        {name: 'searchable', mapping: 'wfs', type: 'object'},
     	'layer' // OpenLayers reference
     ],
     proxy: {

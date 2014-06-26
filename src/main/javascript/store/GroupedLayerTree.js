@@ -104,6 +104,19 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
             layer.wms.options.isBaseLayer = isBaseLayer;
             layer.wms.options.visibility = this.tryToGetRecordAttribute(node, 'visibility');
             
+            var searchable = this.tryToGetRecordAttribute(node, 'searchable');
+            if (searchable){
+                if (!layer.wfs){
+                    layer.wfs = {};
+                }
+                var layerPieces = layer.wms.params.LAYERS.split(':');
+                layer.wfs.featurePrefix = layerPieces[0];
+                layer.wfs.featureType = layerPieces[1];
+                layer.wfs.url = '/geoserver/wfs';
+            }else {
+                if (layer.wfs) delete layer.wfs;
+            }
+            
             /*if (data && data.name && node.get('name') === data.name){ // handle visibility
             	layer.wms.options.visibility = data.checked;
             }*/

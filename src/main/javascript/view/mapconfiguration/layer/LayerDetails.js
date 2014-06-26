@@ -45,10 +45,11 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 		this.store = Ext.create('AdmClient.store.LayerDetails');
 		this.store.setUrl(wfsUrl);
 		this.store.load({
-			scope: this,
-			callback: function(records, operation, success){
-				console.log(records);
-			}
+			scope: this
+		});
+
+		this.cellEditing = new Ext.grid.plugin.CellEditing({
+			clicksToEdit : 1
 		});
 
 		this.items = [{
@@ -56,15 +57,28 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 			xtype: 'grid',
 			itemId: 'layerDetailsGrid',
 			store: this.store,
+
+			plugins : [ this.cellEditing ],
 			columns: [{
 				text: 'Kolumn',
 				dataIndex : 'name'
 			},{
-				text: 'Alias'
+				text: 'Alias',
+				dataIndex: 'alias',
+				editor : {
+					allowBlank : false
+				},
 			},{
-				text: 'S&ouml;kbar'
+				text: 'S&ouml;kbar',
+				xtype: 'checkcolumn',
+				dataIndex: 'searchable',
+				checkchange: function(chkBox, rowIndex, checked, opts){
+					debugger;
+				}
 			},{
-				text: 'Synlig'
+				text: 'Synlig',
+				xtype: 'checkcolumn',
+				dataIndex: 'visible'
 			}]
 		},{
 			region: 'south',

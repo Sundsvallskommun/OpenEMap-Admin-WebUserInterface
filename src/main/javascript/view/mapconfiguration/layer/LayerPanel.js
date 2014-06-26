@@ -113,6 +113,13 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		                dataIndex: 'visibility'
 		            },
 		            {
+		                xtype: 'checkcolumn',
+		                width: 70,
+		                tooltip: 'S&ouml;kbar',
+		                text: 'S&ouml;kbar',
+		                dataIndex: 'searchable'
+		            },
+		            {
 		                xtype: 'actioncolumn',
 		                width: 70,
 		                text: 'Ta bort',
