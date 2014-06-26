@@ -26,7 +26,10 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         //insert: function(store, node, refNode, eOpts) { this.onInsertAndAppend(node); },
         //append: function(store, node, index, eOpts) { this.onInsertAndAppend(node); },
         remove: function(store, node, isMove, eOpts) { this.onRemove(store, node, isMove); },
-        datachanged: function() { this.onUpdate(); }
+        datachanged: function() { this.onUpdate(); },
+        layerMetadataChange: function(){
+            AdmClient.app.config.layers = this.getLayerConfiguration(null);
+        }
     },
 
     constructor: function(config) {
@@ -106,6 +109,10 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
             
             if (layer.wms.options.visibility === undefined || layer.wms.options.visibility === null){
                 layer.wms.options.visibility = false;
+            }
+
+            if (node.data.metadata && node.data.metadata !== ''){
+                layer.metadata = node.data.metadata;
             }
             
             var searchable = this.tryToGetRecordAttribute(node, 'searchable');
@@ -240,6 +247,10 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
             delete this._inserting;
         }
         
+    },
+
+    layerUpdate : function(){
+         AdmClient.app.config.layers = this.getLayerConfiguration(null);
     },
 
     onUpdate: function(chkBox, opt, eOpts ) {

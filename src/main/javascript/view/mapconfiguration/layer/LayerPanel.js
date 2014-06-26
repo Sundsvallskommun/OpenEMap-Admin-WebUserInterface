@@ -147,7 +147,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		            				selectedLayer = grid.getStore().data.items[rowIdex].data;
 		            		}
 		            		Ext.create('AdmClient.view.mapconfiguration.layer.LayerDetails',{
-		            			selectedLayer : selectedLayer
+		            			selectedLayer : selectedLayer, grid: grid
 		            		}).show();
 		            	}
 		            }

@@ -5,19 +5,35 @@ Ext.define('AdmClient.controller.LayerDetails', {
 		ref : 'saveLayerDetail',
 		selector : '#saveLayerDetail'
 	},{
-		ref: 'layerDetails',
+		ref: 'layerDetailsGrid',
 		selector: '#layerDetailsGrid'
+	},{
+		ref: 'layerDetails',
+		selector: 'layerDetails'
 	}],
 
 	init : function() {
 		this.control({
-			'#layerDetailsGrid' : {
-				render : this.layerDetailsGridRender
+			'#saveLayerDetail' : {
+				click : this.save
 			}
 		});
 	},
 
-	layerDetailsGridRender : function(){
-		console.log(arguments);
+	save : function(btn, e, eOpts){
+		var store = this.getLayerDetailsGrid().getStore();
+		var layer = this.getLayerDetails().layer;
+		store.data.items.forEach(function(c){
+			if (c.data.visible || c.data.alias){
+				if (!layer.metadata){
+					layer.metadata = {};
+				}
+				layer.metadata.attributes = {};
+				layer.metadata.attributes[c.data.name] = {alias : c.data.alias};
+			}
+		});
+
+		var store = this.getLayerDetails().panelGrid.store;
+		AdmClient.app.config.layers = store.treeStore.getLayerConfiguration();
 	}
 });

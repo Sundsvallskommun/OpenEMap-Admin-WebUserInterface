@@ -16,6 +16,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 
 	constructor : function(){
 		this.layer = arguments[0].selectedLayer;
+		this.panelGrid = arguments[0].grid;
 
 		if (this.layer === null){
 			Ext.Msg.show({
@@ -44,9 +45,8 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 		var wfsUrl = 'adminproxy?url=' + pathArray[0] + '//' + pathArray[2] + (this.layer.wfs.url || '/geoserver/wfs') + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + this.layer.name;
 		this.store = Ext.create('AdmClient.store.LayerDetails');
 		this.store.setUrl(wfsUrl);
-		this.store.load({
-			scope: this
-		});
+
+		this.store.load();
 
 		this.cellEditing = new Ext.grid.plugin.CellEditing({
 			clicksToEdit : 1
