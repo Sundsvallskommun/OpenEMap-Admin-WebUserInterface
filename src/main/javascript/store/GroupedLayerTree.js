@@ -104,6 +104,10 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
             layer.wms.options.isBaseLayer = isBaseLayer;
             layer.wms.options.visibility = this.tryToGetRecordAttribute(node, 'visibility');
             
+            if (layer.wms.options.visibility === undefined || layer.wms.options.visibility === null){
+                layer.wms.options.visibility = false;
+            }
+            
             var searchable = this.tryToGetRecordAttribute(node, 'searchable');
             if (searchable){
                 if (!layer.wfs){

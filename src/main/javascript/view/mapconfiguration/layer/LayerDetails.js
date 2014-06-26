@@ -69,13 +69,6 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 					allowBlank : false
 				},
 			},{
-				text: 'S&ouml;kbar',
-				xtype: 'checkcolumn',
-				dataIndex: 'searchable',
-				checkchange: function(chkBox, rowIndex, checked, opts){
-					debugger;
-				}
-			},{
 				text: 'Synlig',
 				xtype: 'checkcolumn',
 				dataIndex: 'visible'
