@@ -88,8 +88,9 @@ Ext.define('AdmClient.view.MapConfiguration', {
 				title: 'Preview',
 				itemId: 'previewMap',
 				layout: 'fit',
-				disabled : true
-			} ]
+				disabled : true,
+				hidden: true
+			}]
 		}, {
 			title : 'Config',
 			itemId : 'configurationPreviewPanel',

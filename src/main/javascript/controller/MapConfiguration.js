@@ -225,7 +225,7 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 			this.mapClient.map.zoomToExtent(bounds);
 		}
 		var configTitle = 'Config - ' + AdmClient.app.config.name + ' (' + AdmClient.app.config.configId.toString() + ')';
-		this.getConfigurationPreviewPanel().setTitle(configTitle);
+		//this.getConfigurationPreviewPanel().setTitle(configTitle);
 	},
 
 	loadConfiguration: function(id) {

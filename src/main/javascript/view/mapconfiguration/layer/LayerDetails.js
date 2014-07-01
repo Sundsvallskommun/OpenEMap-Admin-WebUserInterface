@@ -67,7 +67,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 				dataIndex: 'alias',
 				editor : {
 					allowBlank : false
-				},
+				}
 			},{
 				text: 'Synlig',
 				xtype: 'checkcolumn',

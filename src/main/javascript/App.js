@@ -19,8 +19,10 @@ Ext.application({
 	           'AdmClient.controller.toolDetails.MeasureLine',
 	           'AdmClient.controller.toolDetails.MeasureArea',
 	           'AdmClient.controller.toolDetails.DeleteGeometry',
+             'AdmClient.controller.toolDetails.DeleteAllFeatures',
 	           'AdmClient.controller.toolDetails.ModifyGeometry',
 	           'AdmClient.controller.toolDetails.SelectGeometry',
+             'AdmClient.controller.toolDetails.DeleteMeasure',
              'AdmClient.controller.LayerDetails',
 	           
 	           'AdmClient.store.Servers',
@@ -87,11 +89,12 @@ Ext.application({
                   'toolDetails.DeleteGeometry',
                   'toolDetails.ModifyGeometry',
                   'toolDetails.SelectGeometry',
-                  'toolDetails.DetailReport'
+                  'toolDetails.DetailReport',
+                  'toolDetails.DeleteAllFeatures',
+                  'toolDetails.DeleteMeasure'
                 ],
     models : ['SettingBase','Server', 'SearchServer', 'Layer', 'Config'],
     launch: function() {
-      defaultWMSServer = 'http://www.corsproxy.com/nomad.swecosundsvall.se/geoserver/wms?request=GetCapabilities&version=1.1.0';
     	this.config = Ext.create('AdmClient.model.Config');
       this.admClient =  Ext.create('Ext.container.Container', {
         	layout: 'border',
