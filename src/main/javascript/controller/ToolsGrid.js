@@ -13,24 +13,20 @@ Ext.define('AdmClient.controller.ToolsGrid', {
 	}],
 	init : function() {
 		this.control({
-			'#toolsGrid checkcolumn' : {
-				checkchange : this.toolSelected
-			},
 
 			'#toolsGrid' : {
-				render : this.gridRender,
-				select : this.gridRowSelected
+				render : this.gridRender
 			},
 			
 			'#details' : {
 				render : this.detailsRender
-			},
-			
-			'#configurations' :{
-				select : this.selectConfiguration
 			}
-
 		});
+
+		this.application.on({
+            configuration_change: this.markTools,
+            scope: this
+        });
 	},
 
 	views : [],
@@ -73,7 +69,6 @@ Ext.define('AdmClient.controller.ToolsGrid', {
 			}
 		}
 		panel.updateLayout();
-//		panel.doLayout();
 	},
 	
 	toolsHasEmptyObject : function(){
@@ -85,47 +80,6 @@ Ext.define('AdmClient.controller.ToolsGrid', {
 		return false;
 	},
 	
-	
-
-	// if the user checks the item, lets add the tool to a collection of tools in config
-	// if the user uncheckes the item, lets remove the tool from the tools collection in config
-	toolSelected : function(chkBox, rowIndex, checked, eOpts) {
-		
-//			var currentToolName = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data.toolName;
-//			
-//			if (checked){
-//				if(!AdmClient.app.config.tools){
-//					AdmClient.app.config.tools = [];
-//				}
-//				AdmClient.app.config.tools.push({type : currentToolName});
-//			}
-//			if (!checked){
-//				if (AdmClient.app.config.tools){
-//					AdmClient.app.config.tools.forEach(function(i){
-//						if (i.type && i.type === currentToolName){
-//							Ext.Array.remove(AdmClient.app.config.tools, i);
-//							delete i;
-//						}
-//					});
-//					if (AdmClient.app.config.tools.length === 0)
-//						delete AdmClient.app.config.tools;
-//				}
-//			}
-//			this.getToolsGrid().store.commitChanges();
-	},
-
-	// if the user marks a row, lets show some info about the tool,
-	// detailsrender function show details about a tool
-	gridRowSelected : function(toolsGrid, record, index, eOpts) {
-
-//		this.getToolGeneral().removeAll(false);
-//		var view = this.views[record.get('tool')] || 
-//			new AdmClient.view.mapconfiguration.tools.details.General(record.get('tool'), record.get('toolName'));
-//		this.views[record.get('tool')] = view;
-//		this.getToolGeneral().add(view);
-
-	},
-	
 	// function show details about a tool
 	detailsRender : function() {
 		var detailsPanel = arguments[0];
@@ -134,12 +88,6 @@ Ext.define('AdmClient.controller.ToolsGrid', {
 		var tool = 'AdmClient.view.mapconfiguration.tools.details.' + toolName;
 		var toolPanel = Ext.create(tool);
 		detailsPanel.add(toolPanel);
-	},
-	
-	selectConfiguration : function(combo, records){
-		var selectedConfig = records[0].raw;
-		this.markTools();
 	}
 	
-
 });
