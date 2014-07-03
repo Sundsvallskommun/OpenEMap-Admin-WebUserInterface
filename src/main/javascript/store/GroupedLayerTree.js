@@ -123,7 +123,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
                 var layerPieces = layer.wms.params.LAYERS.split(':');
                 layer.wfs.featurePrefix = layerPieces[0];
                 layer.wfs.featureType = layerPieces[1];
-                layer.wfs.url = '/geoserver/wfs';
+                layer.wfs.url = '/wfs';
             }else {
                 if (layer.wfs) delete layer.wfs;
             }
