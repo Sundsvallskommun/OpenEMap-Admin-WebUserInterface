@@ -16,7 +16,7 @@ Ext.define('AdmClient.view.MapConfiguration', {
 				displayField: 'name',
 				enableKeyEvents : true
 			}, {
-				text : 'Save',
+				text : 'Spara',
 				itemId : 'saveConfiguration'
 			} ]
 		}, {

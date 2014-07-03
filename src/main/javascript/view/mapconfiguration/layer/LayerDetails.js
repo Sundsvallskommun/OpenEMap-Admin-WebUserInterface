@@ -44,8 +44,18 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 		var pathArray = this.layer.wms.url.split('/');
 		var wfsUrl = 'adminproxy?url=' + pathArray[0] + '//' + pathArray[2] + (this.layer.wfs.url || '/geoserver/wfs') + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + this.layer.name;
 		this.store = Ext.create('AdmClient.store.LayerDetails');
-		this.store.setUrl(wfsUrl);
 
+		this.store.addListener('load', function(store, records, successful, eOpts){
+			records.forEach(function(l){
+				if (self.layer.metadata && self.layer.metadata.attributes && self.layer.metadata.attributes[l.data.name] instanceof Object){
+					l.data.alias = self.layer.metadata.attributes[l.data.name].alias;
+					l.data.visible = true;
+				}
+			});
+			store.update();
+		}); 
+
+		this.store.setUrl(wfsUrl);
 		this.store.load();
 
 		this.cellEditing = new Ext.grid.plugin.CellEditing({
@@ -60,18 +70,28 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 
 			plugins : [ this.cellEditing ],
 			columns: [{
-				text: 'Kolumn',
+				header: 'Kolumn',
 				dataIndex : 'name'
 			},{
-				text: 'Alias',
+				header: 'Alias',
 				dataIndex: 'alias',
 				editor : {
 					allowBlank : false
 				}
 			},{
-				text: 'Synlig',
+				header: 'Synlig',
 				xtype: 'checkcolumn',
-				dataIndex: 'visible'
+				dataIndex: 'visible',
+				listeners :{
+					'checkchange': function(chkBox, rowIdx, checked, eOpts){
+						if (checked){
+							self.store.data.items[rowIdx].data.alias = self.store.data.items[rowIdx].data.alias || self.store.data.items[rowIdx].data.name;
+						}else{
+							self.store.data.items[rowIdx].data.alias = '';
+						}
+						self.store.update();
+					}
+				}
 			}]
 		},{
 			region: 'south',

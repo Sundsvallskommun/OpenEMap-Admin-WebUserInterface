@@ -23,17 +23,24 @@ Ext.define('AdmClient.controller.LayerDetails', {
 	save : function(btn, e, eOpts){
 		var store = this.getLayerDetailsGrid().getStore();
 		var layer = this.getLayerDetails().layer;
+		layer.metadata = {};
 		store.data.items.forEach(function(c){
 			if (c.data.visible || c.data.alias){
-				if (!layer.metadata){
-					layer.metadata = {};
+				if (c.data.alias === "") return;
+				if (!layer.metadata.attributes){
+					layer.metadata.attributes = {};
 				}
-				layer.metadata.attributes = {};
 				layer.metadata.attributes[c.data.name] = {alias : c.data.alias};
 			}
 		});
 
+		if (Object.keys(layer.metadata).length === 0){
+			delete layer.metadata;
+		}
+
 		var store = this.getLayerDetails().panelGrid.store;
 		AdmClient.app.config.layers = store.treeStore.getLayerConfiguration();
+
+		this.getLayerDetails().close();
 	}
 });
