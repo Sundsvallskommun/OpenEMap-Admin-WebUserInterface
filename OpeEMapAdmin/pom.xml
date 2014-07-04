@@ -13,14 +13,6 @@
             <updatePolicy>always</updatePolicy>
         </snapshots>
     </repository>
-    <repository>
-        <id>openemap-modules</id>
-        <url>https://raw.github.com/Sundsvallskommun/openemap-modules/mvn-repo</url>
-        <snapshots>
-            <enabled>true</enabled>
-            <updatePolicy>always</updatePolicy>
-        </snapshots>
-    </repository>
     </repositories>
     <dependencies>
     <dependency>
