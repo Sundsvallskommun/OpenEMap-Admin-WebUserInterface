@@ -35,6 +35,10 @@ import se.unlogic.hierarchy.foregroundmodules.AnnotatedForegroundModule;
 import se.unlogic.webutils.http.HTTPUtils;
 import se.unlogic.webutils.http.URIParser;
 
+/**
+ * A class Geometadata
+ *
+ */
 public class GeoMetaData extends AnnotatedForegroundModule {
 	
 	 @ModuleSetting
@@ -47,7 +51,16 @@ public class GeoMetaData extends AnnotatedForegroundModule {
 		 return null;
 			
 	 };
-	
+	/**
+	 * Returns the abstract of metadata by id.
+	 * @param req
+	 * @param res
+	 * @param user
+	 * @param uriParser
+	 * @return
+	 * @throws Exception
+	 * @throws Throwable
+	 */
 	@WebPublic(alias="getabstractbyid")
 	public ForegroundModuleResponse getAbstractById(HttpServletRequest req,
 			HttpServletResponse res, User user, URIParser uriParser)
@@ -57,6 +70,17 @@ public class GeoMetaData extends AnnotatedForegroundModule {
 		
 		return null;
 	}
+	
+	/**
+	 * Returns the metadata by id.
+	 * @param req
+	 * @param res
+	 * @param user
+	 * @param uriParser
+	 * @return
+	 * @throws Exception
+	 * @throws Throwable
+	 */
 	@WebPublic(alias="getmetadatabyid")
 	public ForegroundModuleResponse getMetaDataById(HttpServletRequest req,
 			HttpServletResponse res, User user, URIParser uriParser)

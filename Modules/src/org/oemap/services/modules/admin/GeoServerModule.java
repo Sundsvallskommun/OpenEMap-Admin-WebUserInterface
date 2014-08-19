@@ -39,6 +39,11 @@ import se.unlogic.standardutils.dao.AnnotatedDAOWrapper;
 import se.unlogic.standardutils.dao.SimpleAnnotatedDAOFactory;
 import se.unlogic.webutils.http.URIParser;
 
+/**
+ * 
+ * A module to handel geo servers in the farm
+ *
+ */
 public class GeoServerModule extends AnnotatedRESTModule {
 
 	private AnnotatedDAOWrapper<Server, Integer> serversDAO;
@@ -61,6 +66,15 @@ public class GeoServerModule extends AnnotatedRESTModule {
 				Integer.class);
 	}
 
+	/**
+	 * Creates an item by posting 
+	 * @param req
+	 * @param res
+	 * @param user
+	 * @param uriParser
+	 * @return
+	 * @throws Throwable
+	 */
 	@RESTMethod(alias = "servers", method = "post")
 	// @WebPublic(alias = "servers", method = "POST", requireLogin = true)
 	public String Create(HttpServletRequest req, HttpServletResponse res,
@@ -80,6 +94,15 @@ public class GeoServerModule extends AnnotatedRESTModule {
 		return server.getRestResponseObject();
 	}
 
+	/**
+	 * Updates a geo server by using the PUT verb
+	 * @param req
+	 * @param res
+	 * @param user
+	 * @param uriParser
+	 * @return
+	 * @throws Throwable
+	 */
 	@RESTMethod(alias = "servers", method = "put")
 	// @WebPublic(alias = "servers", method = "PUT", requireLogin = true)
 	public String Update(HttpServletRequest req, HttpServletResponse res,
@@ -96,6 +119,16 @@ public class GeoServerModule extends AnnotatedRESTModule {
 		return server.getRestResponseObject();
 	}
 
+	/**
+	 * Deletes a geoserver by using the DELETE verb
+	 * @param req
+	 * @param res
+	 * @param user
+	 * @param uriParser
+	 * @return
+	 * @throws Exception
+	 * @throws Throwable
+	 */
 	@RESTMethod(alias = "servers", method = "delete")
 	// @WebPublic(alias = "servers", method = "DELETE", requireLogin = true)
 	public String Delete(HttpServletRequest req, HttpServletResponse res,

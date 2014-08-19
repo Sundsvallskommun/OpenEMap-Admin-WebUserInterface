@@ -21,9 +21,7 @@ Copyright Härnösands kommun(C) 2014  <name of author>
 
 package org.oemap.services.modules;
 
-/**
- * @author Joakim Gradin
- */
+
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +40,10 @@ import se.unlogic.standardutils.dao.AnnotatedDAO;
 import se.unlogic.standardutils.dao.AnnotatedDAOWrapper;
 import se.unlogic.standardutils.dao.SimpleAnnotatedDAOFactory;
 import se.unlogic.webutils.http.URIParser;
+
+/**
+ * 
+ */
 
 public class PublicGeoServerModule extends AnnotatedRESTModule {
 	private AnnotatedDAOWrapper<Server, Integer> serversDAO;
@@ -63,15 +65,6 @@ public class PublicGeoServerModule extends AnnotatedRESTModule {
 				Integer.class);
 	}
 
-	/**
-	 * 
-	 * @param req
-	 * @param res
-	 * @param user
-	 * @param uriParser
-	 * @return
-	 * @throws Throwable
-	 */
 	@RESTMethod(alias = "servers", method = "get")
 	public String Create(HttpServletRequest req, HttpServletResponse res,
 			User user, URIParser uriParser) throws Throwable {

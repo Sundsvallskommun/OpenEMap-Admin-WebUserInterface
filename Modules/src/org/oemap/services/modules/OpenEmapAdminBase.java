@@ -38,6 +38,11 @@ import se.unlogic.standardutils.xml.XMLUtils;
 import se.unlogic.webutils.http.RequestUtils;
 import se.unlogic.webutils.http.URIParser;
 
+/**
+ * 
+ * A base module for the admin interface
+ *
+ */
 public class OpenEmapAdminBase extends AnnotatedForegroundModule {
 	
 	@ModuleSetting

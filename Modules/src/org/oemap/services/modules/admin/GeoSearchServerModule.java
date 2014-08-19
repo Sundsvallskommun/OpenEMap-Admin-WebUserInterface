@@ -43,6 +43,10 @@ import se.unlogic.standardutils.dao.AnnotatedDAOWrapper;
 import se.unlogic.standardutils.dao.SimpleAnnotatedDAOFactory;
 import se.unlogic.webutils.http.URIParser;
 
+/**
+ * A module to handle available search servers in the farm
+ *
+ */
 public class GeoSearchServerModule extends AnnotatedRESTModule implements
 		ICRUD<SearchServer> {
 
@@ -65,6 +69,9 @@ public class GeoSearchServerModule extends AnnotatedRESTModule implements
 		super.init(moduleDescriptor, sectionInterface, dataSource);
 	}
 
+	/**
+	 * Creates an item.
+	 */
 	@RESTMethod(alias = "server", method = "post")
 	// @WebPublic(alias = "server", method = "server", requireLogin = true)
 	public String Create(HttpServletRequest req, HttpServletResponse res,
@@ -83,6 +90,9 @@ public class GeoSearchServerModule extends AnnotatedRESTModule implements
 		return searchServerFactory.getRestResponseObject();
 	}
 
+	/**
+	 * Returns search servers
+	 */
 	@RESTMethod(alias = "server", method = "get")
 	// @WebPublic(alias = "server", method = "server", requireLogin = true)
 	public String Read(HttpServletRequest req, HttpServletResponse res,
@@ -92,6 +102,9 @@ public class GeoSearchServerModule extends AnnotatedRESTModule implements
 		return searchServerFactory.createJSON(servers);
 	}
 
+	/**
+	 * Updates a configuration
+	 */
 	@RESTMethod(alias = "server", method = "put")
 	// @WebPublic(alias = "server", method = "PUT", requireLogin = true)
 	public String Update(HttpServletRequest req, HttpServletResponse res,
@@ -111,6 +124,9 @@ public class GeoSearchServerModule extends AnnotatedRESTModule implements
 
 	}
 
+	/**
+	 * Deletes a configuration
+	 */
 	@RESTMethod(alias = "server", method = "delete")
 	// @WebPublic(alias = "server", method = "DELETE", requireLogin = true)
 	public String Delete(HttpServletRequest req, HttpServletResponse res,

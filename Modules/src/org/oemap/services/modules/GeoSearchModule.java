@@ -37,6 +37,11 @@ import se.unlogic.hierarchy.foregroundmodules.AnnotatedForegroundModule;
 import se.unlogic.webutils.http.HTTPUtils;
 import se.unlogic.webutils.http.URIParser;
 
+/**
+ * 
+ * A module for public search
+ *
+ */
 
 public class GeoSearchModule extends AnnotatedForegroundModule{
 
@@ -56,7 +61,15 @@ public class GeoSearchModule extends AnnotatedForegroundModule{
 	@TextFieldSettingDescriptor(name = "Fastighetssök", description = "Sökväg till extern fastighetssök", required = true)
 	protected String mappingParameterName = "";
 	
-	// this endpoint lives under search in OH administration
+	/**
+	 * A method for proxy to search service
+	 * @param req
+	 * @param res
+	 * @param user
+	 * @param uriParser
+	 * @return
+	 * @throws Exception
+	 */
 	@WebPublic(alias = "lm")
 	public ForegroundModuleResponse getRegisterenheter(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Exception {
 		String content = "";

@@ -40,6 +40,11 @@ import se.unlogic.standardutils.dao.AnnotatedDAOWrapper;
 import se.unlogic.standardutils.dao.SimpleAnnotatedDAOFactory;
 import se.unlogic.webutils.http.URIParser;
 
+/**
+ * 
+ * A module to handle layers
+ *
+ */
 public class LayersModule extends AnnotatedRESTModule {
 
 	private AnnotatedDAOWrapper<Layer, Integer> layersDAO;
@@ -62,6 +67,16 @@ public class LayersModule extends AnnotatedRESTModule {
 				Integer.class);
 	}
 
+	/**
+	 * A method to create a layer using POST verb
+	 * @param req
+	 * @param res
+	 * @param user
+	 * @param uriParser
+	 * @return
+	 * @throws Exception
+	 * @throws Throwable
+	 */
 	@RESTMethod(alias = "layers", method = "post")
 	public String createLayers(HttpServletRequest req, HttpServletResponse res,
 			User user, URIParser uriParser) throws Exception, Throwable {
@@ -81,6 +96,16 @@ public class LayersModule extends AnnotatedRESTModule {
 		return layerFactory.getRestResponseObject();
 	}
 
+	/**
+	 * A method to update layer using PUT verb
+	 * @param req
+	 * @param res
+	 * @param user
+	 * @param uriParser
+	 * @return
+	 * @throws Exception
+	 * @throws Throwable
+	 */
 	@RESTMethod(alias = "layers", method = "put")
 	public String updateLayers(HttpServletRequest req, HttpServletResponse res,
 			User user, URIParser uriParser) throws Exception, Throwable {
@@ -103,7 +128,18 @@ public class LayersModule extends AnnotatedRESTModule {
 		res.setStatus(201);
 		return layerFactory.getRestResponseObject();
 	}
-
+	
+	/**
+	 * A method to delete a method using DELETE verb
+	 * @param req
+	 * @param res
+	 * @param user
+	 * @param uriParser
+	 * @param id
+	 * @return
+	 * @throws Exception
+	 * @throws Throwable
+	 */
 	@RESTMethod(alias = "layers/{id}", method = "delete")
 	public String deleteLayers(HttpServletRequest req, HttpServletResponse res,
 			User user, URIParser uriParser, @URIParam(name = "id") Integer id)

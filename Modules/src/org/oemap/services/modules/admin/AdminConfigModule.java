@@ -46,6 +46,12 @@ import se.unlogic.standardutils.dao.SimpleAnnotatedDAOFactory;
 import se.unlogic.webutils.http.HTTPUtils;
 import se.unlogic.webutils.http.URIParser;
 
+
+/**
+ * 
+ * Admin configuration module to handle configurations
+ *
+ */
 public class AdminConfigModule extends AnnotatedRESTModule {
 	private AnnotatedDAOWrapper<Config, Integer> configDAO;
 
@@ -59,6 +65,9 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 				Integer.class);
 	}
 
+	/**
+	 * Init method
+	 */
 	public void init(ForegroundModuleDescriptor moduleDescriptor,
 			SectionInterface sectionInterface, DataSource dataSource)
 			throws Exception {
@@ -66,6 +75,10 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 		super.init(moduleDescriptor, sectionInterface, dataSource);
 	}
 	
+	
+	/**
+	 * Default method for all http requests
+	 */
 	@Override
 	public se.unlogic.hierarchy.core.interfaces.ForegroundModuleResponse defaultMethod(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Throwable {
 		List<Config> config = configDAO.getAll();
@@ -76,13 +89,15 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 	};
 
 	/**
+	 *Returns a specific configuration 
+	 *
 	 * 
 	 * @param req
 	 * @param res
 	 * @param user
 	 * @param uriParser
 	 * @param id
-	 * @return
+	 * @return a configuration
 	 * @throws Throwable
 	 */
 	@RESTMethod(alias = "config/{id}", method = "get")
@@ -96,7 +111,7 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 	}
 
 	/**
-	 * 
+	 * Updates a specific configuration by using PUT verb in the request and provide configuration ID is ID param
 	 * @param req
 	 * @param res
 	 * @param user
@@ -123,6 +138,16 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 		return configFactory.getRestResponseObject();
 	}
 
+	/**
+	 * Create a new configuration by using the POST verb. The configuration is expected to be in the req object.
+	 * The configuration is expected to be in JSON format
+	 * @param req
+	 * @param res
+	 * @param user
+	 * @param uriParser
+	 * @return
+	 * @throws Throwable
+	 */
 	@RESTMethod(alias = "config", method = "post")
 	public String createConfig(HttpServletRequest req, HttpServletResponse res,
 			User user, URIParser uriParser)
@@ -145,6 +170,16 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 		return configFactory.getRestResponseObject();
 	}
 
+	/**
+	 * Deletes a configuration by using the DELETE verb. Provide id as parameter representing the configuration to delete. 
+	 * @param req
+	 * @param res
+	 * @param user
+	 * @param uriParser
+	 * @param id
+	 * @return
+	 * @throws Throwable
+	 */
 	@RESTMethod(alias = "config/{id}", method = "delete")
 	public String deleteConfig(HttpServletRequest req, HttpServletResponse res,
 			User user, URIParser uriParser, @URIParam(name = "id") Integer id)
@@ -163,6 +198,8 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 	}
 
 	/**
+	 * 
+	 * Returns if configuration is write protected. The "default" configuration is per default write protected.
 	 * 
 	 * @param config
 	 * @return

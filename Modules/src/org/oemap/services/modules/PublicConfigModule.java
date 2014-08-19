@@ -43,6 +43,11 @@ import se.unlogic.standardutils.dao.SimpleAnnotatedDAOFactory;
 import se.unlogic.webutils.http.HTTPUtils;
 import se.unlogic.webutils.http.URIParser;
 
+/**
+ * 
+ * A module for distributing configuration public
+ *
+ */
 public class PublicConfigModule extends AnnotatedRESTModule {
 
 	private AnnotatedDAOWrapper<Config, Integer> configDAO;
@@ -55,6 +60,9 @@ public class PublicConfigModule extends AnnotatedRESTModule {
 		super.init(moduleDescriptor, sectionInterface, dataSource);
 	}
 	
+	/**
+	 * Returns all the lists
+	 */
 	@Override
 	public se.unlogic.hierarchy.core.interfaces.ForegroundModuleResponse defaultMethod(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Throwable {
 		List<Config> config = configDAO.getAll();
@@ -74,6 +82,16 @@ public class PublicConfigModule extends AnnotatedRESTModule {
 				Integer.class);
 	}
 
+	/**
+	 * Returns a specific list
+	 * @param req
+	 * @param res
+	 * @param user
+	 * @param uriParser
+	 * @param id
+	 * @return
+	 * @throws Throwable
+	 */
 	@RESTMethod(alias = "config/{id}", method = "get")
 	public String getConfig(HttpServletRequest req, HttpServletResponse res,
 			User user, URIParser uriParser, @URIParam(name = "id") Integer id)
