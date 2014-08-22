@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='AdmClient-view-mapconfiguration-tools-details-DrawObject'>/******************************************************************************
+</span>Copyright Härnösands kommun(C) 2014 
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Affero General Public License
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/agpl-3.0.html
+ ******************************************************************************/
+ 
+Ext.define('AdmClient.view.mapconfiguration.tools.details.DrawObject', {
+	extend : 'Ext.form.Panel',
+	alias : 'widget.drawobject',
+	
+<span id='AdmClient-view-mapconfiguration-tools-details-DrawObject-property-type'>	type: 'drawobject',
+</span>	
+<span id='AdmClient-view-mapconfiguration-tools-details-DrawObject-property-typeLabel'>	typeLabel: 'Type',
+</span><span id='AdmClient-view-mapconfiguration-tools-details-DrawObject-property-widthLabel'>    widthLabel: 'Width',
+</span><span id='AdmClient-view-mapconfiguration-tools-details-DrawObject-property-lengthLabel'>    lengthLabel: 'Length',
+</span><span id='AdmClient-view-mapconfiguration-tools-details-DrawObject-property-m1Label'>    m1Label: 'M1',
+</span><span id='AdmClient-view-mapconfiguration-tools-details-DrawObject-property-m2Label'>    m2Label: 'M2',
+</span><span id='AdmClient-view-mapconfiguration-tools-details-DrawObject-property-angleLabel'>    angleLabel: 'Angle',
+</span>    
+<span id='AdmClient-view-mapconfiguration-tools-details-DrawObject-method-initComponent'>	initComponent : function() {
+</span>	    
+	    var formItems = [{
+            xtype: 'numberfield',
+            fieldLabel: this.widthLabel,
+            itemId: 'w',
+            minValue: 0
+        },{
+            xtype: 'numberfield',
+            fieldLabel: this.lengthLabel,
+            itemId: 'l',
+            minValue: 0
+        },{
+            xtype: 'numberfield',
+            fieldLabel: this.m1Label,
+            itemId: 'm1',
+            minValue: 0
+        },{
+            xtype: 'numberfield',
+            fieldLabel: this.m2Label,
+            itemId: 'm2',
+            minValue: 0
+        },{
+            xtype: 'numberfield',
+            itemId: 'angle',
+            fieldLabel: this.angleLabel,
+            value: 0
+        }];
+	    
+		this.items = [ {
+			xtype : 'checkboxfield',
+			boxLabel : 'User customizable'
+		}, {
+		    width: 230,
+		    xtype : 'radiogroup',
+            vertical : true,
+            fieldLabel: 'Type',
+            itemId: 'type',
+		    items : [ {
+                boxLabel : '&lt;div class=&quot;objectconfig-radio-r&quot;&gt;&lt;/div&gt;',
+                name : 'rb',
+                inputValue : 'R',
+                checked : true
+            }, {
+                boxLabel : '&lt;div class=&quot;objectconfig-radio-l&quot;&gt;&lt;/div&gt;',
+                name : 'rb',
+                enabled: false,
+                inputValue : 'L'
+            }, {
+                boxLabel : '&lt;div class=&quot;objectconfig-radio-d&quot;&gt;&lt;/div&gt;',
+                name : 'rb',
+                enabled: false,
+                inputValue : 'D'
+            }, {
+                boxLabel : '&lt;div class=&quot;objectconfig-radio-o&quot;&gt;&lt;/div&gt;',
+                name : 'rb',
+                enabled: false,
+                inputValue : 'O'
+            } ]
+		} ];
+		
+		this.items = this.items.concat(formItems);
+		
+		this.callParent(arguments);
+		
+		this.getConfig();
+	},
+	
+<span id='AdmClient-view-mapconfiguration-tools-details-DrawObject-method-setConfig'>	setConfig: function() {
+</span>	    var toolCfg = this.getToolConfig();
+	},
+	
+<span id='AdmClient-view-mapconfiguration-tools-details-DrawObject-method-getConfig'>	getConfig: function() {
+</span>	    var toolCfg = this.getToolConfig();
+	    var objectConfig = toolCfg.objectConfig;
+	    
+	    if (objectConfig) {
+	        objectConfig.type = this.down('#type').getValue();
+	    }
+	},
+	
+<span id='AdmClient-view-mapconfiguration-tools-details-DrawObject-method-getToolConfig'>	getToolConfig: function() {
+</span>	    return AdmClient.app.config.tools.filter(function(tool) {
+	        return tool.type = this.type;
+	    }, this);
+	}
+});</pre>
+</body>
+</html>

@@ -1,5 +1,5 @@
-/******************************************************************************
-Copyright Härnösands kommun(C) 2014  <name of author>
+/*
+Copyright Härnösands kommun(C) 2014 
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -13,11 +13,17 @@ Copyright Härnösands kommun(C) 2014  <name of author>
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Affero General Public License
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/agpl-3.0.html
- ******************************************************************************/
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the GNU Affero General Public License
+    which accompanies this distribution, and is available at
+    http://www.gnu.org/licenses/agpl-3.0.html
+ */
+
+
+/*
+* A controller to handle main search view.
+*/
+
 
 Ext.define('AdmClient.controller.Search', {
 	extend : 'Ext.app.Controller',
