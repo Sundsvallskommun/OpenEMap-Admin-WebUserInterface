@@ -37,14 +37,14 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A controller to handle servers view.
+<span id='AdmClient-controller-Servers'>/**
+</span>* A controller to handle servers view.
 */
 
 Ext.define('AdmClient.controller.Servers', {
 	extend : 'Ext.app.Controller',
-	init : function() {
-		this.control({
+<span id='AdmClient-controller-Servers-method-init'>	init : function() {
+</span>		this.control({
 
 			'#addSettingsRow' : {
 				click : this.settingsGridAdd
@@ -55,14 +55,14 @@ Ext.define('AdmClient.controller.Servers', {
 		});
 	},
 
-	serversGridEdit : function(editor, e) {
-	},
+<span id='AdmClient-controller-Servers-method-serversGridEdit'>	serversGridEdit : function(editor, e) {
+</span>	},
 
-	searchGridEdit : function(editor, e) {
-	},
+<span id='AdmClient-controller-Servers-method-searchGridEdit'>	searchGridEdit : function(editor, e) {
+</span>	},
 
-	settingsGridAdd : function(btn, e) {
-		var query = 'button[id=' + btn.id + '] ^ grid'; // something like ('button[id=button-1049] ^ grid')
+<span id='AdmClient-controller-Servers-method-settingsGridAdd'>	settingsGridAdd : function(btn, e) {
+</span>		var query = 'button[id=' + btn.id + '] ^ grid'; // something like ('button[id=button-1049] ^ grid')
 		var grids = Ext.ComponentQuery.query(query);
 		if (grids &amp;&amp; grids instanceof Array) {
 			var grid = grids[0];
@@ -70,8 +70,8 @@ Ext.define('AdmClient.controller.Servers', {
 		}
 	},
 	
-	save: function(btn, e){
-		var grid = Ext.ComponentQuery.query('button[id=' + btn.getId() +'] ^ grid')[0];
+<span id='AdmClient-controller-Servers-method-save'>	save: function(btn, e){
+</span>		var grid = Ext.ComponentQuery.query('button[id=' + btn.getId() +'] ^ grid')[0];
 		if (grid){
 			var store = grid.getStore();
 			store.sync({callback : function(){
@@ -81,6 +81,7 @@ Ext.define('AdmClient.controller.Servers', {
 			
 		}
 	}
-});</pre>
+});
+</pre>
 </body>
 </html>

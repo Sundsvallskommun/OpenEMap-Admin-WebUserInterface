@@ -37,26 +37,26 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A controller to handle layer view.
+<span id='AdmClient-controller-Layers'>/**
+</span>* A controller to handle layer view.
 */
 
 Ext.define('AdmClient.controller.Layers', {
     extend : 'Ext.app.Controller',
     requires : ['AdmClient.view.settings.Layers',
                 'AdmClient.view.settings.LayerSettings'],
-    refs: [{
-        ref: 'layers',
+<span id='AdmClient-controller-Layers-property-refs'>    refs: [{
+</span>        ref: 'layers',
         selector: '#layers'
     },{
         ref: 'wmslayers',
         selector: '#wmslayers'
     }],
-    views: ['settings.Layers'],
-    stores: ['Layers'],
-    
-    init : function() {
-        this.control({
+<span id='AdmClient-controller-Layers-property-views'>    views: ['settings.Layers'],
+</span><span id='AdmClient-controller-Layers-property-stores'>    stores: ['Layers'],
+</span>    
+<span id='AdmClient-controller-Layers-method-init'>    init : function() {
+</span>        this.control({
             '#add': {
                 click: this.onAddClick
             },
@@ -75,12 +75,12 @@ Ext.define('AdmClient.controller.Layers', {
         });
     },
 
-    onSaveClick: function() {
-        var layers = this.getLayersStore();
+<span id='AdmClient-controller-Layers-method-onSaveClick'>    onSaveClick: function() {
+</span>        var layers = this.getLayersStore();
         layers.sync();
     },
-    onAddClick: function() {
-        var layers = this.getLayersStore();
+<span id='AdmClient-controller-Layers-method-onAddClick'>    onAddClick: function() {
+</span>        var layers = this.getLayersStore();
         var wmslayers = this.getWmslayers();
         var selection = wmslayers.getSelectionModel().getSelection();
         
@@ -101,11 +101,11 @@ Ext.define('AdmClient.controller.Layers', {
         
         layer.save();
     },
-    onEdit: function(editor, e) {
-        e.record.save();
+<span id='AdmClient-controller-Layers-method-onEdit'>    onEdit: function(editor, e) {
+</span>        e.record.save();
     },
-    onSettingsClick: function(gridview, rl, rowIndex, colIndex, e, record) {
-        var layerSettings = Ext.create('AdmClient.view.settings.LayerSettings');
+<span id='AdmClient-controller-Layers-method-onSettingsClick'>    onSettingsClick: function(gridview, rl, rowIndex, colIndex, e, record) {
+</span>        var layerSettings = Ext.create('AdmClient.view.settings.LayerSettings');
         
         var w = Ext.create('Ext.Window', {
             height: 200,
@@ -122,9 +122,10 @@ Ext.define('AdmClient.controller.Layers', {
                 
         layerSettings.getForm().loadRecord(record);
     },
-    onDeleteClick: function(gridview, rl, rowIndex, colIndex, e, record) {
-        record.destroy();
+<span id='AdmClient-controller-Layers-method-onDeleteClick'>    onDeleteClick: function(gridview, rl, rowIndex, colIndex, e, record) {
+</span>        record.destroy();
     }
-});</pre>
+});
+</pre>
 </body>
 </html>

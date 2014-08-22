@@ -19,6 +19,9 @@ Copyright Härnösands kommun(C) 2014
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
 
+/**
+ * Search panel
+ */
 Ext.define('AdmClient.view.mapconfiguration.search.SearchPanel', {
 	extend : 'Ext.grid.Panel',
 	alias : 'widget.searchPanel',

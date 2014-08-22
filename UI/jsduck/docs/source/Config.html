@@ -37,8 +37,8 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A model that represents the configuration - obselete. 
+<span id='AdmClient-model-Config'>/**
+</span>* A model that represents the configuration - obselete. 
 */
 
 Ext.define('AdmClient.model.Config', {
@@ -46,48 +46,48 @@ Ext.define('AdmClient.model.Config', {
 		observable : 'Ext.util.Observable'
 	},
 	
-	setId : function(configId){
-		this.configId = configId;
+<span id='AdmClient-model-Config-method-setId'>	setId : function(configId){
+</span>		this.configId = configId;
 	},
 	
-	setName : function(name){
-		this.name = name;
+<span id='AdmClient-model-Config-method-setName'>	setName : function(name){
+</span>		this.name = name;
 	},
 	
-	setMaxExtent : function(maxExtent){
-		this.maxExtent = maxExtent;
+<span id='AdmClient-model-Config-method-setMaxExtent'>	setMaxExtent : function(maxExtent){
+</span>		this.maxExtent = maxExtent;
 	},
 	
-	setExtent : function(extent){
-		this.extent = extent;
+<span id='AdmClient-model-Config-method-setExtent'>	setExtent : function(extent){
+</span>		this.extent = extent;
 	},
 	
-	setAttribution : function(attribution){
-		this.attribution = attribution;
+<span id='AdmClient-model-Config-method-setAttribution'>	setAttribution : function(attribution){
+</span>		this.attribution = attribution;
 	},
 	
-	setDrawStyle : function(drawStyle){
-		this.drawStyle = drawStyle;
+<span id='AdmClient-model-Config-method-setDrawStyle'>	setDrawStyle : function(drawStyle){
+</span>		this.drawStyle = drawStyle;
 	},
 	
-	setTools : function(tools){
-		this.tools = tools;
+<span id='AdmClient-model-Config-method-setTools'>	setTools : function(tools){
+</span>		this.tools = tools;
 	},
 	
-	setLayers : function(layers){
-		this.layers = layers;
+<span id='AdmClient-model-Config-method-setLayers'>	setLayers : function(layers){
+</span>		this.layers = layers;
 	},
 	
-	setVersion : function(version){
-		this.version = version;
+<span id='AdmClient-model-Config-method-setVersion'>	setVersion : function(version){
+</span>		this.version = version;
 	},
 	
-	setAutoClearDrawLayer : function(autoClearDrawLayer){
-		this.autoClearDrawLayer = autoClearDrawLayer;
+<span id='AdmClient-model-Config-method-setAutoClearDrawLayer'>	setAutoClearDrawLayer : function(autoClearDrawLayer){
+</span>		this.autoClearDrawLayer = autoClearDrawLayer;
 	},
 	
-	getConfig : function(){
-		var config = {};
+<span id='AdmClient-model-Config-method-getConfig'>	getConfig : function(){
+</span>		var config = {};
 		config.configId = this.configId;
 		config.name = this.name;
 		config.maxExtent = this.maxExtent;
@@ -101,19 +101,20 @@ Ext.define('AdmClient.model.Config', {
 		return config;
 	},
 	
-	loadConfig : function(config){
-		for (var k in config){
+<span id='AdmClient-model-Config-method-loadConfig'>	loadConfig : function(config){
+</span>		for (var k in config){
 			this[k] = config[k];
 		}
 	},
 	
-	constructor : function(config){
-		this.mixins.observable.constructor.call(this, config);
+<span id='AdmClient-model-Config-method-constructor'>	constructor : function(config){
+</span>		this.mixins.observable.constructor.call(this, config);
 		
 		this.addEvents(
 				'updatedConfig'
 		);
 	}
-});</pre>
+});
+</pre>
 </body>
 </html>

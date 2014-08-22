@@ -19,6 +19,9 @@ Copyright Härnösands kommun(C) 2014
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
 
+/**
+ * Identify configuration details
+ */
 Ext.define('AdmClient.view.mapconfiguration.tools.details.Identify', {
 	extend : 'Ext.panel.Panel',
 	alias : 'widget.identify',

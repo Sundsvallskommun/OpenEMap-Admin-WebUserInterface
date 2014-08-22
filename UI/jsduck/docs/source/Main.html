@@ -37,17 +37,17 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A controller to handle main view.
+<span id='AdmClient-controller-Main'>/**
+</span>* A controller to handle main view.
 */
 
 Ext.define('AdmClient.controller.Main', {
     extend: 'Ext.app.Controller',
     requires: ['AdmClient.view.Main'],
-    views: ['Main', 'MapConfiguration'],
-    
-    refs: [{
-      ref: 'form',
+<span id='AdmClient-controller-Main-property-views'>    views: ['Main', 'MapConfiguration'],
+</span>    
+<span id='AdmClient-controller-Main-property-refs'>    refs: [{
+</span>      ref: 'form',
         selector: 'form'
     },{
         ref: 'currentZoom',
@@ -58,8 +58,8 @@ Ext.define('AdmClient.controller.Main', {
     }
     ],
     
-    init: function() {
-        this.control({
+<span id='AdmClient-controller-Main-method-init'>    init: function() {
+</span>        this.control({
             '#mapPanel' : {
             	aftermapmove : this.onMapMove
             },
@@ -70,16 +70,16 @@ Ext.define('AdmClient.controller.Main', {
         });
     },
     
-    onZoomKeyUp : function(evt, e){
-    	var self = this;
+<span id='AdmClient-controller-Main-method-onZoomKeyUp'>    onZoomKeyUp : function(evt, e){
+</span>    	var self = this;
     	var zoom = parseInt(evt.value, 10);
     	if ( (zoom &gt; 0)  &amp;&amp; (zoom &lt; 20) &amp;&amp; (e.keyCode === e.ENTER)){
     		self.map.setCenter(self.map.center, zoom);
     	}
     },
     
-    setZoom : function(zoom){
-    	
+<span id='AdmClient-controller-Main-method-setZoom'>    setZoom : function(zoom){
+</span>    	
     }
 });
 </pre>

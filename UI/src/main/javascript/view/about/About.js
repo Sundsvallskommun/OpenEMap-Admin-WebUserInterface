@@ -19,6 +19,9 @@ Copyright Härnösands kommun(C) 2014
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
 
+/**
+ * About window
+ */
 Ext.define('AdmClient.view.about.About',{
 	extend : 'Ext.window.Window',
 	alias : 'widget.admAbout',

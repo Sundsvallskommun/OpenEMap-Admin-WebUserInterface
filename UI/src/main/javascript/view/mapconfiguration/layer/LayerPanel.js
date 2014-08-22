@@ -19,6 +19,9 @@ Copyright Härnösands kommun(C) 2014
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
 
+/**
+ * Layer panel
+ */
 Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 	extend : 'Ext.panel.Panel',
 	alias : 'widget.layerPanel',

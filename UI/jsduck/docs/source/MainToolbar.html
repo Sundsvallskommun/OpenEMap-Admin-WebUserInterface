@@ -37,24 +37,25 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A controller to handle main toolbar.
+<span id='AdmClient-controller-MainToolbar'>/**
+</span>* A controller to handle main toolbar.
 */
 
 
 Ext.define('AdmClient.controller.MainToolbar', {
 	extend : 'Ext.app.Controller',
-	init : function() {
-		this.control({
+<span id='AdmClient-controller-MainToolbar-method-init'>	init : function() {
+</span>		this.control({
 			'#about' : {
 				click : this.aboutButtonClick
 			}
 		});
 	},
 	
-	aboutButtonClick : function(btn, evt) {
-		new AdmClient.view.about.About().show();
+<span id='AdmClient-controller-MainToolbar-method-aboutButtonClick'>	aboutButtonClick : function(btn, evt) {
+</span>		new AdmClient.view.about.About().show();
 	}
-});</pre>
+});
+</pre>
 </body>
 </html>

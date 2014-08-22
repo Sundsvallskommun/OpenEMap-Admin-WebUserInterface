@@ -19,6 +19,9 @@ Copyright Härnösands kommun(C) 2014
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
 
+/**
+ * Draw geometry configuration details
+ */
 Ext.define('AdmClient.view.mapconfiguration.tools.details.DrawGeometry', {
 	extend : 'Ext.panel.Panel',
 

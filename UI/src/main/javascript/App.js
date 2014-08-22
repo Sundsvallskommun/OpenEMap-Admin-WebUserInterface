@@ -19,11 +19,11 @@ Copyright Härnösands kommun(C) 2014
     http://www.gnu.org/licenses/agpl-3.0.html
  */
 
- /**
-  *
-  * Main class in the app.
+/**
+ * @class AdmClient
+ * Main class in the app.
+ * @singleton
  */
-
 Ext.application({
 	requires: ['Ext.container.Container',
 	           'AdmClient.controller.Main',

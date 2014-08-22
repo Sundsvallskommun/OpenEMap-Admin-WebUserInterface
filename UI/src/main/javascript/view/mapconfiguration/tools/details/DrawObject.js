@@ -18,7 +18,10 @@ Copyright Härnösands kommun(C) 2014
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
- 
+
+/**
+ * Draw object configuration details
+ */
 Ext.define('AdmClient.view.mapconfiguration.tools.details.DrawObject', {
 	extend : 'Ext.form.Panel',
 	alias : 'widget.drawobject',

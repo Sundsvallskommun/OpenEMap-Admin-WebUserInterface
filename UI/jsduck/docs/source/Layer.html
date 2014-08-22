@@ -37,14 +37,14 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A model that represents a layer.
+<span id='AdmClient-model-Layer'>/**
+</span>* A model that represents a layer.
 */
 
 Ext.define('AdmClient.model.Layer', {
     extend : 'Ext.data.Model',
-    fields : [ 
-    	'layerId', 
+<span id='AdmClient-model-Layer-property-fields'>    fields : [ 
+</span>    	'layerId', 
     	'name', 
     	'wms', 
     	'wfs', 
@@ -58,10 +58,11 @@ Ext.define('AdmClient.model.Layer', {
         {name: 'searchable', mapping: 'wfs', type: 'object'},
     	'layer' // OpenLayers reference
     ],
-    proxy: {
-        type: 'rest',
+<span id='AdmClient-model-Layer-property-proxy'>    proxy: {
+</span>        type: 'rest',
         url: '/openemapadmin/layers'
     }
-});</pre>
+});
+</pre>
 </body>
 </html>

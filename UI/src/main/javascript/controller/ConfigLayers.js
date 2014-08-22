@@ -20,7 +20,7 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
+/**
 * A controller to handle layers, see layer store for more implementation specifics regarding
 */
 

@@ -20,7 +20,7 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
+/**
 * A model that represents a layer.
 */
 

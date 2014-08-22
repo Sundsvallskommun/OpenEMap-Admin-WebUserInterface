@@ -19,6 +19,9 @@ Copyright Härnösands kommun(C) 2014
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
 
+/**
+ * Configured layers
+ */
 Ext.define('AdmClient.view.settings.LayersConfigured', {
     extend : 'Ext.grid.Panel',
     requires : [ 'AdmClient.store.Layers' ],

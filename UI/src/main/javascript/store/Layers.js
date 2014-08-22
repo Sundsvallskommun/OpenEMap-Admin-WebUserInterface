@@ -20,7 +20,7 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
+/**
 * A model store for det grouped Layers. 
 */
 

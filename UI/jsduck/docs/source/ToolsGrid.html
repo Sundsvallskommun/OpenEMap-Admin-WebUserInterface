@@ -37,16 +37,16 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A controller to handle main tools grid.
+<span id='AdmClient-controller-ToolsGrid'>/**
+</span>* A controller to handle main tools grid.
 */
 
 
 Ext.define('AdmClient.controller.ToolsGrid', {
 	extend : 'Ext.app.Controller',
 	requires : [ 'AdmClient.view.mapconfiguration.tools.details.*', 'AdmClient.view.MapConfiguration'],
-	refs : [{
-		ref	: 'configurations',
+<span id='AdmClient-controller-ToolsGrid-property-refs'>	refs : [{
+</span>		ref	: 'configurations',
 		selector : '#configurations'
 	},{
 		ref : 'toolsGrid',
@@ -55,8 +55,8 @@ Ext.define('AdmClient.controller.ToolsGrid', {
 		ref : 'toolGeneral',
 		selector : '#toolGeneral'
 	}],
-	init : function() {
-		this.control({
+<span id='AdmClient-controller-ToolsGrid-method-init'>	init : function() {
+</span>		this.control({
 
 			'#toolsGrid' : {
 				render : this.gridRender
@@ -73,14 +73,14 @@ Ext.define('AdmClient.controller.ToolsGrid', {
         });
 	},
 
-	views : [],
-	
-	gridRender : function(panel, opts) {
-		this.markTools();
+<span id='AdmClient-controller-ToolsGrid-property-views'>	views : [],
+</span>	
+<span id='AdmClient-controller-ToolsGrid-method-gridRender'>	gridRender : function(panel, opts) {
+</span>		this.markTools();
 	},
 	
-	markTools : function(){
-		var panel = this.getToolsGrid();
+<span id='AdmClient-controller-ToolsGrid-method-markTools'>	markTools : function(){
+</span>		var panel = this.getToolsGrid();
 		for (var i = 0; i &lt; panel.store.data.items.length; i++){
 			panel.store.data.items[i].data.selected = false;
 			panel.store.data.items[i].save();
@@ -115,8 +115,8 @@ Ext.define('AdmClient.controller.ToolsGrid', {
 		panel.updateLayout();
 	},
 	
-	toolsHasEmptyObject : function(){
-		for (var i = 0; i &lt; AdmClient.app.config.tools.length; i++){
+<span id='AdmClient-controller-ToolsGrid-method-toolsHasEmptyObject'>	toolsHasEmptyObject : function(){
+</span>		for (var i = 0; i &lt; AdmClient.app.config.tools.length; i++){
 			if (Object.keys(AdmClient.app.config.tools[i]).length &gt; 0){
 				return true;
 			}
@@ -124,8 +124,8 @@ Ext.define('AdmClient.controller.ToolsGrid', {
 		return false;
 	},
 	
-	// function show details about a tool
-	detailsRender : function() {
+<span id='AdmClient-controller-ToolsGrid-method-detailsRender'>	// function show details about a tool
+</span>	detailsRender : function() {
 		var detailsPanel = arguments[0];
 		detailsPanel.removeAll(false);
 		var toolName = this.getToolsGrid().getSelectionModel().selected.items[0].data.toolName;
@@ -134,6 +134,7 @@ Ext.define('AdmClient.controller.ToolsGrid', {
 		detailsPanel.add(toolPanel);
 	}
 	
-});</pre>
+});
+</pre>
 </body>
 </html>

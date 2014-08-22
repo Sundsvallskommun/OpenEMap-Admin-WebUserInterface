@@ -19,6 +19,9 @@ Copyright Härnösands kommun(C) 2014
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
 
+/**
+ * GIS Servers grid
+ */
 Ext.define('AdmClient.view.settings.GisServersGrid', {
 	extend : 'AdmClient.view.settings.SettingsGridBase',
 	alias : 'widget.gisServersGrid',

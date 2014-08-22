@@ -37,8 +37,8 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A model store for det grouped layers. 
+<span id='AdmClient-store-GroupedLayerTree'>/**
+</span>* A model store for det grouped layers. 
 */
 
 Ext.define('AdmClient.store.GroupedLayerTree' ,{
@@ -49,17 +49,17 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         'AdmClient.model.Layer'
     ],
 
-    model: 'AdmClient.model.Layer',
-    defaultRootProperty: 'layers',
-
-    proxy: {
-        type: 'memory'
+<span id='AdmClient-store-GroupedLayerTree-property-model'>    model: 'AdmClient.model.Layer',
+</span><span id='AdmClient-store-GroupedLayerTree-property-defaultRootProperty'>    defaultRootProperty: 'layers',
+</span>
+<span id='AdmClient-store-GroupedLayerTree-property-proxy'>    proxy: {
+</span>        type: 'memory'
     },
 
-    maxLayerIndex: 1000,
-
-    listeners: {
-        beforeinsert: function(store, node, refNode, eOpts) { return this.onBeforeInsert(store, node, refNode); },
+<span id='AdmClient-store-GroupedLayerTree-property-maxLayerIndex'>    maxLayerIndex: 1000,
+</span>
+<span id='AdmClient-store-GroupedLayerTree-property-listeners'>    listeners: {
+</span>        beforeinsert: function(store, node, refNode, eOpts) { return this.onBeforeInsert(store, node, refNode); },
         beforeappend: function(store, node, eOpts) { return this.onBeforeAppend(store, node); },
         //insert: function(store, node, refNode, eOpts) { this.onInsertAndAppend(node); },
         //append: function(store, node, index, eOpts) { this.onInsertAndAppend(node); },
@@ -70,14 +70,14 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         }
     },
 
-    constructor: function(config) {
-        config = Ext.apply({}, config);
+<span id='AdmClient-store-GroupedLayerTree-method-constructor'>    constructor: function(config) {
+</span>        config = Ext.apply({}, config);
         this.callParent([config]);
         
     },
 
-    /*
-    * Since not all models include all AdmClient attributes, like wms and wfs
+<span id='AdmClient-store-GroupedLayerTree-method-tryToGetRecordAttribute'>    /*
+</span>    * Since not all models include all AdmClient attributes, like wms and wfs
     * try to get attributes from the raw json data. As a last solution set defaults
     * @param    {Ext.data.NodeInterface}    node        node to search for attributes in
     * @param    {string}                    attribute   searched attribute
@@ -115,8 +115,8 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         return attr;
     },
     
-    /*
-    * Converts a store node to layer configuration
+<span id='AdmClient-store-GroupedLayerTree-method-nodeToLayerConfig'>    /*
+</span>    * Converts a store node to layer configuration
     * !TODO Change into writer and add something like nameProperty: 'mapping' to get mapped JSON
     * @param  {Ext.data.NodeInterface}    node    Node to convert
     * @return {object}                    layer   OpenEMap layer
@@ -174,7 +174,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         return layer;
     },
 
-<span id='global-method-getLayerConfiguration'>    /**
+<span id='AdmClient-store-GroupedLayerTree-method-getLayerConfiguration'>    /**
 </span>    * Returns all layers as OpenEMap layer configuration tree.
     * @return {object} layerConfig  OpenEMap layer configuration
     */
@@ -200,7 +200,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         return layerConfig;
     },
 
-<span id='global-method-onBeforeAppend'>    /**
+<span id='AdmClient-store-GroupedLayerTree-method-onBeforeAppend'>    /**
 </span>    * Before append to store
     * @param {Ext.data.Model} node
     * @param {Ext.data.Model} appendNode
@@ -213,7 +213,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         return true;
     },
 
-<span id='global-method-onBeforeInsert'>    /**
+<span id='AdmClient-store-GroupedLayerTree-method-onBeforeInsert'>    /**
 </span>    * Before insert to store
     * @param {Ext.data.Store} store
     * @param {Ext.data.Model} node
@@ -227,7 +227,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         return true;
     },
 
-<span id='global-method-onInsertAndAppend'>    /**
+<span id='AdmClient-store-GroupedLayerTree-method-onInsertAndAppend'>    /**
 </span>     * Handler for a store's insert and append event.
      *
      * @param {Ext.data.Model} node
@@ -287,12 +287,12 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         
     },
 
-    layerUpdate : function(){
-         AdmClient.app.config.layers = this.getLayerConfiguration(null);
+<span id='AdmClient-store-GroupedLayerTree-method-layerUpdate'>    layerUpdate : function(){
+</span>         AdmClient.app.config.layers = this.getLayerConfiguration(null);
     },
 
-    onUpdate: function(chkBox, opt, eOpts ) {
-        if(!this._updating) {
+<span id='AdmClient-store-GroupedLayerTree-method-onUpdate'>    onUpdate: function(chkBox, opt, eOpts ) {
+</span>        if(!this._updating) {
             this._updating = true;
 
             var data = null
@@ -304,7 +304,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         }
     },
 
-<span id='global-method-onRemove'>    /**
+<span id='AdmClient-store-GroupedLayerTree-method-onRemove'>    /**
 </span>     * Handler for a store's remove event.
      *
      * @param {Ext.data.Store} store
@@ -330,7 +330,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         }
     },
 
-<span id='global-method-reorderLayersOnMap'>    /**
+<span id='AdmClient-store-GroupedLayerTree-method-reorderLayersOnMap'>    /**
 </span>     * Reorder map layers from store order
      *
      * @private
@@ -352,7 +352,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         }
     },
 
-<span id='global-method-addWMSLegend'>    /**
+<span id='AdmClient-store-GroupedLayerTree-method-addWMSLegend'>    /**
 </span>    * Adds a WMS-legend to a node
     * @param {Ext.data.Model} node
     * @return {Ext.data.Model} node
@@ -372,7 +372,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         return node;
     },
 
-<span id='global-method-unbind'>    /**
+<span id='AdmClient-store-GroupedLayerTree-method-unbind'>    /**
 </span>     * Unbind this store from the map it is currently bound.
      */
     unbind: function() {
@@ -385,7 +385,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         me.map = null;
     },
 
-<span id='global-method-destroy'>    /**
+<span id='AdmClient-store-GroupedLayerTree-method-destroy'>    /**
 </span>     * Unbinds listeners by calling #unbind prior to being destroyed.
      *
      * @private

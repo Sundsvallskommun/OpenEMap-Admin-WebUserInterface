@@ -37,15 +37,15 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A controller to handle layer details view.
+<span id='AdmClient-controller-LayerDetails'>/**
+</span>* A controller to handle layer details view.
 */
 
 Ext.define('AdmClient.controller.LayerDetails', {
 	extend: 'Ext.app.Controller',
 	requires : [ 'AdmClient.view.mapconfiguration.layer.LayerDetails'],
-	refs : [{
-		ref : 'saveLayerDetail',
+<span id='AdmClient-controller-LayerDetails-property-refs'>	refs : [{
+</span>		ref : 'saveLayerDetail',
 		selector : '#saveLayerDetail'
 	},{
 		ref: 'layerDetailsGrid',
@@ -55,16 +55,16 @@ Ext.define('AdmClient.controller.LayerDetails', {
 		selector: 'layerDetails'
 	}],
 
-	init : function() {
-		this.control({
+<span id='AdmClient-controller-LayerDetails-method-init'>	init : function() {
+</span>		this.control({
 			'#saveLayerDetail' : {
 				click : this.save
 			}
 		});
 	},
 
-	save : function(btn, e, eOpts){
-		var store = this.getLayerDetailsGrid().getStore();
+<span id='AdmClient-controller-LayerDetails-method-save'>	save : function(btn, e, eOpts){
+</span>		var store = this.getLayerDetailsGrid().getStore();
 		var layer = this.getLayerDetails().layer;
 		layer.metadata = {};
 		store.data.items.forEach(function(c){
@@ -86,6 +86,7 @@ Ext.define('AdmClient.controller.LayerDetails', {
 
 		this.getLayerDetails().close();
 	}
-});</pre>
+});
+</pre>
 </body>
 </html>

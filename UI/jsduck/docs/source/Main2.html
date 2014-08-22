@@ -37,8 +37,8 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* The main page that sets up the UI.
+<span id='AdmClient-view-Main'>/**
+</span>* The main page that sets up the UI.
 */
 
 Ext.define('AdmClient.view.Main', {
@@ -46,16 +46,16 @@ Ext.define('AdmClient.view.Main', {
 	requires: ['AdmClient.view.MapConfiguration'],
 	alias : 'widget.main',
 
-	title : 'RIGES Administration',
-	layout : 'border',
-	border : false,
-	header : false,
-	bodyPadding : 3,
-	renderTo: 'contentitem',
-	region : 'center',
-
-	initComponent : function() {
-		this.items = [ {
+<span id='AdmClient-view-Main-property-title'>	title : 'RIGES Administration',
+</span><span id='AdmClient-view-Main-property-layout'>	layout : 'border',
+</span><span id='AdmClient-view-Main-property-border'>	border : false,
+</span><span id='AdmClient-view-Main-property-header'>	header : false,
+</span><span id='AdmClient-view-Main-property-bodyPadding'>	bodyPadding : 3,
+</span><span id='AdmClient-view-Main-property-renderTo'>	renderTo: 'contentitem',
+</span><span id='AdmClient-view-Main-property-region'>	region : 'center',
+</span>
+<span id='AdmClient-view-Main-method-initComponent'>	initComponent : function() {
+</span>		this.items = [ {
 			xtype : 'tabpanel',
 			tabPosition : 'left',
 //			height : 800,
@@ -80,6 +80,7 @@ Ext.define('AdmClient.view.Main', {
 		],
 		this.callParent(arguments);
 	}
-});</pre>
+});
+</pre>
 </body>
 </html>

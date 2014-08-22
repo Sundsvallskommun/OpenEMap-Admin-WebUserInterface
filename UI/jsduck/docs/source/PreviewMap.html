@@ -37,8 +37,8 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A controller to handle preview map - obselete
+<span id='AdmClient-controller-PreviewMap'>/**
+</span>* A controller to handle preview map - obselete
 */
 
 
@@ -46,16 +46,16 @@ Ext.define('AdmClient.controller.PreviewMap', {
 	extend : 'Ext.app.Controller',
 	requires : [ 'AdmClient.view.mapconfiguration.map.PreviewMap', 'OpenEMap.Client' ],
 
-	init : function() {
-		this.control({
+<span id='AdmClient-controller-PreviewMap-method-init'>	init : function() {
+</span>		this.control({
 			'#previewMap' : {
 				show : this.previewRender
 			}
 		});
 	},
 
-	previewRender : function(panel) {
-		
+<span id='AdmClient-controller-PreviewMap-method-previewRender'>	previewRender : function(panel) {
+</span>		
 		
 		if (this.mapPanel){
 			this.mapPanel.removeAll();
@@ -88,6 +88,7 @@ Ext.define('AdmClient.controller.PreviewMap', {
 	}
 	
 	
-});</pre>
+});
+</pre>
 </body>
 </html>

@@ -37,8 +37,8 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A controller to handle main MapConfiguration view.
+<span id='AdmClient-controller-MapConfiguration'>/**
+</span>* A controller to handle main MapConfiguration view.
 */
 
 Ext.define('AdmClient.controller.MapConfiguration', {
@@ -46,8 +46,8 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 	requires: ['OpenEMap.Client',
 	           'AdmClient.view.MapConfiguration',
 	           'AdmClient.view.mapconfiguration.layer.LayerPanel'],
-	refs : [{
-		ref	: 'configurations',
+<span id='AdmClient-controller-MapConfiguration-property-refs'>	refs : [{
+</span>		ref	: 'configurations',
 		selector : '#configurations'
 	},{
 		ref : 'attribution',
@@ -82,8 +82,8 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 	}
 	],
 	
-	init : function() {
-		this.control({
+<span id='AdmClient-controller-MapConfiguration-method-init'>	init : function() {
+</span>		this.control({
 			'#pan' : {
 				click : this.panMap
 			},
@@ -120,8 +120,8 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 		});
 	},
 
-	panMap : function(btn) {
-		var markExtentButton = Ext.ComponentQuery.query('#markExtent')[0];
+<span id='AdmClient-controller-MapConfiguration-method-panMap'>	panMap : function(btn) {
+</span>		var markExtentButton = Ext.ComponentQuery.query('#markExtent')[0];
 		markExtentButton.toggle();
 
 		var drawRectangleTool = this.mapClient.map.controls.filter(function(t) {
@@ -133,8 +133,8 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 		}
 	},
 
-	markExtent : function(btn) {
-		var panButton = Ext.ComponentQuery.query('#pan')[0];
+<span id='AdmClient-controller-MapConfiguration-method-markExtent'>	markExtent : function(btn) {
+</span>		var panButton = Ext.ComponentQuery.query('#pan')[0];
 		panButton.toggle();
 
 		var drawRectangleTool = this.mapClient.map.controls.filter(function(t) {
@@ -146,9 +146,9 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 		}
 	},
 	
-	mapClient : null,
-	mapPanelRender : function(panel) {
-		this.mapClient = Ext.create('OpenEMap.Client');
+<span id='AdmClient-controller-MapConfiguration-property-mapClient'>	mapClient : null,
+</span><span id='AdmClient-controller-MapConfiguration-method-mapPanelRender'>	mapPanelRender : function(panel) {
+</span>		this.mapClient = Ext.create('OpenEMap.Client');
 		
 		Ext.Ajax.request({
 			scope : this,
@@ -188,8 +188,8 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 		});
 	},
 	
-	saveConfiguration : function(){
-		var self = this;
+<span id='AdmClient-controller-MapConfiguration-method-saveConfiguration'>	saveConfiguration : function(){
+</span>		var self = this;
 		if (AdmClient.app.config.name === 'Default'){
 			Ext.MessageBox.alert('&quot;Default&quot; is an invalid configuration name.', 'You are trying to write to a write protected template. Choose another template name');
 			return;
@@ -212,16 +212,16 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 		});
 	},
 	
-	setConfigurationName : function(combo, e, eOpts){
-		AdmClient.app.config.name = combo.getValue();
+<span id='AdmClient-controller-MapConfiguration-method-setConfigurationName'>	setConfigurationName : function(combo, e, eOpts){
+</span>		AdmClient.app.config.name = combo.getValue();
 		AdmClient.app.config.configId = undefined;
 		this.getConfigId().setValue(AdmClient.app.config.configId || '');
 		this.setConfigText();
 	},
 	
 	
-	renderConfiguration : function(){
-		var self = this;
+<span id='AdmClient-controller-MapConfiguration-method-renderConfiguration'>	renderConfiguration : function(){
+</span>		var self = this;
 		Ext.Ajax.request({
 			url : appPath + '/adminconfigs',
 			method : 'GET',
@@ -243,14 +243,14 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 		});
 	},
 
-	selectConfiguration : function(combo, records){
-		if(records.length &gt; 0) {
+<span id='AdmClient-controller-MapConfiguration-method-selectConfiguration'>	selectConfiguration : function(combo, records){
+</span>		if(records.length &gt; 0) {
 			this.loadConfiguration(	records[0].get('configId'));
 		}
 	},
 
-	changeConfiguration: function(config) {
-		AdmClient.app.config = Ext.apply(AdmClient.app.config,config);
+<span id='AdmClient-controller-MapConfiguration-method-changeConfiguration'>	changeConfiguration: function(config) {
+</span>		AdmClient.app.config = Ext.apply(AdmClient.app.config,config);
 		this.getAttribution().setValue(AdmClient.app.config.attribution);
 		this.getToolsTab().setDisabled(false);
 		this.getMapPanel().setDisabled(false);
@@ -271,8 +271,8 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 		//this.getConfigurationPreviewPanel().setTitle(configTitle);
 	},
 
-	loadConfiguration: function(id) {
-		Ext.Ajax.request({
+<span id='AdmClient-controller-MapConfiguration-method-loadConfiguration'>	loadConfiguration: function(id) {
+</span>		Ext.Ajax.request({
 			url : appPath + '/adminconfigs/config/' + id,
 			method : 'GET',
 			success : function(evt){
@@ -288,23 +288,23 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 	
 
 	
-	configurationPreviewPanelShow : function(panel, eOpts){
-		 this.setConfigText();
+<span id='AdmClient-controller-MapConfiguration-method-configurationPreviewPanelShow'>	configurationPreviewPanelShow : function(panel, eOpts){
+</span>		 this.setConfigText();
 	},
 	
-	setConfigText : function(){
-		var conf = JSON.stringify(AdmClient.app.config, null, ' ');
+<span id='AdmClient-controller-MapConfiguration-method-setConfigText'>	setConfigText : function(){
+</span>		var conf = JSON.stringify(AdmClient.app.config, null, ' ');
 		var configTextArea = this.getConfigurationTextfield();
 		configTextArea.setValue(conf);
 	},
 	
-	setAttribution : function(){
-		AdmClient.app.config.attribution = this.getAttribution().getValue();
+<span id='AdmClient-controller-MapConfiguration-method-setAttribution'>	setAttribution : function(){
+</span>		AdmClient.app.config.attribution = this.getAttribution().getValue();
 		this.setConfigText();
 	},
 	
-	autoClearDrawLayerChanged : function(box, newValue, oldValue, eOpts){
-		AdmClient.app.config.autoClearDrawLayer = newValue;
+<span id='AdmClient-controller-MapConfiguration-method-autoClearDrawLayerChanged'>	autoClearDrawLayerChanged : function(box, newValue, oldValue, eOpts){
+</span>		AdmClient.app.config.autoClearDrawLayer = newValue;
 	}
 });
 </pre>

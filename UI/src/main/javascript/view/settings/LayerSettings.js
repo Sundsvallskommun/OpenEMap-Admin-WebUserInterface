@@ -19,6 +19,9 @@ Copyright Härnösands kommun(C) 2014
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
 
+/**
+ * Layer settings
+ */
 Ext.define('AdmClient.view.settings.LayerSettings', {
     extend : 'Ext.form.Panel',
     requires : [],

@@ -19,6 +19,9 @@ Copyright Härnösands kommun(C) 2014
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
 
+/**
+ * Main toolbar
+ */
 Ext.define('AdmClient.view.main.MainToolbar', {
 	extend : 'Ext.toolbar.Toolbar',
 	alias : 'widget.mainToolbar',

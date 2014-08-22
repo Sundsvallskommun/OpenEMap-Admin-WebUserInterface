@@ -19,6 +19,9 @@ Copyright Härnösands kommun(C) 2014
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
 
+/**
+ * Settings grid
+ */
 Ext.define('AdmClient.view.settings.SettingsGridBase', {
 	extend : 'Ext.grid.Panel',
 	requires : [ 'Ext.grid.*' ],

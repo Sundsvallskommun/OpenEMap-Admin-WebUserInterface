@@ -37,19 +37,19 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* The mapconfiguration view.
+<span id='AdmClient-view-MapConfiguration'>/**
+</span>* The mapconfiguration view.
 */
 
 Ext.define('AdmClient.view.MapConfiguration', {
 	extend : 'Ext.panel.Panel',
 	requires : [ 'GeoExt.panel.Map' ],
 	alias : 'widget.mapConfiguration',
-	layout : 'border',
-	border : false,
-
-	initComponent : function() {
-		this.items = [ {
+<span id='AdmClient-view-MapConfiguration-property-layout'>	layout : 'border',
+</span><span id='AdmClient-view-MapConfiguration-property-border'>	border : false,
+</span>
+<span id='AdmClient-view-MapConfiguration-method-initComponent'>	initComponent : function() {
+</span>		this.items = [ {
 			border : false,
 			bodyPadding : 10,
 			region : 'north',
@@ -153,6 +153,7 @@ Ext.define('AdmClient.view.MapConfiguration', {
 		this.callParent(arguments);
 
 	}
-});</pre>
+});
+</pre>
 </body>
 </html>

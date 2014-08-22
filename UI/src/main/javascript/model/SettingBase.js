@@ -20,7 +20,7 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
+/**
 * A model base model for settings section. 
 */
 Ext.define('AdmClient.model.Server', {

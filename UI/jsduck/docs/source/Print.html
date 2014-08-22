@@ -37,28 +37,28 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A controller to handle tooldetails for print tool.
+<span id='AdmClient-controller-toolDetails-Print'>/**
+</span>* A controller to handle tooldetails for print tool.
 */
 
 
 Ext.define('AdmClient.controller.toolDetails.Print', {
 	extend : 'AdmClient.controller.MapConfiguration',
 	requires : [ 'AdmClient.view.mapconfiguration.tools.details.*', 'AdmClient.view.MapConfiguration'],
-	refs : [{
-		ref : 'toolsGrid',
+<span id='AdmClient-controller-toolDetails-Print-property-refs'>	refs : [{
+</span>		ref : 'toolsGrid',
 		selector : '#toolsGrid'
 	}],
-	init : function() {
-		this.control({
+<span id='AdmClient-controller-toolDetails-Print-method-init'>	init : function() {
+</span>		this.control({
 			'#toolsGrid checkcolumn' : {
 				checkchange : this.toolSelected
 			}
 		});
 	},
 	
-	toolSelected : function(chkBox, rowIndex, checked, eOpts) {
-		
+<span id='AdmClient-controller-toolDetails-Print-method-toolSelected'>	toolSelected : function(chkBox, rowIndex, checked, eOpts) {
+</span>		
 		var toolObject = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data;
 		if (checked){
 			if (/Print/.test(toolObject.toolName)){
@@ -87,6 +87,7 @@ Ext.define('AdmClient.controller.toolDetails.Print', {
 		
 		this.getToolsGrid().store.commitChanges();
 	}
-});</pre>
+});
+</pre>
 </body>
 </html>

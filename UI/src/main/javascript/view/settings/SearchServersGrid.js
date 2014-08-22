@@ -19,6 +19,9 @@ Copyright Härnösands kommun(C) 2014
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
 
+/**
+ * Search servers grid
+ */
 Ext.define('AdmClient.view.settings.SearchServersGrid', {
 	extend : 'AdmClient.view.settings.SettingsGridBase',
 	alias : 'widget.SearchServersGrid',

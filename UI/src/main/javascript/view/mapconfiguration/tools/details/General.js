@@ -19,6 +19,9 @@ Copyright Härnösands kommun(C) 2014
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
 
+/**
+ * General tool configuration details
+ */
 Ext.define('AdmClient.view.mapconfiguration.tools.details.General', {
 	extend : 'Ext.tab.Panel',
 	requires : [ 'AdmClient.view.mapconfiguration.tools.details.Print' ],

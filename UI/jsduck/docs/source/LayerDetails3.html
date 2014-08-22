@@ -15,8 +15,8 @@
   </script>
 </head>
 <body onload="prettyPrint(); highlight();">
-  <pre class="prettyprint lang-js"><span id='AdmClient-view-mapconfiguration-layer-LayerDetails'>/******************************************************************************
-</span>Copyright Härnösands kommun(C) 2014 
+  <pre class="prettyprint lang-js">/*
+Copyright Härnösands kommun(C) 2014 
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -30,128 +30,19 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Affero General Public License
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/agpl-3.0.html
- ******************************************************************************/
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the GNU Affero General Public License
+    which accompanies this distribution, and is available at
+    http://www.gnu.org/licenses/agpl-3.0.html
+ */
 
-Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
-	extend : 'Ext.window.Window',
-	alias : 'widget.layerDetails',
 
-	requires: [
-		'Ext.window.Window',
-		'GeoExt.data.WfsCapabilitiesLayerStore'
-	],
-<span id='AdmClient-view-mapconfiguration-layer-LayerDetails-cfg-layout'>	layout: {
-</span>		type : 'border',
-		margin : 8
-	},
-<span id='AdmClient-view-mapconfiguration-layer-LayerDetails-cfg-title'>	title : 'Lager inst&amp;auml;llningar',
-</span><span id='AdmClient-view-mapconfiguration-layer-LayerDetails-cfg-width'>	width : 600,
-</span><span id='AdmClient-view-mapconfiguration-layer-LayerDetails-cfg-height'>	height : 400,
-</span>
-<span id='AdmClient-view-mapconfiguration-layer-LayerDetails-method-constructor'>	constructor : function(){
-</span>		this.layer = arguments[0].selectedLayer;
-		this.panelGrid = arguments[0].grid;
-
-		if (this.layer === null){
-			Ext.Msg.show({
-				title: 'Inget lagernamn.',
-				msg: 'Kan ej editera grupplager.',
-				buttons: Ext.Msg.OK,
-				icon: Ext.Msg.WARNING
-			});
-			this.close();
-			return;
-		}
-
-		this.title +=  ' - ' + this.layer.name;
-
-		this.callParent(arguments);
-	},
-
-<span id='AdmClient-view-mapconfiguration-layer-LayerDetails-method-initComponent'>	initComponent : function() {
-</span>
-		var self = this;
-		this.x = Math.ceil(window.innerWidth / 2 - this.innerWidth / 2);
-		this.y = Math.ceil(window.innerHeight / 2 - this.innerHeight / 2);
-
-		this.modal = true;
-		var pathArray = this.layer.wms.url.split('/');
-		var wfsUrl = 'adminproxy?url=' + pathArray[0] + '//' + pathArray[2] + (this.layer.wfs.url || '/wfs') + '?service=wfs&amp;request=DescribeFeatureType&amp;version=1.0.0&amp;typeName=' + this.layer.name;
-		this.store = Ext.create('AdmClient.store.LayerDetails');
-
-		this.store.addListener('load', function(store, records, successful, eOpts){
-			records.forEach(function(l){
-				if (self.layer.metadata &amp;&amp; self.layer.metadata.attributes &amp;&amp; self.layer.metadata.attributes[l.data.name] instanceof Object){
-					l.data.alias = self.layer.metadata.attributes[l.data.name].alias;
-					l.data.visible = true;
-				}
-			});
-			store.update();
-		}); 
-
-		this.store.setUrl(wfsUrl);
-		this.store.load();
-
-		this.cellEditing = new Ext.grid.plugin.CellEditing({
-			clicksToEdit : 1
-		});
-
-		this.items = [{
-			region: 'center',
-			xtype: 'grid',
-			itemId: 'layerDetailsGrid',
-			store: this.store,
-
-			plugins : [ this.cellEditing ],
-			columns: [{
-				header: 'Kolumn',
-				dataIndex : 'name'
-			},{
-				header: 'Alias',
-				dataIndex: 'alias',
-				editor : {
-					allowBlank : false
-				}
-			},{
-				header: 'Synlig',
-				xtype: 'checkcolumn',
-				dataIndex: 'visible',
-				listeners :{
-					'checkchange': function(chkBox, rowIdx, checked, eOpts){
-						if (checked){
-							self.store.data.items[rowIdx].data.alias = self.store.data.items[rowIdx].data.alias || self.store.data.items[rowIdx].data.name;
-						}else{
-							self.store.data.items[rowIdx].data.alias = '';
-						}
-						self.store.update();
-					}
-				}
-			}]
-		},{
-			region: 'south',
-			xtype : 'toolbar',
-			items : [
-			'-&gt;',{
-				xtype: 'button',
-				text: 'Spara',
-				itemId: 'saveLayerDetail'
-			},{
-				xtype : 'button',
-				text : 'Avbryt',
-				itemId: 'cancelLayerDetail',
-				handler: function(){
-					self.close();
-				}
-			}
-			]
-		}]
-
-		this.callParent(arguments);
-	}
-});</pre>
+<span id='AdmClient-store-LayerDetails'>/**
+</span>* A model store for det grouped LayerDetails. 
+*/
+Ext.define('AdmClient.store.LayerDetails', {
+    extend: 'GeoExt.data.AttributeStore'
+});
+</pre>
 </body>
 </html>

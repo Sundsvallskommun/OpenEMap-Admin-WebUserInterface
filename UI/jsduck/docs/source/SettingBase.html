@@ -37,15 +37,15 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A model base model for settings section. 
+<span id='AdmClient-model-Server'>/**
+</span>* A model base model for settings section. 
 */
 Ext.define('AdmClient.model.Server', {
 	requires : ['AdmClient.model.SettingBase'],
 	extend : 'AdmClient.model.SettingBase',
 
-	proxy : {
-		type : 'rest',
+<span id='AdmClient-model-Server-property-proxy'>	proxy : {
+</span>		type : 'rest',
 		url : appPath + '/settings/servers',
 		reader : {
 			type : 'json'
@@ -74,6 +74,7 @@ Ext.define('AdmClient.model.SettingBase', {
 		name : 'ID',
 		type : 'integer'
 	}]
-});</pre>
+});
+</pre>
 </body>
 </html>

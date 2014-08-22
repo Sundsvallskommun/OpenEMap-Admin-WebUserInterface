@@ -19,6 +19,9 @@ Copyright Härnösands kommun(C) 2014
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
 
+/**
+ * Preview map
+ */
 Ext.define('AdmClient.view.mapconfiguration.map.PreviewMap', {
 	extend : 'Ext.panel.Panel',
 	requires : [ 'AdmClient.view.MapConfiguration','GeoExt.panel.Map' ],

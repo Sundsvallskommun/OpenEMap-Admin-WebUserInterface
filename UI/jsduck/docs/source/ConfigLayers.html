@@ -37,15 +37,15 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A controller to handle layers, see layer store for more implementation specifics regarding
+<span id='AdmClient-controller-ConfigLayers'>/**
+</span>* A controller to handle layers, see layer store for more implementation specifics regarding
 */
 
 Ext.define('AdmClient.controller.ConfigLayers', {
     extend : 'Ext.app.Controller',
     requires : ['AdmClient.view.mapconfiguration.layer.LayerPanel'],
-    refs: [
-        {
+<span id='AdmClient-controller-ConfigLayers-property-refs'>    refs: [
+</span>        {
             ref: 'mapConfigLayerTree',
             selector: '#mapConfigLayerTree'
         },
@@ -58,10 +58,10 @@ Ext.define('AdmClient.controller.ConfigLayers', {
             selector: '#layerServiceSelector'
         }
     ],
-    views: ['mapconfiguration.layer.LayerPanel'],
-    
-    init : function() {
-        this.control({
+<span id='AdmClient-controller-ConfigLayers-property-views'>    views: ['mapconfiguration.layer.LayerPanel'],
+</span>    
+<span id='AdmClient-controller-ConfigLayers-method-init'>    init : function() {
+</span>        this.control({
             '#mapConfigLayerTree': {
                 checkchange: this.onNodeCheckChange
             },
@@ -89,8 +89,8 @@ Ext.define('AdmClient.controller.ConfigLayers', {
         
     },
 
-    onNewGrouplayer : function(){
-        var self = this;
+<span id='AdmClient-controller-ConfigLayers-method-onNewGrouplayer'>    onNewGrouplayer : function(){
+</span>        var self = this;
         Ext.Msg.prompt('Name', 'Nytt grupplagernamn:', function(btn, text){
             if (btn == 'ok'){
                 var tree = self.getMapConfigLayerTree();
@@ -102,26 +102,26 @@ Ext.define('AdmClient.controller.ConfigLayers', {
         });
     },
     
-    onBaseLayer : function(chkBox, rowIndex, checked, eOpts){
-    	var layerTree = this.getMapConfigLayerTree();
+<span id='AdmClient-controller-ConfigLayers-method-onBaseLayer'>    onBaseLayer : function(chkBox, rowIndex, checked, eOpts){
+</span>    	var layerTree = this.getMapConfigLayerTree();
     	layerTree.store.save();
     },
 
-    onWMSServiceKeyup: function(combo, e, eOpts) {
-        if(e.getKey() === e.ENTER) {
+<span id='AdmClient-controller-ConfigLayers-method-onWMSServiceKeyup'>    onWMSServiceKeyup: function(combo, e, eOpts) {
+</span>        if(e.getKey() === e.ENTER) {
             this.loadWMSCapabilities(combo.getValue());
         }
 
     },
 
-    onNodeCheckChange: function(node, rowIndex, checked, eOpts ) {
-        if(node.data.wms) {
+<span id='AdmClient-controller-ConfigLayers-method-onNodeCheckChange'>    onNodeCheckChange: function(node, rowIndex, checked, eOpts ) {
+</span>        if(node.data.wms) {
             node.data.wms.visibility = checked;
         }
     },
 
-    loadWSLayers: function(url) {
-         if(url) {
+<span id='AdmClient-controller-ConfigLayers-method-loadWSLayers'>    loadWSLayers: function(url) {
+</span>         if(url) {
             this.getMapConfigWMSLayerTree().setLoading(true);
             var wmsCapabilitiesStore = this.getMapConfigWMSLayerTree().getStore();
             Ext.Ajax.request({
@@ -154,8 +154,8 @@ Ext.define('AdmClient.controller.ConfigLayers', {
         }
     },
 
-    loadWMSCapabilities: function(url) {
-        if(url) {
+<span id='AdmClient-controller-ConfigLayers-method-loadWMSCapabilities'>    loadWMSCapabilities: function(url) {
+</span>        if(url) {
             this.getMapConfigWMSLayerTree().setLoading(true);
             var wmsCapabilitiesStore = this.getMapConfigWMSLayerTree().getStore();
             
@@ -186,8 +186,8 @@ Ext.define('AdmClient.controller.ConfigLayers', {
         }
     },
 
-    updateLayerTree: function(config) {
-        if(config.layers &amp;&amp; config.layers.length &gt; 0) {
+<span id='AdmClient-controller-ConfigLayers-method-updateLayerTree'>    updateLayerTree: function(config) {
+</span>        if(config.layers &amp;&amp; config.layers.length &gt; 0) {
             // Update layer tree with new layers
             var layerTree = this.getMapConfigLayerTree();
             layerTree.getStore().setRootNode({
@@ -198,27 +198,27 @@ Ext.define('AdmClient.controller.ConfigLayers', {
         }
     },
 
-    isWMSLayer: function(layer) {
-        return layer.wms ? true : false;
+<span id='AdmClient-controller-ConfigLayers-method-isWMSLayer'>    isWMSLayer: function(layer) {
+</span>        return layer.wms ? true : false;
     },
 
-    isOpenLayersLayer: function(layer) {
-        if (layer.wms || layer.osm || layer.google || layer.bing) {
+<span id='AdmClient-controller-ConfigLayers-method-isOpenLayersLayer'>    isOpenLayersLayer: function(layer) {
+</span>        if (layer.wms || layer.osm || layer.google || layer.bing) {
             return true;
         } else {
             return false;
         }
     },
-    isBaseLayer: function(layer) {
-        var options = this.getOptions(layer);
+<span id='AdmClient-controller-ConfigLayers-method-isBaseLayer'>    isBaseLayer: function(layer) {
+</span>        var options = this.getOptions(layer);
         if (options &amp;&amp; options.isBaseLayer) {
             return true;
         } else {
             return false;
         }
     },
-    getOptions: function(layer) {
-        if (layer.wms) {
+<span id='AdmClient-controller-ConfigLayers-method-getOptions'>    getOptions: function(layer) {
+</span>        if (layer.wms) {
             return layer.wms.options;
         } else if (layer.osm) {
             return layer.osm.options;
@@ -229,7 +229,7 @@ Ext.define('AdmClient.controller.ConfigLayers', {
         }
     },
 
-<span id='global-method-parseLayerTree'>    /**
+<span id='AdmClient-controller-ConfigLayers-method-parseLayerTree'>    /**
 </span>    * Iterate over the layertree and create a ExtJS-tree structure
     */
     parseLayerTree: function(layers) {
@@ -237,7 +237,7 @@ Ext.define('AdmClient.controller.ConfigLayers', {
         return layers;
     },
 
-<span id='global-method-getLayerSwitcherLayers'>    /**
+<span id='AdmClient-controller-ConfigLayers-method-getLayerSwitcherLayers'>    /**
 </span>    * Get all layers and layer groups that should show up in the layer switcher
     */
     getLayerSwitcherLayers: function(layers) {
@@ -246,8 +246,8 @@ Ext.define('AdmClient.controller.ConfigLayers', {
         }, this);
     },
 
-    iterateLayers: function(layer) {
-        // Is node checked?
+<span id='AdmClient-controller-ConfigLayers-method-iterateLayers'>    iterateLayers: function(layer) {
+</span>        // Is node checked?
         //layer.checked = layer.wms &amp;&amp; layer.wms.options ? layer.wms.options.visibility : false;
         // Get url from Server and set to layer
         if(typeof layer.serverId !== 'undefined' &amp;&amp; layer.serverId !== '') {
@@ -281,6 +281,7 @@ Ext.define('AdmClient.controller.ConfigLayers', {
             layer.leaf = true;
         }
     }
-});</pre>
+});
+</pre>
 </body>
 </html>

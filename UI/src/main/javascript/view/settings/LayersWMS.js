@@ -19,6 +19,9 @@ Copyright Härnösands kommun(C) 2014
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
 
+/**
+ * WMS Layers
+ */
 Ext.define('AdmClient.view.settings.LayersWMS', {
     extend : 'Ext.panel.Panel',
     alias : 'widget.layerswms',

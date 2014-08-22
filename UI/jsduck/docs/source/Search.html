@@ -37,24 +37,24 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A controller to handle main search view.
+<span id='AdmClient-controller-Search'>/**
+</span>* A controller to handle main search view.
 */
 
 
 Ext.define('AdmClient.controller.Search', {
 	extend : 'Ext.app.Controller',
 	requires : [ 'AdmClient.view.mapconfiguration.search.SearchPanel', 'AdmClient.view.MapConfiguration'],
-	refs : [{
-			ref	: 'configurations',
+<span id='AdmClient-controller-Search-property-refs'>	refs : [{
+</span>			ref	: 'configurations',
 			selector : '#configurations'
 		},{
 			ref : 'searchGrid',
 			selector : '#searchGridConfig'
 	}],
 	
-	init : function() {
-		this.control({
+<span id='AdmClient-controller-Search-method-init'>	init : function() {
+</span>		this.control({
 			'#searchGridConfig' :{
 				render : this.markGrid
 
@@ -70,8 +70,8 @@ Ext.define('AdmClient.controller.Search', {
         });
 	},
 
-	markGrid : function(){
-
+<span id='AdmClient-controller-Search-method-markGrid'>	markGrid : function(){
+</span>
 		var panel = this.getSearchGrid();
 		for (var i = 0; i &lt; panel.store.data.items.length; i++){
 			panel.store.data.items[i].data.selected = false;
@@ -97,12 +97,12 @@ Ext.define('AdmClient.controller.Search', {
 
 	},
 	
-	configurationChanged : function(){
-		this.markGrid();
+<span id='AdmClient-controller-Search-method-configurationChanged'>	configurationChanged : function(){
+</span>		this.markGrid();
 	},
 	
-	municipalityChanged : function(chkBox, rowIndex, checked, eOpts){
-
+<span id='AdmClient-controller-Search-method-municipalityChanged'>	municipalityChanged : function(chkBox, rowIndex, checked, eOpts){
+</span>
 		var store = this.getSearchGrid().getStore();
 		store.sync();
 		
@@ -128,6 +128,7 @@ Ext.define('AdmClient.controller.Search', {
 			}
 		});
 	}
-});</pre>
+});
+</pre>
 </body>
 </html>

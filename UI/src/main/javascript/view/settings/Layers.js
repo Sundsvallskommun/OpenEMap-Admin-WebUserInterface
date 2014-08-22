@@ -19,6 +19,9 @@ Copyright Härnösands kommun(C) 2014
  * http://www.gnu.org/licenses/agpl-3.0.html
  ******************************************************************************/
 
+/**
+ * Layers
+ */
 Ext.define('AdmClient.view.settings.Layers', {
     extend : 'Ext.panel.Panel',
     requires : [ 'GeoExt.data.WfsCapabilitiesLayerStore',

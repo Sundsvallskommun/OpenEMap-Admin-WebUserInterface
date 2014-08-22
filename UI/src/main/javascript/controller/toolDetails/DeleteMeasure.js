@@ -20,7 +20,7 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
+/**
 * A controller to handle tooldetails for delete measure tool.
 */
 

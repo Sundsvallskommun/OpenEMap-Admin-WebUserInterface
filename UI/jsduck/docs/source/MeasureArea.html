@@ -37,27 +37,27 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-/*
-* A controller to handle tooldetails for measure area tool.
+<span id='AdmClient-controller-toolDetails-MeasureArea'>/**
+</span>* A controller to handle tooldetails for measure area tool.
 */
 
 Ext.define('AdmClient.controller.toolDetails.MeasureArea', {
 	extend : 'AdmClient.controller.MapConfiguration',
 	requires : [ 'AdmClient.view.mapconfiguration.tools.details.*', 'AdmClient.view.MapConfiguration'],
-	refs : [{
-		ref : 'toolsGrid',
+<span id='AdmClient-controller-toolDetails-MeasureArea-property-refs'>	refs : [{
+</span>		ref : 'toolsGrid',
 		selector : '#toolsGrid'
 	}],
-	init : function() {
-		this.control({
+<span id='AdmClient-controller-toolDetails-MeasureArea-method-init'>	init : function() {
+</span>		this.control({
 			'#toolsGrid checkcolumn' : {
 				checkchange : this.toolSelected
 			}
 		});
 	},
 	
-	toolSelected : function(chkBox, rowIndex, checked, eOpts) {
-		
+<span id='AdmClient-controller-toolDetails-MeasureArea-method-toolSelected'>	toolSelected : function(chkBox, rowIndex, checked, eOpts) {
+</span>		
 		var toolObject = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data;
 		if (checked){
 			if (/MeasureArea/.test(toolObject.toolName)){
@@ -86,6 +86,7 @@ Ext.define('AdmClient.controller.toolDetails.MeasureArea', {
 		
 		this.getToolsGrid().store.commitChanges();
 	}
-});</pre>
+});
+</pre>
 </body>
 </html>
