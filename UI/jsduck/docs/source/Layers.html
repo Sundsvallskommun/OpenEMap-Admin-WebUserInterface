@@ -45,15 +45,15 @@ Ext.define('AdmClient.controller.Layers', {
     extend : 'Ext.app.Controller',
     requires : ['AdmClient.view.settings.Layers',
                 'AdmClient.view.settings.LayerSettings'],
-<span id='AdmClient-controller-Layers-property-refs'>    refs: [{
+<span id='AdmClient-controller-Layers-cfg-refs'>    refs: [{
 </span>        ref: 'layers',
         selector: '#layers'
     },{
         ref: 'wmslayers',
         selector: '#wmslayers'
     }],
-<span id='AdmClient-controller-Layers-property-views'>    views: ['settings.Layers'],
-</span><span id='AdmClient-controller-Layers-property-stores'>    stores: ['Layers'],
+<span id='AdmClient-controller-Layers-cfg-views'>    views: ['settings.Layers'],
+</span><span id='AdmClient-controller-Layers-cfg-stores'>    stores: ['Layers'],
 </span>    
 <span id='AdmClient-controller-Layers-method-init'>    init : function() {
 </span>        this.control({

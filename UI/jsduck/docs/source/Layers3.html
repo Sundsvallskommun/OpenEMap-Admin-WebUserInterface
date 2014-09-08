@@ -15,8 +15,8 @@
   </script>
 </head>
 <body onload="prettyPrint(); highlight();">
-  <pre class="prettyprint lang-js">/*
-Copyright Härnösands kommun(C) 2014 
+  <pre class="prettyprint lang-js"><span id='global-property-'>/******************************************************************************
+</span>Copyright Härnösands kommun(C) 2014 
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -30,27 +30,55 @@ Copyright Härnösands kommun(C) 2014
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
-    All rights reserved. This program and the accompanying materials
-    are made available under the terms of the GNU Affero General Public License
-    which accompanies this distribution, and is available at
-    http://www.gnu.org/licenses/agpl-3.0.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Affero General Public License
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/agpl-3.0.html
+ ******************************************************************************/
+
+<span id='AdmClient-view-settings-Layers'>/**
+</span> * Layers
  */
-
-
-<span id='AdmClient-store-Layers'>/**
-</span>* A model store for det grouped Layers. 
-*/
-
-Ext.define('AdmClient.store.Layers', {
-    extend: 'Ext.data.Store',
-<span id='AdmClient-store-Layers-property-model'>    model: 'AdmClient.model.Layer',
-</span>    requires : ['AdmClient.model.Layer'],
-<span id='AdmClient-store-Layers-property-proxy'>    proxy: {
-</span>        type: 'rest',
-        url: '/openemapadmin/layers'
+Ext.define('AdmClient.view.settings.Layers', {
+    extend : 'Ext.panel.Panel',
+    requires : [ 'GeoExt.data.WfsCapabilitiesLayerStore',
+            'AdmClient.store.Layers',
+            'AdmClient.view.settings.LayersConfigured',
+            'AdmClient.view.settings.LayersWMS' ],
+    alias : 'widget.layers',
+<span id='AdmClient-view-settings-Layers-cfg-title'>    title : 'Layers',
+</span><span id='AdmClient-view-settings-Layers-cfg-layout'>    layout : {
+</span>        type : 'hbox',
+        align : 'stretch'
     },
-<span id='AdmClient-store-Layers-property-autoLoad'>    autoLoad: true
-</span>});
+<span id='AdmClient-view-settings-Layers-method-initComponent'>    initComponent : function() {
+</span>
+        this.items = [ {
+            xtype : 'layerswms',
+            //padding : '0 5 0 0',
+            padding : 10,
+            flex : 1
+        }, {
+            layout : {
+                type : 'vbox',
+                align : 'center',
+                pack : 'center'
+            },
+            items : {
+                xtype : 'button',
+                text : 'Add -&gt;',
+                itemId : 'add'
+            }
+        }, {
+            xtype : 'layersconfigured',
+            //padding : '0 0 0 5',
+            padding : 10,
+            flex : 1
+        } ];
+        
+        this.callParent(arguments);
+    }
+});
 </pre>
 </body>
 </html>

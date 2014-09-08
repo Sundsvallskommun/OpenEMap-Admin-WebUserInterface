@@ -42,11 +42,11 @@
 Ext.define('AdmClient.view.settings.LayersWMS', {
     extend : 'Ext.panel.Panel',
     alias : 'widget.layerswms',
-<span id='AdmClient-view-settings-LayersWMS-property-layout'>    layout : {
+<span id='AdmClient-view-settings-LayersWMS-cfg-layout'>    layout : {
 </span>        type : 'vbox',
         align : 'stretch'
     },
-<span id='AdmClient-view-settings-LayersWMS-property-title'>    title : 'WMS layers',
+<span id='AdmClient-view-settings-LayersWMS-cfg-title'>    title : 'WMS layers',
 </span><span id='AdmClient-view-settings-LayersWMS-method-initComponent'>    initComponent : function() {
 </span>        var wms = Ext.create(&quot;GeoExt.data.WmsCapabilitiesLayerStore&quot;, {
             url: '/riges/geoserver/wms?request=GetCapabilities&amp;version=1.1.0',

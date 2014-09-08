@@ -21,6 +21,12 @@ Copyright Härnösands kommun(C) 2014
 
 /**
  * Tools grid
+ *
+ *{@img tools.png}
+ *
+ * In this view the administrator simple checks the tools in the configuration. 
+ * 
+ * The view uses an Arraystore to populate lists.
  */
 Ext.define('AdmClient.view.mapconfiguration.tools.ToolsGrid', {
 	extend : 'Ext.grid.Panel',

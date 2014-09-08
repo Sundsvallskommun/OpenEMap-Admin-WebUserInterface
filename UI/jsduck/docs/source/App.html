@@ -40,6 +40,18 @@ Copyright Härnösands kommun(C) 2014
 </span> * @class AdmClient
  * Main class in the app.
  * @singleton
+ * {@img app.png alt app image}
+ *
+ * This adminstration tool is build on top of ExtJS. It uses a MVC pattern from Sencha. More
+ * information can be found [here](http://docs.sencha.com/extjs/4.2.2/#!/guide/application_architecture)
+ * 
+ * To add tools or search items, add a row to the corresponding Array store. 
+ * 
+ * For tools a details part must be added in the controller.
+ *
+ * In general No ID's are being used to identify components. Instead the application uses ItemID to avoid 
+ * ID collisions. 
+ *
  */
 Ext.application({
 	requires: ['Ext.container.Container',

@@ -21,6 +21,13 @@ Copyright Härnösands kommun(C) 2014
 
 /**
  * Search panel
+ *
+ *{@img search.png}
+ *
+ * In this view the administrator simple checks the municipalies the configuration 
+ * should search inside. 
+ * 
+ * The view uses an Arraystore to populate lists.
  */
 Ext.define('AdmClient.view.mapconfiguration.search.SearchPanel', {
 	extend : 'Ext.grid.Panel',

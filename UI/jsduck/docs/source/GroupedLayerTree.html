@@ -49,16 +49,16 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         'AdmClient.model.Layer'
     ],
 
-<span id='AdmClient-store-GroupedLayerTree-property-model'>    model: 'AdmClient.model.Layer',
-</span><span id='AdmClient-store-GroupedLayerTree-property-defaultRootProperty'>    defaultRootProperty: 'layers',
+<span id='AdmClient-store-GroupedLayerTree-cfg-model'>    model: 'AdmClient.model.Layer',
+</span><span id='AdmClient-store-GroupedLayerTree-cfg-defaultRootProperty'>    defaultRootProperty: 'layers',
 </span>
-<span id='AdmClient-store-GroupedLayerTree-property-proxy'>    proxy: {
+<span id='AdmClient-store-GroupedLayerTree-cfg-proxy'>    proxy: {
 </span>        type: 'memory'
     },
 
 <span id='AdmClient-store-GroupedLayerTree-property-maxLayerIndex'>    maxLayerIndex: 1000,
 </span>
-<span id='AdmClient-store-GroupedLayerTree-property-listeners'>    listeners: {
+<span id='AdmClient-store-GroupedLayerTree-cfg-listeners'>    listeners: {
 </span>        beforeinsert: function(store, node, refNode, eOpts) { return this.onBeforeInsert(store, node, refNode); },
         beforeappend: function(store, node, eOpts) { return this.onBeforeAppend(store, node); },
         //insert: function(store, node, refNode, eOpts) { this.onInsertAndAppend(node); },

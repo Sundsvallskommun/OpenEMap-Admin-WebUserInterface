@@ -21,6 +21,12 @@ Copyright Härnösands kommun(C) 2014
 
 /**
  * Layer panel
+ *
+ * In this view an administrator can organaize the layers by dragging and dropping layers
+ * from a WMS server to a configuration. The administrator can create group layers and populating
+ * the groups either from the configuration or from the remote WMS server.
+ *
+ *{@img layers.png}
  */
 Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 	extend : 'Ext.panel.Panel',

@@ -37,22 +37,17 @@ Copyright Härnösands kommun(C) 2014
  */
 
 
-<span id='AdmClient-model-SearchServer'>/**
-</span>* A model that represents the search server. 
+<span id='AdmClient-store-SearchServer'>/**
+</span>* A model store for det grouped SearchServer. 
 */
 
-Ext.define('AdmClient.model.SearchServer', {
-	requires : ['AdmClient.model.SettingBase'],
-	extend : 'AdmClient.model.SettingBase',
 
-<span id='AdmClient-model-SearchServer-property-proxy'>	proxy : {
-</span>		type : 'rest',
-		url : appPath + '/searchserver/server',
-		reader : {
-			type : 'json'
-		}
-	}
-});
+Ext.define('AdmClient.store.SearchServer', {
+	extend : 'Ext.data.Store',
+	requires : ['AdmClient.model.SearchServer'],
+<span id='AdmClient-store-SearchServer-cfg-model'>	model : 'AdmClient.model.SearchServer',
+</span><span id='AdmClient-store-SearchServer-cfg-autoLoad'>	autoLoad : true
+</span>});
 </pre>
 </body>
 </html>
