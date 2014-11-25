@@ -201,7 +201,8 @@ header .user .logged-out {
 }
 
 input[type="submit"], input[type="button"], button {
-	padding: 10px 20px 9px 20px;	
+	/*padding: 10px 20px 9px 20px;*/
+	padding: 8px;	
 }
 
 input[type="password"] {
