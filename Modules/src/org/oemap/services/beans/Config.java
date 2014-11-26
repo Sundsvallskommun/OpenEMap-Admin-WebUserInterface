@@ -99,6 +99,18 @@ public class Config extends ConfigBase {
 	@DAOManaged
 	private String search;
 	
+	@XMLElement
+	@DAOManaged
+	private Boolean isPublic;
+	
+	public Boolean getIsPublic() {
+		return isPublic;
+	}
+
+	public void setIsPublic(Boolean isPublic) {
+		this.isPublic = isPublic;
+	}
+
 	public JsonNode getSearch()  throws JsonProcessingException, IOException{
 		return getJSONNode(search);
 	}

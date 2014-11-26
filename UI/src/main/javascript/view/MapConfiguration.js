@@ -41,6 +41,7 @@ Ext.define('AdmClient.view.MapConfiguration', {
 					itemId : 'markExtent',
 					text : 'Mark extent',
 					icon : 'icons/figur-R.png',
+					iconCls : 'extent',
 					enableToggle : true
 				},('->'),{
 					xtype : 'textfield',
