@@ -84,7 +84,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
     * @return {object}                    layer   OpenEMap layer
     */
     nodeToLayerConfig: function(node, data) {
-        var attributeList = ['name','wms','wfs','metadataUrl'];
+        var attributeList = ['name','wms','wfs','metadataUrl', 'isGroupLayer'];
         var layer = {};
 
         if(node.hasChildNodes()) {
@@ -155,6 +155,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
             node.childNodes.forEach(function(subnode) {
                 if(layerConfig[index].layers) {
                     layerConfig[index].name = subnode.parentNode.get('name');
+                    layerConfig[index].isGroupLayer = subnode.parentNode.get('isGroupLayer');
                     layerConfig[index].layers.push(this.nodeToLayerConfig(subnode));
                 }
             }, this);

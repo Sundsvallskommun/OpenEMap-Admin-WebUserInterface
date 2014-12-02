@@ -47,6 +47,7 @@ Ext.define('AdmClient.controller.Layers', {
         
         var layer = Ext.create('AdmClient.model.Layer', {
             name: wmslayer.get('name'),
+            isGroupLayer : null,
             wms: {
                 params: {
                     layers: wmslayer.get('name')

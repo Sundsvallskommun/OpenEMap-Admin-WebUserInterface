@@ -103,7 +103,13 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		                tooltip: 'Baslager',
 		                text: 'Baslager',
 		                width: 70,
-		               	dataIndex: 'isBaseLayer'
+		               	dataIndex: 'isBaseLayer',
+		               	renderer: function(value, meta){
+		                	if (meta.record.get('isGroupLayer')){
+		                		return '<span></span>';
+		                	}
+		                	return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
+		                }
 		            },
 		            {
 		                xtype: 'checkcolumn',
@@ -117,7 +123,13 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		                width: 70,
 		                tooltip: 'S&ouml;kbar',
 		                text: 'S&ouml;kbar',
-		                dataIndex: 'searchable'
+		                dataIndex: 'searchable',
+		                renderer: function(value, meta){
+		                	if (meta.record.get('isGroupLayer')){
+		                		return '<span></span>';
+		                	}
+		                	return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
+		                }
 		            },
 		            {
 		                xtype: 'actioncolumn',
@@ -136,10 +148,13 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 						}
 		            },{
 		            	xtype: 'actioncolumn',
-		            	with: 70,
-		            	tooltip: 'Alias kolumner, sökbart etc',
+		            	width: 70,
+		            	tooltip: 'Alias kolumner, s&ouml;kbart etc',
 		            	align: 'center',
 		            	text: 'Inst&auml;llningar',
+		            	isDisabled: function(view, ri, ci, item, record){
+		            		return record.data.isGroupLayer;
+		            	},
 		            	icon: '/openemap-admin/font-awesome/black/png/16/table.png',
 		            	handler : function(grid, rowIdex, colIndex){
 		            		var selectedLayer = null;

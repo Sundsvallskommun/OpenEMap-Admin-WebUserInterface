@@ -53,7 +53,8 @@ Ext.define('AdmClient.controller.ConfigLayers', {
                 var tree = self.getMapConfigLayerTree();
                 var root = tree.getRootNode();
                 root.appendChild({
-                    name : text
+                    name : text,
+                    isGroupLayer: true
                 });
             }
         });
