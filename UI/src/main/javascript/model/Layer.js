@@ -5,6 +5,7 @@ Ext.define('AdmClient.model.Layer', {
     fields : [ 
     	'layerId', 
     	'name', 
+    	'queryable',
     	'wms', 
     	'wfs', 
     	'group', 

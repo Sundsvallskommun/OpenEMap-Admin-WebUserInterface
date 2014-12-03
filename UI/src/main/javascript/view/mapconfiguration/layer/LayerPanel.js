@@ -32,7 +32,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 						height : 30,
 		            	width: 500,
 						enableKeyEvents : true,
-						value: typeof defaultWMSServer !== 'undefined' ? defaultWMSServer : ''
+						value: typeof wmsGetCapabilities !== 'undefined' ? wmsGetCapabilities : ''
 					},
 					{
 			            xtype : 'treepanel',
@@ -121,8 +121,8 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		            {
 		                xtype: 'checkcolumn',
 		                width: 70,
-		                tooltip: 'S&ouml;kbar',
-		                text: 'S&ouml;kbar',
+		                tooltip: 'Klickbar genom WFS',
+		                text: 'Klickbar',
 		                dataIndex: 'searchable',
 		                renderer: function(value, meta){
 		                	if (meta.record.get('isGroupLayer')){

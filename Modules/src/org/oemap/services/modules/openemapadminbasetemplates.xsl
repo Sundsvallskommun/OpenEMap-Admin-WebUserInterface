@@ -11,13 +11,25 @@
 	<xsl:template match="Document">
 	
 	<script type="text/javascript">
-				defaultWMSServer = window.location.protocol + '//' + window.location.host + '<xsl:value-of select="/Document/requestinfo/contextpath" />/<xsl:value-of select="adminproxy" />?url=<xsl:value-of select="wmsServer" />';
+				var gisServer = '<xsl:value-of select="gisServer" />';
+				var wmsServer = gisServer + '<xsl:value-of select="wmsServer" />';
+				var wmsGetCapabilities = gisServer + '<xsl:value-of select="wmsGetCapabilities" />';
+				var wfsServer = gisServer + '<xsl:value-of select="wfsServer" />';
+				var wmtsServer = gisServer + '<xsl:value-of select="wmtsServer" />';
+				var adminproxy = window.location.protocol + '//' + window.location.host + '<xsl:value-of select="/Document/requestinfo/contextpath" />/<xsl:value-of select="adminproxy" />';
+				if (adminproxy !== ''){
+					adminproxy += '?url=';
+					wmsGetCapabilities = adminproxy + wmsGetCapabilities;
+				}
+				
+				
+				// defaultWMSServer
 	</script>
 
 	<xsl:choose>
 		<xsl:when test="debugAdmin='true'">
 			<link rel="stylesheet" type="text/css" href="/ext-4.2.1/resources/css/ext-all-neptune.css" />
-			<link rel="stylesheet" type="text/css" href="/OpenEmap-Admin-WebUserInterface/oeadmin.css" />
+			<link rel="stylesheet" type="text/css" href="/OpenEmap-Admin-WebUserInterface2/UI/oeadmin.css" />
 			<script type="text/javascript" src="/ext-4.2.1/ext-debug.js"></script>
 			<script type="text/javascript" src="/ext-4.2.1/ext-theme-neptune.js"></script>
     		<script type="text/javascript" src="/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
@@ -25,17 +37,17 @@
     		<script type="text/javascript" src="/geoext2-2.0.0/geoext2-all.js"></script>
     		
     		<script type="text/javascript">
-        		 var appPath = '/openemap-admin'; 
+        		 var appPath = 'http://localhost/openemap-admin'; 
         		 Ext.Loader.setConfig({
             		disableCaching: false,
             		paths: {
-                		AdmClient: '/OpenEMap-Admin-WebUserInterface/src/main/javascript',
+                		AdmClient: '/OpenEMap-Admin-WebUserInterface2/UI/src/main/javascript',
                 		OpenEMap: '/OpenEMap-WebUserInterface/src/main/javascript',
                 		GeoExt: '/geoext2-2.0.0/src/GeoExt/'
             		}	
           		});
           </script>
-          <script type="text/javascript" src="/OpenEMap-Admin-WebUserInterface/src/main/javascript/App.js"></script>
+          <script type="text/javascript" src="/OpenEMap-Admin-WebUserInterface2/UI/src/main/javascript/App.js"></script>
         
 		</xsl:when>
 		<xsl:otherwise>

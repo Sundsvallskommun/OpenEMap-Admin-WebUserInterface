@@ -42,7 +42,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 
 		this.modal = true;
 		var pathArray = this.layer.wms.url.split('/');
-		var wfsUrl = 'adminproxy?url=' + pathArray[0] + '//' + pathArray[2] + (this.layer.wfs.url || '/geoserver/wfs') + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + this.layer.name;
+		var wfsUrl = 'adminproxy?url=' + pathArray[0] + '//' + pathArray[2] + (this.layer.wfs.url || '/geoserver/wfs/') + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + this.layer.name;
 		this.store = Ext.create('AdmClient.store.LayerDetails');
 
 		this.store.addListener('load', function(store, records, successful, eOpts){

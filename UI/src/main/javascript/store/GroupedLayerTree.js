@@ -84,7 +84,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
     * @return {object}                    layer   OpenEMap layer
     */
     nodeToLayerConfig: function(node, data) {
-        var attributeList = ['name','wms','wfs','metadataUrl', 'isGroupLayer'];
+        var attributeList = ['name','wms','wfs','metadataUrl', 'isGroupLayer', 'queryable'];
         var layer = {};
 
         if(node.hasChildNodes()) {

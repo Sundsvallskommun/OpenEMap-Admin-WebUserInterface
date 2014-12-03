@@ -45,8 +45,24 @@ public class OpenEmapAdminBase extends AnnotatedForegroundModule {
     protected boolean debug = false;
 	
 	@ModuleSetting
+    @TextFieldSettingDescriptor(name = "GIS Server", description = "Address to GIS Server.")
+    protected String gisServer = "";
+	
+	@ModuleSetting
     @TextFieldSettingDescriptor(name = "WMS Server", description = "Address to WMS Server.")
     protected String wmsServer = "";
+	
+	@ModuleSetting
+    @TextFieldSettingDescriptor(name = "WMS Server Getcapabilities URL", description = "Address to Getcapabilities.")
+    protected String wmsGetCapabilities = "";
+	
+	@ModuleSetting
+    @TextFieldSettingDescriptor(name = "WFS Server", description = "Address to WFS Server.")
+    protected String wfsServer = "";
+	
+	@ModuleSetting
+    @TextFieldSettingDescriptor(name = "WMTS Server", description = "Address to WMTS Server.")
+    protected String wmtsServer = "";
 	
 	@ModuleSetting
     @TextFieldSettingDescriptor(name = "Alias for proxy", description = "Alias set in admin proxy.")
@@ -75,7 +91,11 @@ public class OpenEmapAdminBase extends AnnotatedForegroundModule {
 		document.appendChild(moduleDescriptor.toXML(doc));
 
 		XMLUtils.appendNewElement(doc, document, "debugAdmin", debug);
+		XMLUtils.appendNewElement(doc, document, "gisServer", gisServer);
 		XMLUtils.appendNewElement(doc, document, "wmsServer", wmsServer);
+		XMLUtils.appendNewElement(doc, document, "wmsGetCapabilities", wmsGetCapabilities);
+		XMLUtils.appendNewElement(doc, document, "wfsServer", wfsServer);
+		XMLUtils.appendNewElement(doc, document, "wmtsServer", wmtsServer);
 		XMLUtils.appendNewElement(doc, document, "adminproxy", adminproxy);
 		
 		return doc;
