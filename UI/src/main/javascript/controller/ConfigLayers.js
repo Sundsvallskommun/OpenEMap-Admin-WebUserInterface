@@ -1,6 +1,9 @@
 Ext.define('AdmClient.controller.ConfigLayers', {
     extend : 'Ext.app.Controller',
-    requires : ['AdmClient.view.mapconfiguration.layer.LayerPanel'],
+    requires : ['AdmClient.view.mapconfiguration.layer.LayerPanel',
+                'GeoExt.data.WmsCapabilitiesLayerStore',
+                'AdmClient.store.GroupedLayerTree'
+                ],
     refs: [
         {
             ref: 'mapConfigLayerTree',
@@ -16,6 +19,7 @@ Ext.define('AdmClient.controller.ConfigLayers', {
         }
     ],
     views: ['mapconfiguration.layer.LayerPanel'],
+    stores :['GroupedLayerTree'],
     
     init : function() {
         this.control({
@@ -34,7 +38,7 @@ Ext.define('AdmClient.controller.ConfigLayers', {
                 scope: this
             },
             'checkcolumn' : {
-            	checkchange : this.onBaseLayer
+            	checkchange : this.onChangeLayer
             }
         });
 
@@ -60,7 +64,7 @@ Ext.define('AdmClient.controller.ConfigLayers', {
         });
     },
     
-    onBaseLayer : function(chkBox, rowIndex, checked, eOpts){
+    onChangeLayer : function(chkBox, rowIndex, checked, eOpts){
     	var layerTree = this.getMapConfigLayerTree();
     	layerTree.store.save();
     },

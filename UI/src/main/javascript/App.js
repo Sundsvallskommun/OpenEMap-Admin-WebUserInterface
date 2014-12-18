@@ -19,25 +19,25 @@ Ext.application({
 	           'AdmClient.controller.toolDetails.MeasureLine',
 	           'AdmClient.controller.toolDetails.MeasureArea',
 	           'AdmClient.controller.toolDetails.DeleteGeometry',
-             'AdmClient.controller.toolDetails.DeleteAllFeatures',
+	           'AdmClient.controller.toolDetails.DeleteAllFeatures',
 	           'AdmClient.controller.toolDetails.ModifyGeometry',
 	           'AdmClient.controller.toolDetails.SelectGeometry',
-             'AdmClient.controller.toolDetails.DeleteMeasure',
-             'AdmClient.controller.LayerDetails',
+	           'AdmClient.controller.toolDetails.DeleteMeasure',
+	           'AdmClient.controller.LayerDetails',
 	           
 	           'AdmClient.store.Servers',
 	           'AdmClient.store.ToolStore',
 	           'AdmClient.store.Layers',
 	           'AdmClient.store.SearchServer',
 	           'AdmClient.store.Municipalities',
-             'AdmClient.store.LayerDetails',
-             'AdmClient.store.GroupedLayerTree',
+	           'AdmClient.store.LayerDetails',
+	           'AdmClient.store.GroupedLayerTree',
 	           
-             'AdmClient.view.main.MainToolbar',
-             'AdmClient.view.Main',
-             'AdmClient.view.mapconfiguration.tools.ToolsGrid',
-             'AdmClient.view.mapconfiguration.tools.details.General',
-             'AdmClient.view.mapconfiguration.tools.details.DrawGeometry',
+	           'AdmClient.view.main.MainToolbar',
+	           'AdmClient.view.Main',
+	           'AdmClient.view.mapconfiguration.tools.ToolsGrid',
+	           'AdmClient.view.mapconfiguration.tools.details.General',
+	           'AdmClient.view.mapconfiguration.tools.details.DrawGeometry',
              'AdmClient.view.mapconfiguration.tools.details.DeleteGeometry',
              'AdmClient.view.mapconfiguration.tools.details.DrawObject',
              'AdmClient.view.mapconfiguration.tools.details.FullExtent',
@@ -66,7 +66,7 @@ Ext.application({
                'AdmClient.model.Config'
                ],
     name: 'AdmClient',
-    appFolder: 'src/main/javascript',
+    appFolder: 'http://localhost/OpenEMap-Admin-WebUserInterface2/UI/src/main/javascript',
     controllers: ['Main', 
                   'Layers', 
                   'MainToolbar', 
@@ -99,7 +99,7 @@ Ext.application({
       this.admClient =  Ext.create('Ext.container.Container', {
         	layout: 'border',
           renderTo: 'contentitem',
-        	height : 800,
+        	height : (window.innerHeight - 70),
         	items : [{xtype: 'main'}]
         });
     }

@@ -28,6 +28,7 @@ Ext.define('AdmClient.store.ToolStore', {
 			[ 'Print', 'Print', 'Tool for printing.', false ],
 			[ 'ModifyGeometry', 'Modify geometry', 'Tool for modify geometry.', false ],
 			[ 'DetailReport', 'Detail report', 'Tool for detail report.', false]
+			//[ 'A', 'Detail report', 'Tool for detail report.', false]
 	]
 	
 });

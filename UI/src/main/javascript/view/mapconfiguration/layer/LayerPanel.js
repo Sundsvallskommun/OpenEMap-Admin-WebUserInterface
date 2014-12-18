@@ -105,7 +105,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		                width: 70,
 		               	dataIndex: 'isBaseLayer',
 		               	renderer: function(value, meta){
-		                	if (meta.record.get('isGroupLayer')){
+		                	if ((meta.record.get('isGroupLayer')) || (meta.record.get('id') === 'root')){
 		                		return '<span></span>';
 		                	}
 		                	return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
@@ -116,17 +116,32 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		                width: 70,
 		                tooltip: 'Synlig',
 		                text: 'Synlig',
-		                dataIndex: 'visibility'
+		                dataIndex: 'visibility',
+		                dataIndex: 'clickable',
+		                renderer: function(value, meta){
+		                	if ((meta.record.get('isGroupLayer')) || (meta.record.get('id') === 'root')){
+		                		return '<span></span>';
+		                	}
+		                	return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
+		                }
 		            },
 		            {
 		                xtype: 'checkcolumn',
 		                width: 70,
-		                tooltip: 'Klickbar genom WFS',
+		                tooltip: 'Klickbart lager',
 		                text: 'Klickbar',
-		                dataIndex: 'searchable',
+		                dataIndex: 'clickable',
 		                renderer: function(value, meta){
-		                	if (meta.record.get('isGroupLayer')){
+		                	if ((meta.record.get('isGroupLayer')) || (meta.record.get('id') === 'root')){
 		                		return '<span></span>';
+		                	}
+
+		                	if (!meta.record.get('queryable')){
+		                		return '<span></span>';
+		                	}
+
+		                	if (meta.record.get('clickable')){
+		                		return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
 		                	}
 		                	return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
 		                }
@@ -155,7 +170,13 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		            	isDisabled: function(view, ri, ci, item, record){
 		            		return record.data.isGroupLayer;
 		            	},
-		            	icon: '/openemap-admin/font-awesome/black/png/16/table.png',
+		            	//icon: '/openemap-admin/font-awesome/black/png/16/table.png',
+		            	renderer:function(value, meta){
+		            		if (!meta.record.get('queryable')){
+		            			return '<span></span>';
+		            		}
+		            		return '<img role="button" class="x-action-col-icon x-action-col-0" src="/openemap-admin/font-awesome/black/png/16/table.png" />';
+		            	},
 		            	handler : function(grid, rowIdex, colIndex){
 		            		var selectedLayer = null;
 		            		if (grid.getStore().data.items[rowIdex].childNodes.length === 0){

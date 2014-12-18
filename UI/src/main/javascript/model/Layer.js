@@ -5,7 +5,6 @@ Ext.define('AdmClient.model.Layer', {
     fields : [ 
     	'layerId', 
     	'name', 
-    	'queryable',
     	'wms', 
     	'wfs', 
     	'group', 
@@ -13,10 +12,12 @@ Ext.define('AdmClient.model.Layer', {
     	'isSearchable',
     	'urlToMetadata',
     	'serverId',
+        {name: 'queryable', type: 'boolean', defaultValue: false},
+    	{name: 'clickable', type: 'boolean', defaultValue: false},
     	{name: 'isGroupLayer', type: 'boolean', defaultValue: false},
     	{name: 'isBaseLayer', mapping: 'wms.options.isBaseLayer',  type : 'boolean'},
         {name: 'visibility', mapping: 'wms.options.visibility', type: 'boolean'},
-        {name: 'searchable', mapping: 'wfs', type: 'object'},
+        {name: 'wfs', mapping: 'wfs', type: 'object'},
     	'layer' // OpenLayers reference
     ],
     proxy: {

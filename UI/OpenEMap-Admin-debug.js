@@ -41,6 +41,7 @@ Ext.define('AdmClient.view.MapConfiguration', {
 					itemId : 'markExtent',
 					text : 'Mark extent',
 					icon : 'icons/figur-R.png',
+					iconCls : 'extent',
 					enableToggle : true
 				},('->'),{
 					xtype : 'textfield',
@@ -5591,6 +5592,8 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 
 	           
 		                    
+		                    
+		                                        
 		                                       
 	  
 	layout: {
@@ -5628,22 +5631,86 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 		this.y = Math.ceil(window.innerHeight / 2 - this.innerHeight / 2);
 
 		this.modal = true;
-		var pathArray = this.layer.wms.url.split('/');
-		var wfsUrl = 'adminproxy?url=' + pathArray[0] + '//' + pathArray[2] + (this.layer.wfs.url || '/geoserver/wfs') + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + this.layer.name;
-		this.store = Ext.create('AdmClient.store.LayerDetails');
+		
+		
+		if (this.layer.wfs){
+			//var pathArray = this.layer.wfs.url.split('/');
+			var wfsUrl = 'adminproxy?url=' + wfsServer /*pathArray[0] + '//' + pathArray[2] + (this.layer.wfs.url || '/geoserver/wfs/') + */ + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + this.layer.name;
+			this.store = Ext.create('AdmClient.store.LayerDetails');
+			this.store.setUrl(wfsUrl);
+			this.store.load();
+		}
+		else if (this.layer.wms){
+			var pathArray = this.layer.wms.url.split('/');
 
-		this.store.addListener('load', function(store, records, successful, eOpts){
-			records.forEach(function(l){
-				if (self.layer.metadata && self.layer.metadata.attributes && self.layer.metadata.attributes[l.data.name] instanceof Object){
-					l.data.alias = self.layer.metadata.attributes[l.data.name].alias;
-					l.data.visible = true;
-				}
+			this.store = Ext.create('Ext.data.ArrayStore', {fields: [
+				{name: 'name'},
+                {name: 'alias', defaultValue: ''},
+                {name: 'visible', type: 'boolean', defaultValue: false}
+                ]
+            });
+
+			this.wmsStore = Ext.create('GeoExt.data.WmsCapabilitiesLayerStore',{
+				url: wmsGetCapabilities
 			});
-			store.update();
-		}); 
 
-		this.store.setUrl(wfsUrl);
-		this.store.load();
+			this.wmsStore.load({
+                scope: this,
+                callback: function(records, operation, success) {
+                	var layerName = this.layer.name;
+                    if(records && records.length > 0) {
+                        
+                        //var args = this;
+                        records.forEach(function(record) {
+                        	if (!this.layer.name) return;
+
+                            var layerName = this.layer.name;
+                            var currentLayerName = record.get('name');
+                            if (layerName === currentLayerName){
+                            	var boundaryBox = record.get('bbox');
+                            	for (var srsName in boundaryBox){
+                            		var boundary = boundaryBox[srsName].bbox;
+                            		var extent = new OpenLayers.Bounds.fromArray(boundary);
+
+                            		var requestUrl = 'adminproxy?url=' + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
+                            		 	'&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
+                            		 Ext.Ajax.request({
+                            		 	scope: this,
+                            		 	url: requestUrl,
+                            		 	success: function(){
+                            		 		var format = new OpenLayers.Format.GML();
+                            		 		var feature = format.read(arguments[0].responseXML);
+                            		 		
+                            		 		var items = [];
+                            		 		for (var attribute in feature[0].attributes){
+                            		 			var item = [attribute, '', false];
+                            		 			items.push(item);
+                            		 		}
+                            		 		this.store.loadData(items);
+
+                            		 	}
+                            		 });
+                            	}
+                            }
+                        }, this);
+                    } else {
+                        // !TODO Throw error
+                    }
+                }
+            });
+
+		}
+		if (this.store){
+			this.store.addListener('load', function(store, records, successful, eOpts){
+				records.forEach(function(l){
+					if (self.layer.metadata && self.layer.metadata.attributes && self.layer.metadata.attributes[l.data.name] instanceof Object){
+						l.data.alias = self.layer.metadata.attributes[l.data.name].alias;
+						l.data.visible = true;
+					}
+				});
+				store.update();
+			});
+		}
 
 		this.cellEditing = new Ext.grid.plugin.CellEditing({
 			clicksToEdit : 1
@@ -5653,7 +5720,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 			region: 'center',
 			xtype: 'grid',
 			itemId: 'layerDetailsGrid',
-			store: this.store,
+			store: this.store || undefined,
 
 			plugins : [ this.cellEditing ],
 			columns: [{
@@ -5697,7 +5764,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 				}
 			}
 			]
-		}]
+		}],
 
 		this.callParent(arguments);
 	}
@@ -5736,7 +5803,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 						height : 30,
 		            	width: 500,
 						enableKeyEvents : true,
-						value: typeof defaultWMSServer !== 'undefined' ? defaultWMSServer : ''
+						value: typeof wmsGetCapabilities !== 'undefined' ? wmsGetCapabilities : ''
 					},
 					{
 			            xtype : 'treepanel',
@@ -5807,21 +5874,48 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		                tooltip: 'Baslager',
 		                text: 'Baslager',
 		                width: 70,
-		               	dataIndex: 'isBaseLayer'
+		               	dataIndex: 'isBaseLayer',
+		               	renderer: function(value, meta){
+		                	if ((meta.record.get('isGroupLayer')) || (meta.record.get('id') === 'root')){
+		                		return '<span></span>';
+		                	}
+		                	return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
+		                }
 		            },
 		            {
 		                xtype: 'checkcolumn',
 		                width: 70,
 		                tooltip: 'Synlig',
 		                text: 'Synlig',
-		                dataIndex: 'visibility'
+		                dataIndex: 'visibility',
+		                dataIndex: 'clickable',
+		                renderer: function(value, meta){
+		                	if ((meta.record.get('isGroupLayer')) || (meta.record.get('id') === 'root')){
+		                		return '<span></span>';
+		                	}
+		                	return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
+		                }
 		            },
 		            {
 		                xtype: 'checkcolumn',
 		                width: 70,
-		                tooltip: 'S&ouml;kbar',
-		                text: 'S&ouml;kbar',
-		                dataIndex: 'searchable'
+		                tooltip: 'Klickbart lager',
+		                text: 'Klickbar',
+		                dataIndex: 'clickable',
+		                renderer: function(value, meta){
+		                	if ((meta.record.get('isGroupLayer')) || (meta.record.get('id') === 'root')){
+		                		return '<span></span>';
+		                	}
+
+		                	if (!meta.record.get('queryable')){
+		                		return '<span></span>';
+		                	}
+
+		                	if (meta.record.get('clickable')){
+		                		return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
+		                	}
+		                	return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
+		                }
 		            },
 		            {
 		                xtype: 'actioncolumn',
@@ -5840,11 +5934,20 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 						}
 		            },{
 		            	xtype: 'actioncolumn',
-		            	with: 70,
-		            	tooltip: 'Alias kolumner, sökbart etc',
+		            	width: 70,
+		            	tooltip: 'Alias kolumner, s&ouml;kbart etc',
 		            	align: 'center',
 		            	text: 'Inst&auml;llningar',
-		            	icon: '/openemap-admin/font-awesome/black/png/16/table.png',
+		            	isDisabled: function(view, ri, ci, item, record){
+		            		return record.data.isGroupLayer;
+		            	},
+		            	//icon: '/openemap-admin/font-awesome/black/png/16/table.png',
+		            	renderer:function(value, meta){
+		            		if (!meta.record.get('queryable')){
+		            			return '<span></span>';
+		            		}
+		            		return '<img role="button" class="x-action-col-icon x-action-col-0" src="/openemap-admin/font-awesome/black/png/16/table.png" />';
+		            	},
 		            	handler : function(grid, rowIdex, colIndex){
 		            		var selectedLayer = null;
 		            		if (grid.getStore().data.items[rowIdex].childNodes.length === 0){
@@ -6507,9 +6610,12 @@ Ext.define('AdmClient.model.Layer', {
     	'isSearchable',
     	'urlToMetadata',
     	'serverId',
+        {name: 'queryable', type: 'boolean', defaultValue: false},
+    	{name: 'clickable', type: 'boolean', defaultValue: false},
+    	{name: 'isGroupLayer', type: 'boolean', defaultValue: false},
     	{name: 'isBaseLayer', mapping: 'wms.options.isBaseLayer',  type : 'boolean'},
         {name: 'visibility', mapping: 'wms.options.visibility', type: 'boolean'},
-        {name: 'searchable', mapping: 'wfs', type: 'object'},
+        {name: 'wfs', mapping: 'wfs', type: 'object'},
     	'layer' // OpenLayers reference
     ],
     proxy: {
@@ -6715,6 +6821,7 @@ Ext.define('AdmClient.controller.Layers', {
         
         var layer = Ext.create('AdmClient.model.Layer', {
             name: wmslayer.get('name'),
+            isGroupLayer : null,
             wms: {
                 params: {
                     layers: wmslayer.get('name')
@@ -6925,9 +7032,511 @@ Ext.define('AdmClient.controller.PreviewMap', {
 	
 	
 });
+Ext.define('AdmClient.store.LayerDetails', {
+    extend:  GeoExt.data.AttributeStore 
+});
+/**
+ * Grouped layer tree store
+ * Ext.data.TreeStore extended to support OpenEMap layer configuration including layer groups
+ */
+
+Ext.define('AdmClient.store.GroupedLayerTree' ,{
+    extend:  Ext.data.TreeStore ,
+
+               
+                            
+                                     
+                                                
+                                                
+                                
+                                      
+      
+    id: 'configurationTreeStore',
+
+    model: 'AdmClient.model.Layer',
+    defaultRootProperty: 'layers',
+
+    proxy: {
+        type: 'memory'
+    },
+
+    maxLayerIndex: 1000,
+
+    listeners: {
+        beforeinsert: function(store, node, refNode, eOpts) { return this.onBeforeInsert(store, node, refNode); },
+        beforeappend: function(store, node, eOpts) { return this.onBeforeAppend(store, node); },
+        insert: function(store, node, refNode, eOpts) { this.onInsert(node); },
+        append: function(store, node, index, eOpts) { this.onAppend(node); },// this.onInsertAndAppend(node); },
+        remove: function(store, node, isMove, eOpts) { this.onRemove(store, node, isMove); },
+        datachanged: function() { this.onUpdate(); },
+        layerMetadataChange: function(){
+            AdmClient.app.config.layers = this.getLayerConfiguration(null);
+        }
+    },
+
+    constructor: function(config) {
+        config = Ext.apply({}, config);
+        this.callParent([config]);
+        
+    },
+
+    /*
+    * Since not all models include all AdmClient attributes, like wms and wfs
+    * try to get attributes from the raw json data. As a last solution set defaults
+    * @param    {Ext.data.NodeInterface}    node        node to search for attributes in
+    * @param    {string}                    attribute   searched attribute
+    */
+    tryToGetRecordAttribute: function(node, attribute) {
+        var attr = null;
+        var modelNodeAttr = node.get(attribute);
+        
+        if( (modelNodeAttr && typeof modelNodeAttr !== 'undefined')) {
+            attr = modelNodeAttr;
+        } else if(typeof node.data[attribute] !== 'undefined') {
+            attr = node.data[attribute];
+        }
+        
+        // Set defaults
+        if(attribute === 'wms' && typeof modelNodeAttr === 'string') {
+            attr = { url: '', options: {}, params: {} };
+        } else if(attribute === 'wfs' && typeof modelNodeAttr === 'string') {
+            attr = { url: '', featureType: '', featurePrefix: '' };
+        }
+        
+        if (attribute === 'wms' && !modelNodeAttr){
+        	attr = attr || {};
+        	attr.params = node.raw.params;
+        	attr.url = node.raw.url;
+        	attr.options = {
+        	     "isBaseLayer": false,
+        	     "visibility": false
+        	    };
+        	if (node.raw.options && node.raw.options.metadata && node.raw.options.metadata.metadataURLs && node.raw.options.metadata.metadataURLs.length > 0){
+        		attr.metadataUrl = node.raw.options.metadata.metadataURLs[0].href;
+        	}
+        }
+        
+        return attr;
+    },
+    
+    /*
+    * Converts a store node to layer configuration
+    * !TODO Change into writer and add something like nameProperty: 'mapping' to get mapped JSON
+    * @param  {Ext.data.NodeInterface}    node    Node to convert
+    * @return {object}                    layer   OpenEMap layer
+    */
+    nodeToLayerConfig: function(node, data) {
+        var attributeList = ['name','wms','wfs','metadataUrl', 'isGroupLayer', 'queryable', 'clickable'];
+        var layer = {};
+
+        if(node.hasChildNodes()) {
+            layer.layers = [];
+            return layer;
+        }
+        
+        attributeList.forEach(function(attributeName) {
+            var attr = this.tryToGetRecordAttribute(node, attributeName);
+            if(attr !== undefined) {
+                layer[attributeName] = attr;
+            }
+        }, this);
+
+        if(layer.wms && layer.wms.options) {
+            var isBaseLayer = this.tryToGetRecordAttribute(node, 'isBaseLayer');
+            if(!isBaseLayer) {
+                isBaseLayer = false;
+            }
+            
+            layer.wms.options.isBaseLayer = isBaseLayer;
+            layer.wms.options.visibility = this.tryToGetRecordAttribute(node, 'visibility');
+            
+            if (layer.wms.options.visibility === undefined || layer.wms.options.visibility === null){
+                layer.wms.options.visibility = false;
+            }
+
+            if (node.data.metadata && node.data.metadata !== ''){
+                layer.metadata = node.data.metadata;
+            }
+            node.set('wms', layer.wms);
+            
+            var queryable = this.tryToGetRecordAttribute(node, 'queryable');
+            var clickable = this.tryToGetRecordAttribute(node, 'clickable');
+            var isWmsInfo = this.tryToGetRecordAttribute(node, 'isWmsInfo');
+            if ((queryable && clickable) || (clickable && this._updating)){
+            	//OK rebuild logic here to determine of there is WFS get Feature, or WMSGetFeatureInfo
+            	var layerPieces = layer.wms.params.LAYERS.split(':');
+            	
+                if (!isWmsInfo){
+                    layer.wfs = {};
+                    layer.wfs.featurePrefix = layerPieces[0];
+                    layer.wfs.featureType = layerPieces[1];
+                    layer.wfs.url = wfsServer;
+                    node.set('wfs', layer.wfs);
+                }else{
+                    node.set('description', 'Added by OpeEMap Admin');
+                }
+                
+            }else {
+                if (layer.wfs) delete layer.wfs;
+            }
+            
+            /*if (data && data.name && node.get('name') === data.name){ // handle visibility
+            	layer.wms.options.visibility = data.checked;
+            }*/
+        }
+        
+        return layer;
+    },
+
+    /**
+    * Returns all layers as OpenEMap layer configuration tree.
+    * @return {object} layerConfig  OpenEMap layer configuration
+    */
+    getLayerConfiguration: function(data) {
+
+    	var layerConfig  = [];
+    
+        // Get layers and sublayers.
+        // TODO: clean up
+    	var offset = layerConfig.length;
+        var index = 0;
+        this.getRootNode().childNodes.forEach(function(node, i) {
+            index = offset + i;
+            layerConfig[index] = this.nodeToLayerConfig(node, data);
+            
+            node.childNodes.forEach(function(subnode) {
+                if(layerConfig[index].layers) {
+                    layerConfig[index].name = subnode.parentNode.get('name');
+                    layerConfig[index].isGroupLayer = subnode.parentNode.get('isGroupLayer');
+                    layerConfig[index].layers.push(this.nodeToLayerConfig(subnode));
+                }
+            }, this);
+        }, this);
+        return layerConfig;
+    },
+
+    /**
+    * Before append to store
+    * @param {Ext.data.Model} node
+    * @param {Ext.data.Model} appendNode
+    */
+    onBeforeAppend: function(node, appendNode) {
+        // Prevent groups from being added to groups
+        if(node && !node.isRoot() && !appendNode.isLeaf()) {
+            return false;
+        }
+        
+        return true;
+    },
+
+    /**
+    * Before insert to store
+    * @param {Ext.data.Store} store
+    * @param {Ext.data.Model} node
+    * @param {Ext.data.Model} refNode
+    */
+    onBeforeInsert: function(store, node, refNode) {
+        // Prevent groups from being added to groups
+        if(!refNode.parentNode.isRoot() && !node.isLeaf()) {
+            return false;
+        }
+        
+        return true;
+    },
+    
+    onInsert: function(node) {
+    	//console.log(node);
+        this.newNodeUpdate(node.data);
+    },
+    
+    onAppend: function(node) {
+    	this.newNodeUpdate(node.data);
+    },
+
+    /**
+     * Handler for a store's insert and append event.
+     *
+     * @param {Ext.data.Model} node
+     */
+    
+    //this function is obselete??
+    onInsertAndAppend: function(node) {
+        if(!this._inserting) {
+            this._inserting = true;
+            
+            // Add this node layers and subnodes to map. 
+            node.cascadeBy(function(subnode) {
+
+                // If this node is a GeoExt layer, then the raw model is an OpenLayers layer
+                if(subnode.raw && subnode.raw.CLASS_NAME && subnode.raw.CLASS_NAME.indexOf('OpenLayers.Layer') > -1) {
+                    // Store a reference to the OpenLayers layer.
+                    subnode.set('layer',subnode.raw);
+
+                    // Insert WMS params
+                    if(subnode.raw.CLASS_NAME.indexOf('OpenLayers.Layer.WMS') > -1) {
+                        subnode.set('wms',{
+                            url: subnode.raw.url,
+                            params: subnode.raw.params,
+                            options: {
+                                isBaseLayer: false,
+                                visibility: false
+                            }
+                        });
+                        subnode.set('checked', false);
+                        if(subnode.raw.options && subnode.raw.options.metadata && subnode.raw.options.metadata.metadataURLs && subnode.raw.options.metadata.metadataURLs.length > 0) {
+                            subnode.set('metadataUrl', subnode.raw.options.metadata.metadataURLs[0].href);
+                        }
+                    }
+                }
+
+                var layer = subnode.get('layer');
+
+                // Add getLayer function to support GeoExt
+                subnode.getLayer = function() {
+                    return this.get('layer');
+                };
+                // Add WMS legened 
+                this.addWMSLegend(subnode);
+
+                // If store is connected to a map, add layer to map
+                if(layer && layer !== '' && this.map) {
+                    var mapLayer = this.map.getLayer(layer);
+                    if(mapLayer === null && layer && layer.displayInLayerSwitcher === true) {
+                        this.map.addLayer(layer);
+                    }
+                }
+            }, this);
+
+            // Reorder layers on map
+            this.reorderLayersOnMap();
+    
+            delete this._inserting;
+        }
+        
+    },
+
+    layerUpdate : function(){
+         AdmClient.app.config.layers = this.getLayerConfiguration(null);
+    },
+
+    newNodeUpdate: function(data){
+        this.data = data;
+        if (!data.wfs){ // new layer
+                    // first check for wfs then wms
+            var wfsUrl = 'adminproxy?url=' + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + data.name || data.wms.params.LAYERS;
+            var localWfsStore = Ext.create('AdmClient.store.LayerDetails');
+            localWfsStore.setUrl(wfsUrl);
+            localWfsStore.load({
+                scope: this,
+                callback: function(records, operation, success) {
+            	if (records.length === 0){ // Not wfs then wms
+                    var layerName = data.name;
+                    var wmsStore = Ext.create('GeoExt.data.WmsCapabilitiesLayerStore',{
+                        url: wmsGetCapabilities
+                    });
+
+                    if (records.length === 0){
+
+                        wmsStore.load({
+                            scope: this,
+                            callback: function(records, operation, success) {
+                            
+                            if(records && records.length > 0) {
+                            
+                                //var args = this;
+                                records.forEach(function(record) {
+                                    
+                                    var layerName = this.data.name;
+                                    var currentLayerName = record.get('name');
+                                    if (layerName === currentLayerName){
+                                        var boundaryBox = record.get('bbox');
+                                        for (var srsName in boundaryBox){
+                                            var boundary = boundaryBox[srsName].bbox;
+                                            var extent = new OpenLayers.Bounds.fromArray(boundary);
+
+                                            var requestUrl = 'adminproxy?url=' + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
+                                                '&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
+                                            Ext.Ajax.request({
+                                                scope: this,
+                                                url: requestUrl,
+                                                success: function(){
+                                                    var format = new OpenLayers.Format.GML();
+                                                    var feature = format.read(arguments[0].responseXML);
+                                                
+                                                    
+                                                    
+                                                    if (this.data.metadata === '' || !this.data.metadata){
+                                                        this.data.metadata = {};
+                                                        this.data.metadata.attributes = {};
+                                                    }
+                                                    for (var attribute in feature[0].attributes){
+                                                        var item = [attribute, '', false];
+                                                        this.data.metadata.attributes[attribute] = {
+                                                            "alias" : attribute
+                                                        };
+                                                    }
+                                                    this.data.clickable = true; 
+                                                    this.data.isWmsInfo = true;
+                                                    AdmClient.app.config.layers = this.getLayerConfiguration(this.data);
+                                                }
+                                            });
+                                        }
+                                    }
+                                }, this);
+                            }
+                            } // callback
+                        }); // load wms
+                    }
+                } else{ // it is wfs
+                    records.forEach(function(a){
+                        if (this.data.metadata === '' || !this.data.metadata){
+                            this.data.metadata = {};
+                            this.data.metadata.attributes = {};
+                        }
+                        this.data.metadata.attributes[a.data.name] = {
+                            "alias" : a.data.name
+                        };
+                    }, this);
+                    this.data.clickable = true;
+                    this.data.isWmsInfo = false;
+                    AdmClient.app.config.layers = this.getLayerConfiguration(this.data);
+                }
+                }
+            });
+        }
+    },
+
+    onUpdate: function(chkBox, opt, eOpts ) {
+        if(!this._updating) {
+            this._updating = true;
+
+            var data = null;
+            if (chkBox && chkBox.data)
+            	data = chkBox.data;
+
+            if (data && data.id === "root"){
+                this._updating = false;
+                return;
+            }
+
+            if (data && data.clickable){
+                //determine wfs or wms
+            	this.newNodeUpdate(data);
+                //check if wms or wfs already in configuration
+
+
+            }else if (data && !data.clickable){
+                delete data.wfs;
+                delete data.metadata;
+                data.clickable = false;
+                var s = Ext.getStore('configurationTreeStore');
+                AdmClient.app.config.layers = s.getLayerConfiguration(data);
+            }
+            else{
+                AdmClient.app.config.layers = this.getLayerConfiguration(data);
+            }
+        }
+        this._updating = false;
+    },
+
+    /**
+     * Handler for a store's remove event.
+     *
+     * @param {Ext.data.Store} store
+     * @param {Ext.data.Model} node
+     * @param {Boolean} isMove
+     * @private
+     */
+    onRemove: function(store, node, isMove) {
+        if(!this._removing && !isMove) {
+            this._removing = true;
+            // Remove layer and sublayers from map
+            node.cascadeBy(function(subnode) {
+                var layer = subnode.get('layer');
+                if(layer && layer.map) {
+                    this.map.removeLayer(layer);
+                }
+            }, this);
+
+            // Remove layers from app configuration
+            //AdmClient.app.config.layers = this.getLayerConfiguration();
+
+            delete this._removing;
+        }
+    },
+
+    /**
+     * Reorder map layers from store order
+     *
+     * @private
+     */
+    reorderLayersOnMap: function() {
+        if(this.map) {
+            var node = this.getRootNode();
+            if(node) {
+                var i = this.maxLayerIndex;
+                node.cascadeBy(function(subnode) {
+                    var layer = subnode.get('layer');
+                    if(layer) {
+                        layer.setZIndex(i);
+                        i--;
+                    }
+                   
+                }, this);
+            }
+        }
+    },
+
+    /**
+    * Adds a WMS-legend to a node
+    * @param {Ext.data.Model} node
+    * @return {Ext.data.Model} node
+    */
+    addWMSLegend: function(node) {
+        if(node.get('layer')) {
+            node.gx_wmslegend = Ext.create('GeoExt.container.WmsLegend',{
+                layerRecord: node,
+                showTitle: false,
+                hidden: true,
+                deferRender: true,
+                // custom class for css positioning
+                // see tree-legend.html
+                cls: "legend"
+            });
+        }
+        return node;
+    },
+
+    /**
+     * Unbind this store from the map it is currently bound.
+     */
+    unbind: function() {
+        var me = this;
+        me.un('beforeinsert', me.onBeforeInsert, me);
+        me.un('beforeappend', me.onBeforeAppend, me);
+        me.un('insert', me.onInsertAndAppend, me);
+        me.un('append', me.onInsertAndAppend, me);
+        me.un('remove', me.onRemove, me);
+        me.map = null;
+    },
+
+    /**
+     * Unbinds listeners by calling #unbind prior to being destroyed.
+     *
+     * @private
+     */
+    destroy: function() {
+        //this.unbind();
+        //this.callParent();
+    }
+});
+
 Ext.define('AdmClient.controller.ConfigLayers', {
     extend :  Ext.app.Controller ,
-                                                                    
+                                                                   
+                                                        
+                                                  
+                  
     refs: [
         {
             ref: 'mapConfigLayerTree',
@@ -6943,6 +7552,7 @@ Ext.define('AdmClient.controller.ConfigLayers', {
         }
     ],
     views: ['mapconfiguration.layer.LayerPanel'],
+    stores :['GroupedLayerTree'],
     
     init : function() {
         this.control({
@@ -6961,7 +7571,7 @@ Ext.define('AdmClient.controller.ConfigLayers', {
                 scope: this
             },
             'checkcolumn' : {
-            	checkchange : this.onBaseLayer
+            	checkchange : this.onChangeLayer
             }
         });
 
@@ -6980,13 +7590,14 @@ Ext.define('AdmClient.controller.ConfigLayers', {
                 var tree = self.getMapConfigLayerTree();
                 var root = tree.getRootNode();
                 root.appendChild({
-                    name : text
+                    name : text,
+                    isGroupLayer: true
                 });
             }
         });
     },
     
-    onBaseLayer : function(chkBox, rowIndex, checked, eOpts){
+    onChangeLayer : function(chkBox, rowIndex, checked, eOpts){
     	var layerTree = this.getMapConfigLayerTree();
     	layerTree.store.save();
     },
@@ -7929,6 +8540,7 @@ Ext.define('AdmClient.store.ToolStore', {
 			[ 'Print', 'Print', 'Tool for printing.', false ],
 			[ 'ModifyGeometry', 'Modify geometry', 'Tool for modify geometry.', false ],
 			[ 'DetailReport', 'Detail report', 'Tool for detail report.', false]
+			//[ 'A', 'Detail report', 'Tool for detail report.', false]
 	]
 	
 });
@@ -7974,369 +8586,6 @@ Ext.define('AdmClient.store.Municipalities', {
 	         [ 'Nordmaling', '2401', false ]
 	]
 });
-Ext.define('AdmClient.store.LayerDetails', {
-    extend:  GeoExt.data.AttributeStore 
-});
-/**
- * Grouped layer tree store
- * Ext.data.TreeStore extended to support OpenEMap layer configuration including layer groups
- */
-
-Ext.define('AdmClient.store.GroupedLayerTree' ,{
-    extend:  Ext.data.TreeStore ,
-
-               
-                                     
-                               
-      
-
-    model: 'AdmClient.model.Layer',
-    defaultRootProperty: 'layers',
-
-    proxy: {
-        type: 'memory'
-    },
-
-    maxLayerIndex: 1000,
-
-    listeners: {
-        beforeinsert: function(store, node, refNode, eOpts) { return this.onBeforeInsert(store, node, refNode); },
-        beforeappend: function(store, node, eOpts) { return this.onBeforeAppend(store, node); },
-        //insert: function(store, node, refNode, eOpts) { this.onInsertAndAppend(node); },
-        //append: function(store, node, index, eOpts) { this.onInsertAndAppend(node); },
-        remove: function(store, node, isMove, eOpts) { this.onRemove(store, node, isMove); },
-        datachanged: function() { this.onUpdate(); },
-        layerMetadataChange: function(){
-            AdmClient.app.config.layers = this.getLayerConfiguration(null);
-        }
-    },
-
-    constructor: function(config) {
-        config = Ext.apply({}, config);
-        this.callParent([config]);
-        
-    },
-
-    /*
-    * Since not all models include all AdmClient attributes, like wms and wfs
-    * try to get attributes from the raw json data. As a last solution set defaults
-    * @param    {Ext.data.NodeInterface}    node        node to search for attributes in
-    * @param    {string}                    attribute   searched attribute
-    */
-    tryToGetRecordAttribute: function(node, attribute) {
-        var attr = null;
-        var modelNodeAttr = node.get(attribute);
-        
-        if( (modelNodeAttr && typeof modelNodeAttr !== 'undefined')) {
-            attr = modelNodeAttr;
-        } else if(typeof node.raw[attribute] !== 'undefined') {
-            attr = node.raw[attribute];
-        }
-        
-        // Set defaults
-        if(attribute === 'wms' && typeof modelNodeAttr === 'string') {
-            attr = { url: '', options: {}, params: {} };
-        } else if(attribute === 'wfs' && typeof modelNodeAttr === 'string') {
-            attr = { url: '', featureType: '', featurePrefix: '' };
-        }
-        
-        if (attribute === 'wms' && !modelNodeAttr){
-        	attr = attr || {};
-        	attr.params = node.raw.params;
-        	attr.url = node.raw.url;
-        	attr.options = {
-        	     "isBaseLayer": false,
-        	     "visibility": false
-        	    };
-        	if (node.raw.options && node.raw.options.metadata && node.raw.options.metadata.metadataURLs && node.raw.options.metadata.metadataURLs.length > 0){
-        		attr.metadataUrl = node.raw.options.metadata.metadataURLs[0].href;
-        	}
-        }
-        
-        return attr;
-    },
-    
-    /*
-    * Converts a store node to layer configuration
-    * !TODO Change into writer and add something like nameProperty: 'mapping' to get mapped JSON
-    * @param  {Ext.data.NodeInterface}    node    Node to convert
-    * @return {object}                    layer   OpenEMap layer
-    */
-    nodeToLayerConfig: function(node, data) {
-        var attributeList = ['name','wms','wfs','metadataUrl'];
-        var layer = {};
-
-        if(node.hasChildNodes()) {
-            layer.layers = [];
-            return layer;
-        }
-        
-        attributeList.forEach(function(attributeName) {
-            var attr = this.tryToGetRecordAttribute(node, attributeName);
-            if(attr) {
-                layer[attributeName] = attr;
-            }
-        }, this);
-
-        if(layer.wms && layer.wms.options) {
-            var isBaseLayer = this.tryToGetRecordAttribute(node, 'isBaseLayer');
-            if(!isBaseLayer) {
-                isBaseLayer = false;
-            }
-            layer.wms.options.isBaseLayer = isBaseLayer;
-            layer.wms.options.visibility = this.tryToGetRecordAttribute(node, 'visibility');
-            
-            if (layer.wms.options.visibility === undefined || layer.wms.options.visibility === null){
-                layer.wms.options.visibility = false;
-            }
-
-            if (node.data.metadata && node.data.metadata !== ''){
-                layer.metadata = node.data.metadata;
-            }
-            
-            var searchable = this.tryToGetRecordAttribute(node, 'searchable');
-            if (searchable){
-                if (!layer.wfs){
-                    layer.wfs = {};
-                }
-                var layerPieces = layer.wms.params.LAYERS.split(':');
-                layer.wfs.featurePrefix = layerPieces[0];
-                layer.wfs.featureType = layerPieces[1];
-                layer.wfs.url = '/wfs';
-            }else {
-                if (layer.wfs) delete layer.wfs;
-            }
-            
-            /*if (data && data.name && node.get('name') === data.name){ // handle visibility
-            	layer.wms.options.visibility = data.checked;
-            }*/
-        }
-        
-        return layer;
-    },
-
-    /**
-    * Returns all layers as OpenEMap layer configuration tree.
-    * @return {object} layerConfig  OpenEMap layer configuration
-    */
-    getLayerConfiguration: function(data) {
-
-    	var layerConfig  = [];
-    
-        // Get layers and sublayers.
-        // TODO: clean up
-    	var offset = layerConfig.length;
-        var index = 0;
-        this.getRootNode().childNodes.forEach(function(node, i) {
-            index = offset + i;
-            layerConfig[index] = this.nodeToLayerConfig(node, data);
-            
-            node.childNodes.forEach(function(subnode) {
-                if(layerConfig[index].layers) {
-                    layerConfig[index].name = subnode.parentNode.get('name');
-                    layerConfig[index].layers.push(this.nodeToLayerConfig(subnode));
-                }
-            }, this);
-        }, this);
-        return layerConfig;
-    },
-
-    /**
-    * Before append to store
-    * @param {Ext.data.Model} node
-    * @param {Ext.data.Model} appendNode
-    */
-    onBeforeAppend: function(node, appendNode) {
-        // Prevent groups from being added to groups
-        if(node && !node.isRoot() && !appendNode.isLeaf()) {
-            return false;
-        }
-        return true;
-    },
-
-    /**
-    * Before insert to store
-    * @param {Ext.data.Store} store
-    * @param {Ext.data.Model} node
-    * @param {Ext.data.Model} refNode
-    */
-    onBeforeInsert: function(store, node, refNode) {
-        // Prevent groups from being added to groups
-        if(!refNode.parentNode.isRoot() && !node.isLeaf()) {
-            return false;
-        }
-        return true;
-    },
-
-    /**
-     * Handler for a store's insert and append event.
-     *
-     * @param {Ext.data.Model} node
-     */
-    onInsertAndAppend: function(node) {
-        if(!this._inserting) {
-            this._inserting = true;
-            
-            // Add this node layers and subnodes to map. 
-            node.cascadeBy(function(subnode) {
-
-                // If this node is a GeoExt layer, then the raw model is an OpenLayers layer
-                if(subnode.raw && subnode.raw.CLASS_NAME && subnode.raw.CLASS_NAME.indexOf('OpenLayers.Layer') > -1) {
-                    // Store a reference to the OpenLayers layer.
-                    subnode.set('layer',subnode.raw);
-
-                    // Insert WMS params
-                    if(subnode.raw.CLASS_NAME.indexOf('OpenLayers.Layer.WMS') > -1) {
-                        subnode.set('wms',{
-                            url: subnode.raw.url,
-                            params: subnode.raw.params,
-                            options: {
-                                isBaseLayer: false,
-                                visibility: false
-                            }
-                        });
-                        subnode.set('checked', false);
-                        if(subnode.raw.options && subnode.raw.options.metadata && subnode.raw.options.metadata.metadataURLs && subnode.raw.options.metadata.metadataURLs.length > 0) {
-                            subnode.set('metadataUrl', subnode.raw.options.metadata.metadataURLs[0].href);
-                        }
-                    }
-                }
-
-                var layer = subnode.get('layer');
-
-                // Add getLayer function to support GeoExt
-                subnode.getLayer = function() {
-                    return this.get('layer');
-                };
-                // Add WMS legened 
-                this.addWMSLegend(subnode);
-
-                // If store is connected to a map, add layer to map
-                if(layer && layer !== '' && this.map) {
-                    var mapLayer = this.map.getLayer(layer);
-                    if(mapLayer === null && layer && layer.displayInLayerSwitcher === true) {
-                        this.map.addLayer(layer);
-                    }
-                }
-            }, this);
-
-            // Reorder layers on map
-            this.reorderLayersOnMap();
-    
-            delete this._inserting;
-        }
-        
-    },
-
-    layerUpdate : function(){
-         AdmClient.app.config.layers = this.getLayerConfiguration(null);
-    },
-
-    onUpdate: function(chkBox, opt, eOpts ) {
-        if(!this._updating) {
-            this._updating = true;
-
-            var data = null
-            if (chkBox && chkBox.data)
-            	data = chkBox.data;
-            AdmClient.app.config.layers = this.getLayerConfiguration(data);
-
-            delete this._updating;
-        }
-    },
-
-    /**
-     * Handler for a store's remove event.
-     *
-     * @param {Ext.data.Store} store
-     * @param {Ext.data.Model} node
-     * @param {Boolean} isMove
-     * @private
-     */
-    onRemove: function(store, node, isMove) {
-        if(!this._removing && !isMove) {
-            this._removing = true;
-            // Remove layer and sublayers from map
-            node.cascadeBy(function(subnode) {
-                var layer = subnode.get('layer');
-                if(layer && layer.map) {
-                    this.map.removeLayer(layer);
-                }
-            }, this);
-
-            // Remove layers from app configuration
-            AdmClient.app.config.layers = this.getLayerConfiguration();
-
-            delete this._removing;
-        }
-    },
-
-    /**
-     * Reorder map layers from store order
-     *
-     * @private
-     */
-    reorderLayersOnMap: function() {
-        if(this.map) {
-            var node = this.getRootNode();
-            if(node) {
-                var i = this.maxLayerIndex;
-                node.cascadeBy(function(subnode) {
-                    var layer = subnode.get('layer');
-                    if(layer) {
-                        layer.setZIndex(i);
-                        i--;
-                    }
-                   
-                }, this);
-            }
-        }
-    },
-
-    /**
-    * Adds a WMS-legend to a node
-    * @param {Ext.data.Model} node
-    * @return {Ext.data.Model} node
-    */
-    addWMSLegend: function(node) {
-        if(node.get('layer')) {
-            node.gx_wmslegend = Ext.create('GeoExt.container.WmsLegend',{
-                layerRecord: node,
-                showTitle: false,
-                hidden: true,
-                deferRender: true,
-                // custom class for css positioning
-                // see tree-legend.html
-                cls: "legend"
-            });
-        }
-        return node;
-    },
-
-    /**
-     * Unbind this store from the map it is currently bound.
-     */
-    unbind: function() {
-        var me = this;
-        me.un('beforeinsert', me.onBeforeInsert, me);
-        me.un('beforeappend', me.onBeforeAppend, me);
-        me.un('insert', me.onInsertAndAppend, me);
-        me.un('append', me.onInsertAndAppend, me);
-        me.un('remove', me.onRemove, me);
-        me.map = null;
-    },
-
-    /**
-     * Unbinds listeners by calling #unbind prior to being destroyed.
-     *
-     * @private
-     */
-    destroy: function() {
-        //this.unbind();
-        //this.callParent();
-    }
-});
-
 Ext.define('AdmClient.view.main.MainToolbar', {
 	extend :  Ext.toolbar.Toolbar ,
 	alias : 'widget.mainToolbar',
@@ -8631,25 +8880,25 @@ Ext.application({
 	                                                          
 	                                                          
 	                                                             
-                                                                  
+	                                                                
 	                                                             
 	                                                             
-                                                              
-                                                 
+	                                                            
+	                                               
 	           
 	                                     
 	                                       
 	                                    
 	                                          
 	                                            
-                                            
-                                                
+	                                          
+	                                              
 	           
-                                               
-                                   
-                                                               
-                                                                     
-                                                                          
+	                                             
+	                                 
+	                                                             
+	                                                                   
+	                                                                        
                                                                             
                                                                         
                                                                         
@@ -8678,7 +8927,7 @@ Ext.application({
                                        
                  
     name: 'AdmClient',
-    appFolder: 'src/main/javascript',
+    appFolder: 'http://localhost/OpenEMap-Admin-WebUserInterface2/UI/src/main/javascript',
     controllers: ['Main', 
                   'Layers', 
                   'MainToolbar', 
@@ -8711,7 +8960,7 @@ Ext.application({
       this.admClient =  Ext.create('Ext.container.Container', {
         	layout: 'border',
           renderTo: 'contentitem',
-        	height : 800,
+        	height : (window.innerHeight - 70),
         	items : [{xtype: 'main'}]
         });
     }
@@ -8730,6 +8979,14 @@ Ext.define("OpenEMap.locale.sv_SE.view.ObjectConfig", {
     m1Label: "M1",
     m2Label: "M2",
     angleLabel: "Vinkel"
+});
+Ext.define('AdmClient.store.WmsCapabilitiesLayerStore',{
+    extend:  Ext.data.JsonStore ,
+                                                     
+    model: 'GeoExt.data.WmsCapabilitiesLayerModel',
+
+    alias: 'widget.wmsCapabilities',
+
 });
 Ext.define('AdmClient.store.WmsCapabilitiesLayerTree',{
     extend:  Ext.data.TreeStore ,

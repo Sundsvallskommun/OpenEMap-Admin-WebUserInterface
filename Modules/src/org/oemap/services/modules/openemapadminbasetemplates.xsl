@@ -21,9 +21,6 @@
 					adminproxy += '?url=';
 					wmsGetCapabilities = adminproxy + wmsGetCapabilities;
 				}
-				
-				
-				// defaultWMSServer
 	</script>
 
 	<xsl:choose>
@@ -34,7 +31,7 @@
 			<script type="text/javascript" src="/ext-4.2.1/ext-theme-neptune.js"></script>
     		<script type="text/javascript" src="/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
     		<script type="text/javascript" src="/OpenLayers-2.13.1/OpenLayers.js"></script>
-    		<script type="text/javascript" src="/geoext2-2.0.0/geoext2-all.js"></script>
+    		<!-- script type="text/javascript" src="/geoext2-2.0.0/geoext2.js"></script-->
     		
     		<script type="text/javascript">
         		 var appPath = 'http://localhost/openemap-admin'; 
@@ -73,12 +70,27 @@
 			});
 			</script>
 			<script type="text/javascript" src="{/Document/requestinfo/contextpath}/static/f/{/Document/module/sectionID}/{/Document/module/moduleID}/OpenEMap-Admin-debug.js"></script>
+			<!-- script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/openemapadminjs/OpenEMap-Admin-debug.js"></script-->
 					
 		</xsl:otherwise>
 	</xsl:choose>
+		<script type="text/javascript">
+		setTimeout(2000, function(){
+			$(document).ready(function(){
+						AdmClient.app.admClient.setHeight(window.innerHeight - 70);
+						AdmClient.app.admClient.setWidth(window.innerWidth);
+			});
+					
+			$(window).resize(function() {
+  						AdmClient.app.admClient.setHeight(window.innerHeight - 70);
+  						AdmClient.app.admClient.setWidth(window.innerWidth);
+					});
+			});
+				
+		</script>
 		<div id="content">
 			<div id="contentitem"
-				style="min-height: 100%; min-width: 100%; position: absolute; left: 0; right: 0;">
+				style="position: absolute; left: 0; right: 0;">
 			</div>
 		</div>
 	</xsl:template>
