@@ -117,7 +117,6 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		                tooltip: 'Synlig',
 		                text: 'Synlig',
 		                dataIndex: 'visibility',
-		                dataIndex: 'clickable',
 		                renderer: function(value, meta){
 		                	if ((meta.record.get('isGroupLayer')) || (meta.record.get('id') === 'root')){
 		                		return '<span></span>';
