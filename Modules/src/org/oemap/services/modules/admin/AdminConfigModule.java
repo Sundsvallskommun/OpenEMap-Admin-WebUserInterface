@@ -213,7 +213,7 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 		}
 		String configUserName = config.getUsername();
 		String userName = user.getUsername();
-		if (configUserName.equalsIgnoreCase(userName)){
+		if (configUserName.equalsIgnoreCase(userName) || configUserName.equalsIgnoreCase(null)){
 			return false;
 		}
 		return true;
