@@ -27,11 +27,11 @@
 	
 	var hideOH = function(){
 		$('header').css('display', 'none');
-					$('#mapContent').height(window.innerHeight - 50);
-					$('#mapContent').width(window.innerWidth - 50);
-					$('#mapContent').css('position', 'absolute');
-					$('#mapContent').css('left', 25);
-					$('#mapContent').css('top', 25);
+					$('#mapContent').height(window.innerHeight - 20);
+					$('#mapContent').width(window.innerWidth - 20);
+					//$('#mapContent').css('position', 'absolute');
+					//$('#mapContent').css('left', 0);
+					//$('#mapContent').css('top', 0);
 					
 					$("link[src='/openemap-admin/css/global.css']").remove();
 					$("link[src='/openemap-admin/css/header.css']").remove();
