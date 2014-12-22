@@ -69,7 +69,7 @@
 					metadata_abstract: 'geometadata/getabstractbyid'}});
 			});
 			</script>
-			<script type="text/javascript" src="{/Document/requestinfo/contextpath}/static/f/{/Document/module/sectionID}/{/Document/module/moduleID}/OpenEMap-Admin-debug.js"></script>
+			<script type="text/javascript" src="{/Document/requestinfo/contextpath}/static/f/{/Document/module/sectionID}/{/Document/module/moduleID}/OpenEMap-Admin-debug.js?v15"></script>
 			<!-- script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/openemapadminjs/OpenEMap-Admin-debug.js"></script-->
 					
 		</xsl:otherwise>

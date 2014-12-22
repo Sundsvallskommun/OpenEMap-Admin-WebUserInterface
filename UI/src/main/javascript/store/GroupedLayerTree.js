@@ -11,8 +11,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         'GeoExt.container.WmsLegend',
         'GeoExt.data.WfsCapabilitiesLayerStore',
         'GeoExt.data.WmsCapabilitiesLayerStore',
-        'AdmClient.model.Layer',
-        'AdmClient.store.LayerDetails'
+        'AdmClient.model.Layer'
     ],
     id: 'configurationTreeStore',
 
@@ -287,7 +286,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         if (!data.wfs){ // new layer
                     // first check for wfs then wms
             var wfsUrl = 'adminproxy?url=' + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + data.name || data.wms.params.LAYERS;
-            var localWfsStore = Ext.create('AdmClient.store.LayerDetails');
+            var localWfsStore = Ext.create('GeoExt.data.AttributeStore');
             localWfsStore.setUrl(wfsUrl);
             localWfsStore.load({
                 scope: this,
@@ -333,7 +332,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
                                                         this.data.metadata.attributes = {};
                                                     }
                                                     for (var attribute in feature[0].attributes){
-                                                        var item = [attribute, '', false];
+                                                        //var item = [attribute, attribute, true];
                                                         this.data.metadata.attributes[attribute] = {
                                                             "alias" : attribute
                                                         };

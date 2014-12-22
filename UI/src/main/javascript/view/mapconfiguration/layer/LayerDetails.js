@@ -6,7 +6,8 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 		'Ext.window.Window',
 		'Ext.data.XmlStore',
 		'GeoExt.data.WfsCapabilitiesLayerStore',
-		'GeoExt.data.WmsCapabilitiesLayerStore'
+		'GeoExt.data.WmsCapabilitiesLayerStore',
+		'GeoExt.data.AttributeStore'
 	],
 	layout: {
 		type : 'border',
@@ -36,6 +37,21 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 		this.callParent(arguments);
 	},
 
+	getAttributeCollection: function(attributes){
+		var items = [];
+		for (var key in attributes){
+				var item = [key, '', false];
+				items.push(item);
+		}
+		return items;
+	},
+
+	getItem: function(item){
+		item.forEach(function(row){
+			console.log(row);
+		});
+	},
+
 	initComponent : function() {
 
 		var self = this;
@@ -46,9 +62,8 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 		
 		
 		if (this.layer.wfs){
-			//var pathArray = this.layer.wfs.url.split('/');
-			var wfsUrl = 'adminproxy?url=' + wfsServer /*pathArray[0] + '//' + pathArray[2] + (this.layer.wfs.url || '/geoserver/wfs/') + */ + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + this.layer.name;
-			this.store = Ext.create('AdmClient.store.LayerDetails');
+			var wfsUrl = 'adminproxy?url=' + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + this.layer.name;
+			this.store = Ext.create('GeoExt.data.AttributeStore');
 			this.store.setUrl(wfsUrl);
 			this.store.load();
 		}
@@ -57,8 +72,8 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 
 			this.store = Ext.create('Ext.data.ArrayStore', {fields: [
 				{name: 'name'},
-                {name: 'alias', defaultValue: ''},
-                {name: 'visible', type: 'boolean', defaultValue: false}
+                {name: 'alias'},
+                {name: 'visible', type: 'boolean', defaultValue: true}
                 ]
             });
 
@@ -66,50 +81,65 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 				url: wmsGetCapabilities
 			});
 
-			this.wmsStore.load({
-                scope: this,
-                callback: function(records, operation, success) {
-                	var layerName = this.layer.name;
-                    if(records && records.length > 0) {
-                        
-                        //var args = this;
-                        records.forEach(function(record) {
-                        	if (!this.layer.name) return;
+			
+			
+				this.wmsStore.load({
+	                scope: this,
+	                callback: function(records, operation, success) {
+	                	var layerName = this.layer.name;
+	                    if(records && records.length > 0) {
+	                        
+	                        //var args = this;
+	                        records.forEach(function(record) {
+	                        	if (!this.layer.name) return;
 
-                            var layerName = this.layer.name;
-                            var currentLayerName = record.get('name');
-                            if (layerName === currentLayerName){
-                            	var boundaryBox = record.get('bbox');
-                            	for (var srsName in boundaryBox){
-                            		var boundary = boundaryBox[srsName].bbox;
-                            		var extent = new OpenLayers.Bounds.fromArray(boundary);
+	                            var layerName = this.layer.name;
+	                            var currentLayerName = record.get('name');
+	                            if (layerName === currentLayerName){
+	                            	var boundaryBox = record.get('bbox');
+	                            	for (var srsName in boundaryBox){
+	                            		var boundary = boundaryBox[srsName].bbox;
+	                            		var extent = new OpenLayers.Bounds.fromArray(boundary);
 
-                            		var requestUrl = 'adminproxy?url=' + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
-                            		 	'&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
-                            		 Ext.Ajax.request({
-                            		 	scope: this,
-                            		 	url: requestUrl,
-                            		 	success: function(){
-                            		 		var format = new OpenLayers.Format.GML();
-                            		 		var feature = format.read(arguments[0].responseXML);
-                            		 		
-                            		 		var items = [];
-                            		 		for (var attribute in feature[0].attributes){
-                            		 			var item = [attribute, '', false];
-                            		 			items.push(item);
-                            		 		}
-                            		 		this.store.loadData(items);
+	                            		var requestUrl = 'adminproxy?url=' + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
+	                            		 	'&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
+	                            		 Ext.Ajax.request({
+	                            		 	scope: this,
+	                            		 	url: requestUrl,
+	                            		 	success: function(){
+	                            		 		var format = new OpenLayers.Format.GML();
+	                            		 		var feature = format.read(arguments[0].responseXML);
+	                            		 		var fields = this.getAttributeCollection(feature[0].attributes);
+	                            		 		
 
-                            		 	}
-                            		 });
-                            	}
-                            }
-                        }, this);
-                    } else {
-                        // !TODO Throw error
-                    }
-                }
-            });
+	                            		 		if (this.layer.metadata && this.layer.metadata.attributes && this.layer.metadata.attributes instanceof Object){
+	                            		 			var attributesInLayer = this.layer.metadata.attributes;
+	                            		 			for (var attribute in attributesInLayer){
+	                            		 				var item = fields.filter(function(f){
+	                            		 					return f[0] === attribute;
+	                            		 				});
+	                            		 				if (item.length > 0){
+	                            		 					item[0][1] = item[0][1] === '' ? attributesInLayer[attribute].alias : item[0][1];
+	                            		 					item[0][2] = true;
+	                            		 				}
+	                            		 			}
+	                            		 			
+	                            		 			
+
+	                            		 		}
+	                            		 		this.store.loadData(fields);
+											}
+	                            		 	
+	                            		 });
+	                            	}
+	                            }
+	                        }, this);
+	                    } else {
+	                        // !TODO Throw error
+	                    }
+	                }
+	            });
+			
 
 		}
 		if (this.store){
