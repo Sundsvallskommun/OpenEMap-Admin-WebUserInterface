@@ -10,6 +10,7 @@
      	padding: 0px !important;
      }
     </style>
+    <xsl:variable name="oemapjs" select="openEMapScript"></xsl:variable>
     <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/ext-4.2.1/ext-all.js"></script>
     <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/ext-4.2.1/ext-theme-neptune.js"></script>
     <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
@@ -18,7 +19,11 @@
     <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/proj4js/proj4_defs.js"></script>
     <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/geoext-2.0.2-rc.1-all.js"></script> 
     <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/es5-shim.min.js"></script>
-    <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/OpenEMap-1.5.0-rc.2/OpenEMap-1.5.0-rc.2-min.js"></script>
+    <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/OpenEMap-1.5.0-rc.3/OpenEMap-1.5.0-rc.3-min.js">
+    	<!-- xsl:attribute name="src">
+    		<xsl:value-of select="openEMapScript"></xsl:value-of>
+    	</xsl:attribute -->
+    </script>
 
 	<div id="mapContent"></div>
 	<div id="layers" style="position: fixed; right: 10px; top: 10px;"></div>
@@ -27,8 +32,9 @@
 	
 	var hideOH = function(){
 		$('header').css('display', 'none');
-					$('#mapContent').height(window.innerHeight - 20);
-					$('#mapContent').width(window.innerWidth - 20);
+					$('#mapContent').height(window.innerHeight);
+					$('#mapContent').width(window.innerWidth);
+					$('body').css('overflow', 'hidden');
 					//$('#mapContent').css('position', 'absolute');
 					//$('#mapContent').css('left', 0);
 					//$('#mapContent').css('top', 0);
