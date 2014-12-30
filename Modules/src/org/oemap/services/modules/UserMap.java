@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import se.unlogic.hierarchy.core.annotations.ModuleSetting;
+import se.unlogic.hierarchy.core.annotations.TextFieldSettingDescriptor;
 import se.unlogic.hierarchy.core.beans.SimpleForegroundModuleResponse;
 import se.unlogic.hierarchy.core.beans.User;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModuleResponse;
@@ -37,6 +39,16 @@ import se.unlogic.webutils.http.URIParser;
 
 
 public class UserMap extends AnnotatedForegroundModule {
+	
+	@ModuleSetting
+    @TextFieldSettingDescriptor(name = "Sökväg till JavaScript bibliotek", description = "Sökväg till JavaScript bibliotek")
+    protected String libraryBaseUrl = "";
+	
+	@ModuleSetting
+    @TextFieldSettingDescriptor(name = "Absolut sökväg till OpenEMapAdmin javascript", description = "Absolut sökväg till OpenEMapAdmin javascript")
+    protected String openEMapScript = "";
+	
+	
 	@Override
 	public ForegroundModuleResponse defaultMethod(HttpServletRequest req,
 			HttpServletResponse res, User user, URIParser uriParser)
@@ -55,6 +67,9 @@ public class UserMap extends AnnotatedForegroundModule {
 		document.appendChild(RequestUtils.getRequestInfoAsXML(doc, req,
 				uriParser));
 		document.appendChild(moduleDescriptor.toXML(doc));
+		
+		XMLUtils.appendNewElement(doc, document, "libraryBaseUrl", libraryBaseUrl);
+		XMLUtils.appendNewElement(doc, document, "openEMapScript", openEMapScript);
 
 		
 		return doc;
