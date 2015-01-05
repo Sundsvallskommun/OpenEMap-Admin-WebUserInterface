@@ -2,9 +2,9 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	version="1.0">
 	<xsl:output method="html" version="4.0" encoding="ISO-8859-1" />
-	<xsl:template match="/">
+	<xsl:template match="Document">
 	<link rel="stylesheet" type="text/css" href="https://kartatest.e-tjansteportalen.se/libs/ext-theme-oep/oepTheme-all.css"></link>
-    <link rel="stylesheet" type="text/css" href="https://kartatest.e-tjansteportalen.se/OpenEMap-1.5.0-rc.1/resources/css/OpenEMap.css"></link>
+    <link rel="stylesheet" type="text/css" href="https://kartatest.e-tjansteportalen.se/OpenEMap-1.5.0-rc.3/resources/css/OpenEMap.css"></link>
     <style>
      input[type="button"], button {
      	padding: 0px !important;
@@ -19,12 +19,8 @@
     <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/proj4js/proj4_defs.js"></script>
     <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/geoext-2.0.2-rc.1-all.js"></script> 
     <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/es5-shim.min.js"></script>
-    <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/OpenEMap-1.5.0-rc.3/OpenEMap-1.5.0-rc.3-min.js">
-    	<!-- xsl:attribute name="src">
-    		<xsl:value-of select="openEMapScript"></xsl:value-of>
-    	</xsl:attribute -->
-    </script>
-
+    <script type="text/javascript" src="{openEMapScript}"></script>
+   
 	<div id="mapContent"></div>
 	<div id="layers" style="position: fixed; right: 10px; top: 10px;"></div>
 	<div id="search" style="position: fixed; right: 10px; top: 670px; width: 300px; height: 100px;"></div>
