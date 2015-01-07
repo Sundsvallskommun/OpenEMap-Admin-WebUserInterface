@@ -64,9 +64,12 @@
 				
 				
 				function init(config) {
+					OpenEMap.wsUrls.basePath = '/openemap-admin';
+					OpenEMap.wsUrls.adminconfigs = '/adminconfigs'
+					
 					var mapClient = Ext.create('OpenEMap.Client');
 					var gui = {
-						map : {},
+						map : {renderTo: 'mapContent'},
 						toolbar : {},
 						zoomTools : {},
 						layers : {type: 'advanced', renderTo: 'layers'},
