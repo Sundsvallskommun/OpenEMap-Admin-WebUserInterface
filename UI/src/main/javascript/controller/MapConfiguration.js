@@ -151,6 +151,8 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 			Ext.MessageBox.alert('"Default" is an invalid configuration name.', 'You are trying to write to a write protected template. Choose another template name');
 			return;
 		}
+		
+		AdmClient.app.config.isPublic = true;
 		var url = appPath + '/adminconfigs/config';
 		url += AdmClient.app.config.configId === undefined ? '' : ('/' + AdmClient.app.config.configId);
 		var method = AdmClient.app.config.configId === undefined ? 'POST' : 'PUT';
