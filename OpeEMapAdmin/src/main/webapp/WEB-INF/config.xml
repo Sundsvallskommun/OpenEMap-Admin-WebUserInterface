@@ -17,7 +17,7 @@
 		<Type>SystemManaged</Type>
 		<Driver>com.mysql.jdbc.Driver</Driver>
 		<Username>root</Username>
-		<Password>perfa</Password>
+		<Password>sUndsvA11</Password>
 		<LogAbandoned>true</LogAbandoned>
 		<RemoveAbandoned>true</RemoveAbandoned>
 		<RemoveAbandonedTimeout>30</RemoveAbandonedTimeout>
