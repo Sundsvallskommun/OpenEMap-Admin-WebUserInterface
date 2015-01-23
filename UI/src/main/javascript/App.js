@@ -30,7 +30,6 @@ Ext.application({
 	           'AdmClient.store.Layers',
 	           'AdmClient.store.SearchServer',
 	           'AdmClient.store.Municipalities',
-	           'AdmClient.store.GroupedLayerTree',
 	           
 	           'AdmClient.view.main.MainToolbar',
 	           'AdmClient.view.Main',
@@ -65,7 +64,7 @@ Ext.application({
                'AdmClient.model.Config'
                ],
     name: 'AdmClient',
-    appFolder: 'http://localhost/OpenEMap-Admin-WebUserInterface2/UI/src/main/javascript',
+    appFolder: 'http://localhost/OpenEMap-Admin-WebUserInterface/UI/src/main/javascript',
     controllers: ['Main', 
                   'Layers', 
                   'MainToolbar', 

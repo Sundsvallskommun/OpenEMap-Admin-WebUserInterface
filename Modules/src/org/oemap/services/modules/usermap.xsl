@@ -3,22 +3,22 @@
 	version="1.0">
 	<xsl:output method="html" version="4.0" encoding="ISO-8859-1" />
 	<xsl:template match="Document">
-	<link rel="stylesheet" type="text/css" href="https://kartatest.e-tjansteportalen.se/libs/ext-theme-oep/oepTheme-all.css"></link>
-    <link rel="stylesheet" type="text/css" href="https://kartatest.e-tjansteportalen.se/OpenEMap-1.5.0-rc.3/resources/css/OpenEMap.css"></link>
+	<link rel="stylesheet" type="text/css" href="http://localhost/libs/ext-theme-oep/release/ext-theme-oep-1.0.0/oepTheme-all.css"></link>
+    <link rel="stylesheet" type="text/css" href="{openEMapCSSFile}"></link>
     <style>
      input[type="button"], button {
      	padding: 0px !important;
      }
     </style>
-    <xsl:variable name="oemapjs" select="openEMapScript"></xsl:variable>
-    <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/ext-4.2.1/ext-all.js"></script>
-    <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/ext-4.2.1/ext-theme-neptune.js"></script>
-    <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
-    <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/OpenLayers-2.13.1/OpenLayers.js"></script>
-    <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/proj4js/proj4-compressed.js"></script>
-    <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/proj4js/proj4_defs.js"></script>
-    <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/geoext-2.0.2-rc.1-all.js"></script> 
-    <script type="text/javascript" src="https://kartatest.e-tjansteportalen.se/libs/es5-shim.min.js"></script>
+  <xsl:variable name="oemapjs" select="openEMapScript"></xsl:variable>
+    <script type="text/javascript" src="/libs/ext-4.2.1/ext-all.js"></script>
+    <script type="text/javascript" src="/libs/ext-4.2.1/ext-theme-neptune.js"></script>
+    <script type="text/javascript" src="/libs/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
+    <script type="text/javascript" src="/libs/OpenLayers-2.13.1/OpenLayers.js"></script>
+    <script type="text/javascript" src="/libs/proj4js/proj4-compressed.js"></script>
+    <script type="text/javascript" src="/libs/proj4js/proj4_defs.js"></script>
+    <script type="text/javascript" src="/libs/geoext-2.0.2-rc.1-all.js"></script> 
+    <script type="text/javascript" src="/libs/es5-shim.min.js"></script>
     <script type="text/javascript" src="{openEMapScript}"></script>
    
 	<div id="mapContent"></div>

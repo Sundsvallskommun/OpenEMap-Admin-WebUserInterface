@@ -45,7 +45,11 @@ public class UserMap extends AnnotatedForegroundModule {
     protected String libraryBaseUrl = "";
 	
 	@ModuleSetting
-    @TextFieldSettingDescriptor(name = "Absolut sökväg till OpenEMapAdmin javascript", description = "Absolut sökväg till OpenEMapAdmin javascript")
+    @TextFieldSettingDescriptor(name = "Open eMap CSS file", description = "Absolut sökväg till Open eMap CSS fil")
+    protected String openEMapCSSFile = "";
+
+	@ModuleSetting
+    @TextFieldSettingDescriptor(name = "OpenEMap javascript", description = "Absolut sökväg till OpenEMap javascript")
     protected String openEMapScript = "";
 	
 	
@@ -69,8 +73,8 @@ public class UserMap extends AnnotatedForegroundModule {
 		document.appendChild(moduleDescriptor.toXML(doc));
 		
 		XMLUtils.appendNewElement(doc, document, "libraryBaseUrl", libraryBaseUrl);
+		XMLUtils.appendNewElement(doc, document, "openEMapCSSFile", openEMapCSSFile);
 		XMLUtils.appendNewElement(doc, document, "openEMapScript", openEMapScript);
-
 		
 		return doc;
 	}
