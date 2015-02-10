@@ -3,7 +3,7 @@
 	version="1.0">
 	<xsl:output method="html" version="4.0" encoding="ISO-8859-1" />
 	<xsl:template match="Document">
-	<link rel="stylesheet" type="text/css" href="http://localhost/libs/ext-theme-oep/release/ext-theme-oep-1.0.0/oepTheme-all.css"></link>
+	<link rel="stylesheet" type="text/css" href="/libs/ext-theme-oep/oepTheme-all.css"></link>
     <link rel="stylesheet" type="text/css" href="{openEMapCSSFile}"></link>
     <style>
      input[type="button"], button {
@@ -35,13 +35,13 @@
 					//$('#mapContent').css('left', 0);
 					//$('#mapContent').css('top', 0);
 					
-					$("link[src='/openemap-admin/css/global.css']").remove();
-					$("link[src='/openemap-admin/css/header.css']").remove();
-					$("link[src='/openemap-admin/css/layout.css']").remove();
-					$("link[src='/openemap-admin/css/modules.css']").remove();
-					$("link[src='/openemap-admin/css/interface.css']").remove();
-					$("link[src='/openemap-admin/css/footer.css']").remove();
-					$("link[src='/openemap-admin/css/openhierarchy.css']").remove();
+					$("link[src='{/document/requestinfo/contextpath}/css/global.css']").remove();
+					$("link[src='{/document/requestinfo/contextpath}/css/header.css']").remove();
+					$("link[src='{/document/requestinfo/contextpath}/css/layout.css']").remove();
+					$("link[src='{/document/requestinfo/contextpath}/css/modules.css']").remove();
+					$("link[src='{/document/requestinfo/contextpath}/css/interface.css']").remove();
+					$("link[src='{/document/requestinfo/contextpath}/css/footer.css']").remove();
+					$("link[src='{/document/requestinfo/contextpath}/css/openhierarchy.css']").remove();
 	};
 	
 	var intervalId = setInterval(function(){
@@ -64,7 +64,7 @@
 				
 				
 				function init(config) {
-					OpenEMap.wsUrls.basePath = '/openemap-admin';
+					OpenEMap.wsUrls.basePath = window.location.protocol + window.location.hostname;
 					OpenEMap.wsUrls.adminconfigs = '/adminconfigs'
 					
 					var mapClient = Ext.create('OpenEMap.Client');
@@ -106,7 +106,7 @@
 				}
 				
 				Ext.Ajax.request({
-					url : 'adminconfigs/config/' + id,
+					url : 'configs/config/' + id,
 					method : 'GET',
 					success : function(evt){
 						var config = JSON.parse(evt.responseText);

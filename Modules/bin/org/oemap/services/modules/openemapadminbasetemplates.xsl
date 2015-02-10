@@ -10,7 +10,7 @@
 	<xsl:template match="Document">
 
 		<script type="text/javascript">
-			var appPath = '/openemapadmin/';
+			var appPath = '{/document/requestinfo/contextpath}/';
 		</script>
 
 		<link rel="stylesheet" type="text/css"
@@ -25,7 +25,7 @@
 			Ext.onReady({
 
 			Ext.applyIf(OpenEMap, { wsUrls :{
-				basePath: '/openemapadmin/',
+				basePath: '{/document/requestinfo/contextpath}/',
 				configs: 'configurations/configs',
 				servers: 'settings/servers',
 				layers: 'layers/layers',

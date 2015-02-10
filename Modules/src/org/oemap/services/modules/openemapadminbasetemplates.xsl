@@ -68,7 +68,7 @@
 					metadata_abstract: 'geometadata/getabstractbyid'}});
 			});
 			</script>
-			<script type="text/javascript" src="{/Document/requestinfo/contextpath}/static/f/{/Document/module/sectionID}/{/Document/module/moduleID}/OpenEMap-Admin-1.5.0-rc.4-debug.js"></script>
+			<script type="text/javascript" src="{/Document/requestinfo/contextpath}/static/f/{/Document/module/sectionID}/{/Document/module/moduleID}/OpenEMap-Admin-1.5.0-min.js"></script>
 					
 		</xsl:otherwise>
 	</xsl:choose>
