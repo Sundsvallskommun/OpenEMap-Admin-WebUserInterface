@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import se.unlogic.hierarchy.core.annotations.CheckboxSettingDescriptor;
 import se.unlogic.hierarchy.core.annotations.ModuleSetting;
 import se.unlogic.hierarchy.core.annotations.TextFieldSettingDescriptor;
 import se.unlogic.hierarchy.core.beans.SimpleForegroundModuleResponse;
@@ -41,16 +42,16 @@ import se.unlogic.webutils.http.URIParser;
 public class UserMap extends AnnotatedForegroundModule {
 	
 	@ModuleSetting
-    @TextFieldSettingDescriptor(name = "Sökväg till JavaScript bibliotek", description = "Sökväg till JavaScript bibliotek")
-    protected String libraryBaseUrl = "";
-	
-	@ModuleSetting
     @TextFieldSettingDescriptor(name = "Open eMap CSS file", description = "Absolut sökväg till Open eMap CSS fil")
-    protected String openEMapCSSFile = "";
+    protected String openEMapCSSFile = "http://localhost/OpenEMap-WebUserInterface/resources/css/OpenEMap.css";
 
 	@ModuleSetting
     @TextFieldSettingDescriptor(name = "OpenEMap javascript", description = "Absolut sökväg till OpenEMap javascript")
-    protected String openEMapScript = "";
+    protected String openEMapScript = "http://localhost/OpenEMap-WebUserInterface/release/OpenEMap-1.5.0/OpenEMap-1.5.0-debug.js";
+
+	@ModuleSetting
+	@CheckboxSettingDescriptor(name = "Debug mode?", description = "This assumes Open eMap javascript sources at /OpenEMap-WebUserInterface.")
+	protected boolean debug = false;
 	
 	
 	@Override
@@ -72,9 +73,9 @@ public class UserMap extends AnnotatedForegroundModule {
 				uriParser));
 		document.appendChild(moduleDescriptor.toXML(doc));
 		
-		XMLUtils.appendNewElement(doc, document, "libraryBaseUrl", libraryBaseUrl);
 		XMLUtils.appendNewElement(doc, document, "openEMapCSSFile", openEMapCSSFile);
 		XMLUtils.appendNewElement(doc, document, "openEMapScript", openEMapScript);
+		XMLUtils.appendNewElement(doc, document, "debug", debug);
 		
 		return doc;
 	}

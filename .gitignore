@@ -54,3 +54,4 @@ search-lm-rmi-java-client/.gitignore
 Properties/src/Properties.java
 
 Properties/.gitignore
+Modules/.gitignore

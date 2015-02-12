@@ -60,8 +60,7 @@
 			
 			Ext.onReady(function(){
 				Ext.applyIf(OpenEMap, { wsUrls :{
-					//basePath: '/openemap-admin/',
-					configs: 'configurations/configs',
+					configs: '/configs/',
 					servers: 'settings/servers',
 					layers: 'layers/layers',
 					metadata: 'geometadata/getmetadatabyid',

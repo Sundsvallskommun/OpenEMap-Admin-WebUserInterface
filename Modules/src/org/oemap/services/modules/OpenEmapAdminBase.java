@@ -45,23 +45,23 @@ public class OpenEmapAdminBase extends AnnotatedForegroundModule {
     protected boolean debug = false;
 	
 	@ModuleSetting
-    @TextFieldSettingDescriptor(name = "GIS Server", description = "Address to GIS Server.")
+    @TextFieldSettingDescriptor(name = "GIS Server", description = "Base URL to GIS Server. (eg. https://extmap.sundsvall.se/geoserver")
     protected String gisServer = "";
 	
 	@ModuleSetting
-    @TextFieldSettingDescriptor(name = "WMS Server", description = "Address to WMS Server.")
+    @TextFieldSettingDescriptor(name = "WMS Server", description = "Context path to WMS endpoint on GIS server (eg. /wms")
     protected String wmsServer = "";
 	
 	@ModuleSetting
-    @TextFieldSettingDescriptor(name = "WMS Server Getcapabilities URL", description = "Address to Getcapabilities.")
+    @TextFieldSettingDescriptor(name = "WMS Server Getcapabilities URL", description = "Context path to Getcapabilities used when listing layers in advanced layer control and admin. (eg /wms?request=GetCapabilities&version=1.1.1")
     protected String wmsGetCapabilities = "";
 	
 	@ModuleSetting
-    @TextFieldSettingDescriptor(name = "WFS Server", description = "Address to WFS Server.")
+    @TextFieldSettingDescriptor(name = "WFS Server", description = "Context path to WFS endpoint on GIS server (eg. /wfs")
     protected String wfsServer = "";
 	
 	@ModuleSetting
-    @TextFieldSettingDescriptor(name = "WMTS Server", description = "Address to WMTS Server.")
+    @TextFieldSettingDescriptor(name = "WMTS Server", description = "Context path to WMTS endpoint on GIS server (eg. /gwc/service/wms")
     protected String wmtsServer = "";
 	
 	@ModuleSetting
