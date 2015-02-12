@@ -23,6 +23,7 @@ Copyright Härnösands kommun(C) 2014  <name of author>
 package org.oemap.services.modules.admin;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,6 +32,7 @@ import javax.sql.DataSource;
 
 import org.oemap.services.beans.Config;
 import org.oemap.services.bl.OpenEmapBeanFactory;
+import org.oemap.services.exceptions.InvalidUserException;
 import org.oemap.services.exceptions.WriteprotectedException;
 import org.oemap.services.modules.responsehandler.StringResponseHandler;
 
@@ -81,9 +83,23 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 	 */
 	@Override
 	public se.unlogic.hierarchy.core.interfaces.ForegroundModuleResponse defaultMethod(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Throwable {
-		List<Config> config = configDAO.getAll();
+		List<Config> configs = configDAO.getAll();
+		List<Config> filteredConfigs = new ArrayList<Config>();
+		
+		for (Config config : configs){
+			String configName = config.getName();
+			if (configName.equalsIgnoreCase("default")) 
+				continue;
+			
+			if (config.getUsername().equalsIgnoreCase(user.getUsername())){
+				filteredConfigs.add(config);
+			}
+			else if (config.getIsPublic()){
+				filteredConfigs.add(config);
+			}
+		}
 		OpenEmapBeanFactory<Config> configFactory = new OpenEmapBeanFactory<Config>();
-		String json = configFactory.createJSON(config);
+		String json = configFactory.createJSON(filteredConfigs);
 		HTTPUtils.sendReponse(json, res);
 		return null;
 	};
@@ -105,6 +121,18 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 			HttpServletResponse res, User user, URIParser uriParser,
 			@URIParam(name = "id") Integer id) throws Throwable {
 		Config config = configDAO.get(id);
+		Boolean isPublic = config.getIsPublic();
+		
+		if (isPublic == null){
+			return "";
+		}
+		else if (!isPublic){
+			String currentUser = user.getUsername();
+			String configUser = config.getUsername();
+			if (!currentUser.equalsIgnoreCase(configUser)){
+				throw new InvalidUserException();
+			}
+		}
 		OpenEmapBeanFactory<Config> configFactory = new OpenEmapBeanFactory<Config>();
 		String json = configFactory.createJSON(config);
 		return json;
@@ -128,7 +156,7 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 		try {
 			Config config = configFactory.createBean(Config.class, req);
 			config.setUsername(user.getUsername());
-			if (isWriteProtected(config)) {
+			if (isWriteProtected(config, user)) {
 				throw new WriteprotectedException();
 			}
 			configDAO.update(config);
@@ -160,7 +188,7 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 
 			config.setUsername(user.getUsername());
 
-			if (isWriteProtected(config)) {
+			if (isWriteProtected(config, user)) {
 				throw new WriteprotectedException();
 			}
 			configDAO.add(config);
@@ -186,11 +214,15 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 			throws Throwable {
 		OpenEmapBeanFactory<Config> configFactory = new OpenEmapBeanFactory<Config>();
 		try {
+			// get config
+			// see if user owns config
+			// only administrators can delete public configs
 			Config config = configDAO.get(id);
-			if (isWriteProtected(config)) {
+			if (isWriteProtected(config, user)) {
 				throw new WriteprotectedException();
 			}
 			configDAO.delete(config);
+			
 		} catch (Exception x) {
 			configFactory.setRestResponseObject(false, 0, x.getMessage());
 		}
@@ -204,7 +236,23 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 	 * @param config
 	 * @return
 	 */
-	public boolean isWriteProtected(Config config) {
-		return config.getName().toLowerCase().equals("default") ? true : false;
+	public boolean isWriteProtected(Config config, User user) {
+		// lock default config
+		if (config.getName().toLowerCase().equals("default")){
+			return true;
+		}
+		
+		if (config.getIsPublic()){
+			if (user.isAdmin()){
+				return false;
+			}
+			return true;
+		}
+		String configUserName = config.getUsername();
+		String userName = user.getUsername();
+		if (configUserName.equalsIgnoreCase(userName) || configUserName.equalsIgnoreCase(null)){
+			return false;
+		}
+		return true;
 	}
 }

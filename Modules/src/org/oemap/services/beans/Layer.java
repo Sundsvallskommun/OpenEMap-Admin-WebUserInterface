@@ -66,6 +66,18 @@ public class Layer extends ConfigBase {
 	@XMLElement
 	@DAOManaged
 	private String urlToMetadata;
+	
+	@XMLElement
+	@DAOManaged
+	private Boolean isGroupLayer;
+
+	public Boolean getIsGroupLayer() {
+		return isGroupLayer;
+	}
+
+	public void setIsGroupLayer(Boolean isGroupLayer) {
+		this.isGroupLayer = isGroupLayer;
+	}
 
 	public String getUrlToMetadata() {
 		return urlToMetadata;

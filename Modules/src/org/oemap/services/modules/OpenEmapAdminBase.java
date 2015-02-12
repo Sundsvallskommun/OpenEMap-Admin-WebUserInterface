@@ -50,8 +50,24 @@ public class OpenEmapAdminBase extends AnnotatedForegroundModule {
     protected boolean debug = false;
 	
 	@ModuleSetting
-    @TextFieldSettingDescriptor(name = "WMS Server", description = "Address to WMS Server.")
+    @TextFieldSettingDescriptor(name = "GIS Server", description = "Base URL to GIS Server. (eg. https://extmap.sundsvall.se/geoserver")
+    protected String gisServer = "";
+	
+	@ModuleSetting
+    @TextFieldSettingDescriptor(name = "WMS Server", description = "Context path to WMS endpoint on GIS server (eg. /wms")
     protected String wmsServer = "";
+	
+	@ModuleSetting
+    @TextFieldSettingDescriptor(name = "WMS Server Getcapabilities URL", description = "Context path to Getcapabilities used when listing layers in advanced layer control and admin. (eg /wms?request=GetCapabilities&version=1.1.1")
+    protected String wmsGetCapabilities = "";
+	
+	@ModuleSetting
+    @TextFieldSettingDescriptor(name = "WFS Server", description = "Context path to WFS endpoint on GIS server (eg. /wfs")
+    protected String wfsServer = "";
+	
+	@ModuleSetting
+    @TextFieldSettingDescriptor(name = "WMTS Server", description = "Context path to WMTS endpoint on GIS server (eg. /gwc/service/wms")
+    protected String wmtsServer = "";
 	
 	@ModuleSetting
     @TextFieldSettingDescriptor(name = "Alias for proxy", description = "Alias set in admin proxy.")
@@ -80,7 +96,11 @@ public class OpenEmapAdminBase extends AnnotatedForegroundModule {
 		document.appendChild(moduleDescriptor.toXML(doc));
 
 		XMLUtils.appendNewElement(doc, document, "debugAdmin", debug);
+		XMLUtils.appendNewElement(doc, document, "gisServer", gisServer);
 		XMLUtils.appendNewElement(doc, document, "wmsServer", wmsServer);
+		XMLUtils.appendNewElement(doc, document, "wmsGetCapabilities", wmsGetCapabilities);
+		XMLUtils.appendNewElement(doc, document, "wfsServer", wfsServer);
+		XMLUtils.appendNewElement(doc, document, "wmtsServer", wmtsServer);
 		XMLUtils.appendNewElement(doc, document, "adminproxy", adminproxy);
 		
 		return doc;

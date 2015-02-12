@@ -56,7 +56,7 @@ Ext.define('AdmClient.controller.toolDetails.DetailReport', {
 			}
 		}
 		else{
-			if (/DetailsReport/.test(toolObject.toolName)){
+			if (/DetailReport/.test(toolObject.toolName)){
 				
 				for (var i = 0; i < AdmClient.app.config.tools.length; i++){
 					var tool = AdmClient.app.config.tools[i];

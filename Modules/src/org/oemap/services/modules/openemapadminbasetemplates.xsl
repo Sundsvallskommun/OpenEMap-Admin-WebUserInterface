@@ -11,31 +11,39 @@
 	<xsl:template match="Document">
 	
 	<script type="text/javascript">
-				defaultWMSServer = window.location.protocol + '//' + window.location.host + '<xsl:value-of select="/Document/requestinfo/contextpath" />/<xsl:value-of select="adminproxy" />?url=<xsl:value-of select="wmsServer" />';
+				var gisServer = '<xsl:value-of select="gisServer" />';
+				var wmsServer = gisServer + '<xsl:value-of select="wmsServer" />';
+				var wmsGetCapabilities = gisServer + '<xsl:value-of select="wmsGetCapabilities" />';
+				var wfsServer = gisServer + '<xsl:value-of select="wfsServer" />';
+				var wmtsServer = gisServer + '<xsl:value-of select="wmtsServer" />';
+				var adminproxy = window.location.protocol + '//' + window.location.host + '<xsl:value-of select="/Document/requestinfo/contextpath" />/<xsl:value-of select="adminproxy" />';
+				if (adminproxy !== ''){
+					adminproxy += '?url=';
+					wmsGetCapabilities = adminproxy + wmsGetCapabilities;
+				}
 	</script>
 
 	<xsl:choose>
 		<xsl:when test="debugAdmin='true'">
 			<link rel="stylesheet" type="text/css" href="/ext-4.2.1/resources/css/ext-all-neptune.css" />
-			<link rel="stylesheet" type="text/css" href="/OpenEmap-Admin-WebUserInterface/oeadmin.css" />
+			<link rel="stylesheet" type="text/css" href="/OpenEmap-Admin-WebUserInterface/UI/oeadmin.css" />
 			<script type="text/javascript" src="/ext-4.2.1/ext-debug.js"></script>
 			<script type="text/javascript" src="/ext-4.2.1/ext-theme-neptune.js"></script>
     		<script type="text/javascript" src="/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
     		<script type="text/javascript" src="/OpenLayers-2.13.1/OpenLayers.js"></script>
-    		<script type="text/javascript" src="/geoext2-2.0.0/geoext2-all.js"></script>
     		
     		<script type="text/javascript">
-        		 var appPath = '/openemap-admin'; 
+        		 var appPath = 'http://localhost/openemap-admin'; 
         		 Ext.Loader.setConfig({
             		disableCaching: false,
             		paths: {
-                		AdmClient: '/OpenEMap-Admin-WebUserInterface/src/main/javascript',
+                		AdmClient: '/OpenEMap-Admin-WebUserInterface/UI/src/main/javascript',
                 		OpenEMap: '/OpenEMap-WebUserInterface/src/main/javascript',
-                		GeoExt: '/geoext2-2.0.0/src/GeoExt/'
+                		GeoExt: '/libs/geoext-2.0.1/src/GeoExt/'
             		}	
           		});
           </script>
-          <script type="text/javascript" src="/OpenEMap-Admin-WebUserInterface/src/main/javascript/App.js"></script>
+          <script type="text/javascript" src="/OpenEMap-Admin-WebUserInterface/UI/src/main/javascript/App.js"></script>
         
 		</xsl:when>
 		<xsl:otherwise>
@@ -47,26 +55,39 @@
 			<script type="text/javascript" src="/libs/ext-4.2.1/ext-theme-neptune.js"></script>
 			<script type="text/javascript" src="/libs/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
 			<script type="text/javascript" src="/libs/OpenLayers-2.13.1/OpenLayers.js"></script>
-			<script type="text/javascript" src="/libs/geoext2-all.js"></script>
+			<script type="text/javascript" src="/libs/geoext-2.0.2-rc.1-all.js"></script>
 			<script type="text/javascript">
 			
 			Ext.onReady(function(){
 				Ext.applyIf(OpenEMap, { wsUrls :{
-					//basePath: '/openemap-admin/',
-					configs: 'configurations/configs',
+					configs: '/configs/',
 					servers: 'settings/servers',
 					layers: 'layers/layers',
 					metadata: 'geometadata/getmetadatabyid',
 					metadata_abstract: 'geometadata/getabstractbyid'}});
 			});
 			</script>
-			<script type="text/javascript" src="{/Document/requestinfo/contextpath}/static/f/{/Document/module/sectionID}/{/Document/module/moduleID}/OpenEMap-Admin-debug.js"></script>
+			<script type="text/javascript" src="{/Document/requestinfo/contextpath}/static/f/{/Document/module/sectionID}/{/Document/module/moduleID}/OpenEMap-Admin-1.5.0-min.js"></script>
 					
 		</xsl:otherwise>
 	</xsl:choose>
+		<script type="text/javascript">
+		setTimeout(2000, function(){
+			$(document).ready(function(){
+						AdmClient.app.admClient.setHeight(window.innerHeight - 70);
+						AdmClient.app.admClient.setWidth(window.innerWidth);
+			});
+					
+			$(window).resize(function() {
+  						AdmClient.app.admClient.setHeight(window.innerHeight - 70);
+  						AdmClient.app.admClient.setWidth(window.innerWidth);
+					});
+			});
+				
+		</script>
 		<div id="content">
 			<div id="contentitem"
-				style="min-height: 100%; min-width: 100%; position: absolute; left: 0; right: 0;">
+				style="position: absolute; left: 0; right: 0;">
 			</div>
 		</div>
 	</xsl:template>

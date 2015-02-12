@@ -1,34 +1,13 @@
-/******************************************************************************
-Copyright Härnösands kommun(C) 2014 
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as
-    published by the Free Software Foundation, either version 3 of the
-    License, or (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
-
-    You should have received a copy of the GNU Affero General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Affero General Public License
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/agpl-3.0.html
- ******************************************************************************/
-
-/**
- * Layer details
- */
 Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 	extend : 'Ext.window.Window',
 	alias : 'widget.layerDetails',
 
 	requires: [
 		'Ext.window.Window',
-		'GeoExt.data.WfsCapabilitiesLayerStore'
+		'Ext.data.XmlStore',
+		'GeoExt.data.WfsCapabilitiesLayerStore',
+		'GeoExt.data.WmsCapabilitiesLayerStore',
+		'GeoExt.data.AttributeStore'
 	],
 	layout: {
 		type : 'border',
@@ -58,6 +37,21 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 		this.callParent(arguments);
 	},
 
+	getAttributeCollection: function(attributes){
+		var items = [];
+		for (var key in attributes){
+				var item = [key, '', false];
+				items.push(item);
+		}
+		return items;
+	},
+
+	getItem: function(item){
+		item.forEach(function(row){
+			console.log(row);
+		});
+	},
+
 	initComponent : function() {
 
 		var self = this;
@@ -65,22 +59,100 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 		this.y = Math.ceil(window.innerHeight / 2 - this.innerHeight / 2);
 
 		this.modal = true;
-		var pathArray = this.layer.wms.url.split('/');
-		var wfsUrl = 'adminproxy?url=' + pathArray[0] + '//' + pathArray[2] + (this.layer.wfs.url || '/wfs') + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + this.layer.name;
-		this.store = Ext.create('AdmClient.store.LayerDetails');
+		
+		
+		if (this.layer.wfs){
+			var wfsUrl = 'adminproxy?url=' + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + this.layer.name;
+			this.store = Ext.create('GeoExt.data.AttributeStore');
+			this.store.setUrl(wfsUrl);
+			this.store.load();
+		}
+		else if (this.layer.wms){
+			var pathArray = this.layer.wms.url.split('/');
 
-		this.store.addListener('load', function(store, records, successful, eOpts){
-			records.forEach(function(l){
-				if (self.layer.metadata && self.layer.metadata.attributes && self.layer.metadata.attributes[l.data.name] instanceof Object){
-					l.data.alias = self.layer.metadata.attributes[l.data.name].alias;
-					l.data.visible = true;
-				}
+			this.store = Ext.create('Ext.data.ArrayStore', {fields: [
+				{name: 'name'},
+                {name: 'alias'},
+                {name: 'visible', type: 'boolean', defaultValue: true}
+                ]
+            });
+
+			this.wmsStore = Ext.create('GeoExt.data.WmsCapabilitiesLayerStore',{
+				url: wmsGetCapabilities
 			});
-			store.update();
-		}); 
 
-		this.store.setUrl(wfsUrl);
-		this.store.load();
+			
+			
+				this.wmsStore.load({
+	                scope: this,
+	                callback: function(records, operation, success) {
+	                	var layerName = this.layer.name;
+	                    if(records && records.length > 0) {
+	                        
+	                        //var args = this;
+	                        records.forEach(function(record) {
+	                        	if (!this.layer.name) return;
+
+	                            var layerName = this.layer.name;
+	                            var currentLayerName = record.get('name');
+	                            if (layerName === currentLayerName){
+	                            	var boundaryBox = record.get('bbox');
+	                            	for (var srsName in boundaryBox){
+	                            		var boundary = boundaryBox[srsName].bbox;
+	                            		var extent = new OpenLayers.Bounds.fromArray(boundary);
+
+	                            		var requestUrl = 'adminproxy?url=' + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
+	                            		 	'&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
+	                            		 Ext.Ajax.request({
+	                            		 	scope: this,
+	                            		 	url: requestUrl,
+	                            		 	success: function(){
+	                            		 		var format = new OpenLayers.Format.GML();
+	                            		 		var feature = format.read(arguments[0].responseXML);
+	                            		 		var fields = this.getAttributeCollection(feature[0].attributes);
+	                            		 		
+
+	                            		 		if (this.layer.metadata && this.layer.metadata.attributes && this.layer.metadata.attributes instanceof Object){
+	                            		 			var attributesInLayer = this.layer.metadata.attributes;
+	                            		 			for (var attribute in attributesInLayer){
+	                            		 				var item = fields.filter(function(f){
+	                            		 					return f[0] === attribute;
+	                            		 				});
+	                            		 				if (item.length > 0){
+	                            		 					item[0][1] = item[0][1] === '' ? attributesInLayer[attribute].alias : item[0][1];
+	                            		 					item[0][2] = true;
+	                            		 				}
+	                            		 			}
+	                            		 			
+	                            		 			
+
+	                            		 		}
+	                            		 		this.store.loadData(fields);
+											}
+	                            		 	
+	                            		 });
+	                            	}
+	                            }
+	                        }, this);
+	                    } else {
+	                        // !TODO Throw error
+	                    }
+	                }
+	            });
+			
+
+		}
+		if (this.store){
+			this.store.addListener('load', function(store, records, successful, eOpts){
+				records.forEach(function(l){
+					if (self.layer.metadata && self.layer.metadata.attributes && self.layer.metadata.attributes[l.data.name] instanceof Object){
+						l.data.alias = self.layer.metadata.attributes[l.data.name].alias;
+						l.data.visible = true;
+					}
+				});
+				store.update();
+			});
+		}
 
 		this.cellEditing = new Ext.grid.plugin.CellEditing({
 			clicksToEdit : 1
@@ -90,7 +162,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 			region: 'center',
 			xtype: 'grid',
 			itemId: 'layerDetailsGrid',
-			store: this.store,
+			store: this.store || undefined,
 
 			plugins : [ this.cellEditing ],
 			columns: [{
@@ -134,7 +206,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 				}
 			}
 			]
-		}]
+		}],
 
 		this.callParent(arguments);
 	}

@@ -62,7 +62,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 						height : 30,
 		            	width: 500,
 						enableKeyEvents : true,
-						value: typeof defaultWMSServer !== 'undefined' ? defaultWMSServer : ''
+						value: typeof wmsGetCapabilities !== 'undefined' ? wmsGetCapabilities : ''
 					},
 					{
 			            xtype : 'treepanel',
@@ -133,21 +133,47 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		                tooltip: 'Baslager',
 		                text: 'Baslager',
 		                width: 70,
-		               	dataIndex: 'isBaseLayer'
+		               	dataIndex: 'isBaseLayer',
+		               	renderer: function(value, meta){
+		                	if ((meta.record.get('isGroupLayer')) || (meta.record.get('id') === 'root')){
+		                		return '<span></span>';
+		                	}
+		                	return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
+		                }
 		            },
 		            {
 		                xtype: 'checkcolumn',
 		                width: 70,
 		                tooltip: 'Synlig',
 		                text: 'Synlig',
-		                dataIndex: 'visibility'
+		                dataIndex: 'visibility',
+		                renderer: function(value, meta){
+		                	if ((meta.record.get('isGroupLayer')) || (meta.record.get('id') === 'root')){
+		                		return '<span></span>';
+		                	}
+		                	return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
+		                }
 		            },
 		            {
 		                xtype: 'checkcolumn',
 		                width: 70,
-		                tooltip: 'S&ouml;kbar',
-		                text: 'S&ouml;kbar',
-		                dataIndex: 'searchable'
+		                tooltip: 'Klickbart lager',
+		                text: 'Klickbar',
+		                dataIndex: 'clickable',
+		                renderer: function(value, meta){
+		                	if ((meta.record.get('isGroupLayer')) || (meta.record.get('id') === 'root')){
+		                		return '<span></span>';
+		                	}
+
+		                	if (!meta.record.get('queryable')){
+		                		return '<span></span>';
+		                	}
+
+		                	if (meta.record.get('clickable')){
+		                		return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
+		                	}
+		                	return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
+		                }
 		            },
 		            {
 		                xtype: 'actioncolumn',
@@ -166,11 +192,20 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 						}
 		            },{
 		            	xtype: 'actioncolumn',
-		            	with: 70,
-		            	tooltip: 'Alias kolumner, sökbart etc',
+		            	width: 70,
+		            	tooltip: 'Alias kolumner, s&ouml;kbart etc',
 		            	align: 'center',
 		            	text: 'Inst&auml;llningar',
-		            	icon: '/openemap-admin/font-awesome/black/png/16/table.png',
+		            	isDisabled: function(view, ri, ci, item, record){
+		            		return record.data.isGroupLayer;
+		            	},
+		            	//icon: '/openemap-admin/font-awesome/black/png/16/table.png',
+		            	renderer:function(value, meta){
+		            		if (!meta.record.get('queryable')){
+		            			return '<span></span>';
+		            		}
+		            		return '<img role="button" class="x-action-col-icon x-action-col-0" src="/openemap-admin/font-awesome/black/png/16/table.png" />';
+		            	},
 		            	handler : function(grid, rowIdex, colIndex){
 		            		var selectedLayer = null;
 		            		if (grid.getStore().data.items[rowIdex].childNodes.length === 0){

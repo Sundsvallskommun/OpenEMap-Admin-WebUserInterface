@@ -41,6 +41,7 @@ Ext.define('AdmClient.view.MapConfiguration', {
 					itemId : 'markExtent',
 					text : 'Mark extent',
 					icon : 'icons/figur-R.png',
+					iconCls : 'extent',
 					enableToggle : true
 				},('->'),{
 					xtype : 'textfield',
@@ -213,11 +214,27 @@ Ext.define('AdmClient.controller.MainToolbar', {
 		new AdmClient.view.about.About().show();
 	}
 });
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * Base class for adding common functionality upon GeoExt.Action
- * 
- * @param {string} config.minScale disable tool below this scale
- * @param {string} config.maxScale disable tool above this scale
+ * @param {Object} [config] configuration object setting common action properties on cretaion of an action
+ * @param {string} [config.minScale] disable tool below this scale
+ * @param {string} [config.maxScale] disable tool above this scale
  */
 Ext.define('OpenEMap.action.Action', {
     extend:  GeoExt.Action ,
@@ -251,817 +268,150 @@ Ext.define('OpenEMap.action.Action', {
 });
 
 /**
- * Action that measure area.
- *{@img Measurearea.png measurearea}
- * 
- * The example below is from configuration adding the tool to MapClient.view.Map:
- * 
- *         "tools": [ "FullExtent", "ZoomSelector", "MeasureLine", "MeasureArea"]
+ * Action for delete all features in map
  */
-Ext.define('OpenEMap.action.MeasureArea', {
+Ext.define('OpenEMap.action.DeleteAllFeatures', {
     extend:  OpenEMap.action.Action ,
     
-    constructor: function(config) {
+    constructor : function(config){
         
-        var mapPanel = config.mapPanel;
-        
-        var sketchSymbolizers = {
-            "Point": {
-                pointRadius: 4,
-                graphicName: "square",
-                fillColor: "white",
-                fillOpacity: 1,
-                strokeWidth: 1,
-                strokeOpacity: 1,
-                strokeColor: "#333333"
-            },
-            "Line": {
-                strokeWidth: 3,
-                strokeOpacity: 1,
-                strokeColor: "#666666",
-                strokeDashstyle: "solid"
-            },
-            "Polygon": {
-                strokeWidth: 3,
-                strokeOpacity: 1,
-                strokeColor: "#666666",
-                strokeDashstyle: "solid",
-                fillColor: "#AFAFAF",
-                fillOpacity: 0.4
-            }
-        };
-        var style = new OpenLayers.Style();
-        style.addRules([
-            new OpenLayers.Rule({symbolizer: sketchSymbolizers})
-        ]);
-        var styleMap = new OpenLayers.StyleMap({"default": style});
-        
-        config.control = new OpenLayers.Control.DynamicMeasure(OpenLayers.Handler.Polygon, {
-            //persist: true,
-            layerSegmentsOptions : null,
-            layerLengthOptions : null,
-            handlerOptions: {
-                layerOptions: {
-                    styleMap: styleMap
-                }
+         config.control = new OpenLayers.Control.Button({
+            trigger: function(){
+                
+                config.mapPanel.measureLayer.removeAllFeatures();
+                config.mapPanel.measureLayerSegmentsLayer.removeAllFeatures();
+
+                config.mapPanel.map.layers.forEach(function(l){
+                    if(l instanceof OpenLayers.Layer.Vector){
+                        l.removeAllFeatures();
+                    }
+                });
             }
         });
 
-        config.iconCls = config.iconCls || 'action-measurearea';
-        config.tooltip = config.tooltip || 'M&auml;t area';
-        config.toggleGroup = 'extraTools';
+        config.iconCls = config.iconCls || 'action-deleteallfeatures';
+        config.tooltip = config.tooltip || 'Rensa kartan fr&aring;n ritade objekt.';
         
         this.callParent(arguments);
     }
 });
+/*    
+    Copyright (C) 2014 Härnösands kommun
 
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
- * Action for print using mapfish.
- */
-Ext.define('OpenEMap.action.Print', {
-    extend :  OpenEMap.action.Action ,
-    constructor : function(config) {
-        var mapPanel = config.mapPanel;
-        var printExtent = mapPanel.plugins[0];
-        var printProvider = printExtent.printProvider;
-        printProvider.customParams = {attribution: config.mapPanel.config.attribution.trim()};
-        var printDialog = null;
-        var page = null;
-
-        var onTransformComplete = function() {
-            var scale = printDialog.down('#scale');
-            scale.select(page.scale);
-        };
-        var onBeforedownload = function() {
-            if (printDialog) printDialog.setLoading(false);
-        };
-        var onPrintexception = function(printProvider, response) {
-            if (printDialog) printDialog.setLoading(false);
-            Ext.Msg.show({
-                 title:'Felmeddelande',
-                 msg: 'Print failed.\n\n' + response.responseText,
-                 icon: Ext.Msg.ERROR
-            });
-        };
-        var close = function() {
-            printProvider.un('beforedownload', onBeforedownload);
-            printProvider.on('printexception', onPrintexception);
-            printExtent.control.events.unregister('transformcomplete', null, onTransformComplete);
-            printExtent.removePage(page);
-            printExtent.hide();
-            printDialog = null;
-        };
-        var onClose = function() {
-            close();
-            control.deactivate();
-        };
-        
-        config.iconCls = config.iconCls || 'action-print';
-        config.tooltip = config.tooltip || 'Skriv ut';
-        config.toggleGroup = 'extraTools';
-        
-        var Custom =  OpenLayers.Class(OpenLayers.Control, {
-            initialize: function(options) {
-                OpenLayers.Control.prototype.initialize.apply(
-                    this, arguments
-                );
-            },
-            type: OpenLayers.Control.TYPE_TOGGLE,
-            activate: function() {
-                if (printDialog) {
-                    return;
-                }
-                // NOTE: doing a hide/show at first display fixes interaction problems with preview extent for unknown reasons
-                printExtent.hide();
-                printExtent.show();
-                page = printExtent.addPage();
-                
-                
-                printProvider.dpis.data.items.forEach(function(d){
-                	var validDpi = false;
-                	if (d.data.name === '56'){
-                		validDpi = true;
-                		d.data.name = 'Låg';
-                	} 
-                	else if (d.data.name === '127'){
-                		validDpi = true;
-                		d.data.name = 'Medel';
-                	}
-                	else if (d.data.name === '254'){
-                		validDpi = true;
-                		d.data.name = 'Hög';
-                	} 
-                });
-                
-                
-                printProvider.layouts.data.items.forEach(function(p){
-                	if (/landscape$/.test(p.data.name)){
-                		p.data.displayName = p.data.name.replace('landscape', 'liggande');
-                	} else if (/portrait$/.test(p.data.name)){
-                		p.data.displayName = p.data.name.replace('portrait', 'stående');	
-                	}
-                });
-
-                
-                
-                printDialog = new Ext.Window({
-                    autoHeight : true,
-                    width : 290,
-                    resizable: false,
-                    layout : 'fit',
-                    bodyPadding : '5 5 0',
-                    title: 'Utskriftsinst&auml;llningar',
-                    listeners: {
-                        close: onClose
-                    },
-                    items : [ {
-                        xtype : 'form',
-                        layout : 'anchor',
-                        defaults : {
-                            anchor : '100%'
-                        },
-                        fieldDefaults : {
-                            labelWidth : 120
-                        },
-                        items : [ {
-                            xtype : 'combo',
-                            fieldLabel: 'Pappersformat',
-                            store : printProvider.layouts,
-                            displayField : 'displayName',
-                            valueField : 'name',
-                            itemId : 'printLayouts',
-                            queryMode: 'local',
-                            value : printProvider.layouts.getAt(0).get("name"),
-                            listeners: {
-                                select: function(combo, records, eOpts) {
-                                    var record = records[0];
-                                    printProvider.setLayout(record);
-                                }
-                            }
-                        }, {
-                            xtype : 'combo',
-                            fieldLabel: 'Kvalité',
-                            store : printProvider.dpis,
-                            displayField : 'name',
-                            valueField : 'value',
-                            queryMode: 'local',
-                            value: printProvider.dpis.first().get("value"),
-                            listeners: {
-                                select: function(combo, records, eOpts) {
-                                    var record = records[0];
-                                    printProvider.setDpi(record);
-                                }
-                            }
-                        }, {
-                            xtype : 'combo',
-                            fieldLabel: 'Skala',
-                            store : printProvider.scales,
-                            displayField : 'name',
-                            valueField : 'value',
-                            queryMode: 'local',
-                            itemId: 'scale',
-                            value: printProvider.scales.first().get("value"),
-                            listeners: {
-                                select: function(combo, records, eOpts) {
-                                    var record = records[0];
-                                    page.setScale(record, "m");
-                                }
-                            }
-                        } ]
-                    } ],
-                    bbar : [ '->', {
-                        text : "Skriv ut",
-                        handler : function() {
-                            printDialog.setLoading(true);
-                            printExtent.print();
-                        }
-                    } ]
-                });
-                printDialog.show();
-                var scale = printDialog.down('#scale');
-                scale.select(page.scale);
-                
-                var layoutId = 6;
-                var printLayouts = printDialog.down('#printLayouts');
-                printLayouts.select(printLayouts.store.data.get(layoutId));
-                var currentPrintLayout = printLayouts.store.data.items[layoutId];
-                printProvider.setLayout(currentPrintLayout);
-                
-                
-                printExtent.control.events.register('transformcomplete', null, onTransformComplete);
-                printExtent.control.events.register('transformcomplete', null, onTransformComplete);
-                printProvider.on('beforedownload', onBeforedownload);
-                printProvider.on('printexception', onPrintexception);
-                
-                OpenLayers.Control.prototype.activate.apply(this, arguments);
-            },
-            deactivate: function() {
-                if (printDialog) printDialog.close();
-                OpenLayers.Control.prototype.deactivate.apply(this, arguments);
-            }
-        });
-        var control = new Custom({
-            type: OpenLayers.Control.TYPE_TOGGLE
-        });
-        config.control = control;
-        
-        this.callParent(arguments);
-    }
-});
-
-/**
- * Action for draw geometry
+ * Action to delete geometry
  * 
  * The snippet below is from configuration to MapClient.view.Map
- *
- *         "tools" : [{
- *           "type": "DrawGeometry",
- *           "geometry": "Path",
- *           "tooltip": "Markera väg",
- *           "attributes": {
- *             "type": "Väg"
- *             "metadata": {
- *               "type": {
- *                 "hidden": true
- *               }
- *             }
- *           }
- *       }]
- *       
- * NOTE: metadata attribute can be used to hide another attributes from showing up in ObjectConfig dialog.
- *  
- * DrawGeometry can also be used to draw text features, since they are simply point features with an attribute to be labeled with styling.
+ * 
+ *      "tools" : [{
+ *            "type": "DeleteGeometry",
+ *            "tooltip": "Ta bort valt objekt/geometri"
+ *        }]
  */
-Ext.define('OpenEMap.action.DrawGeometry', {
+Ext.define('OpenEMap.action.DeleteGeometry', {
     extend:  OpenEMap.action.Action ,
-
-    isText : function(feature){
-        if (feature){
-            var isPoint = feature.geometry === 'Point' || feature.geometry instanceof OpenLayers.Geometry.Point;
-            if (isPoint){
-                var isText =  feature.attributes && 
-                    feature.attributes.type && 
-                    feature.attributes.type === 'label';
-                return isText;
-            }
-        }
-        return false;
-    },
-
     /**
      * @param config
      * @param {string} config.typeAttribute string to write to new feature attribute type
-     * @param {boolean} config.singleObject Set to true to clear layer before adding feature effectively restricing 
      */
     constructor: function(config) {
         var mapPanel = config.mapPanel;
         var layer = mapPanel.drawLayer;
-
-
-        config.attributes = config.attributes || {};
         
-        config.geometry = config.geometry || 'Polygon';
-        
-        var Control = OpenLayers.Class(OpenLayers.Control.DrawFeature, {
-            // NOTE: override drawFeature to set custom attributes
-            drawFeature: function(geometry) {
-                var feature = new OpenLayers.Feature.Vector(geometry, config.attributes, config.style);
-                var proceed = this.layer.events.triggerEvent(
-                    "sketchcomplete", {feature: feature}
-                );
-                if(proceed !== false) {
-                    feature.state = OpenLayers.State.INSERT;
-                    this.layer.addFeatures([feature]);
-                    this.featureAdded(feature);
-                    this.events.triggerEvent("featureadded",{feature : feature});
-                }
-            }
-        });
-        
-        config.control = new Control(layer, OpenLayers.Handler[config.geometry]);
-
-        layer.events.register('beforefeatureadded', this, function(evt){
-            if (this.isText(evt.feature)){
-                Ext.Msg.prompt('Text', 'Mata in text:', function(btn, text){
-                    if (btn == 'ok'){
-                        evt.feature.attributes.label = text;
-                        evt.feature.data.label = text;
-                        layer.redraw();
+        config.handler = function() {
+            layer.selectedFeatures.forEach(function(feature) {
+                mapPanel.map.controls.forEach(function(control) {
+                    if (control.CLASS_NAME == "OpenLayers.Control.ModifyFeature" && control.active) {
+                        control.unselectFeature(feature);
                     }
                 });
-            }
-        });
-        
-                
-        config.iconCls = config.iconCls || 'action-drawgeometry';
-       
-       if (!config.tooltip){
-       		config.tooltip = config.geometry === 'Polygon' ? 'Rita område' :
-         		config.geometry === 'Path' ? 'Rita linje' :
-         		config.geometry === 'Point' ? 'Rita punkt' : 'Rita geometri';
-         		
-         	if (this.isText(config)){
-         		config.tooltip = 'Placera ut text.';	
-         	}
-       }
-        config.toggleGroup = 'extraTools';
-        
-        this.callParent(arguments);
-    }
-});
-
-/**
- * Action that selelcts geometry.
- */
-Ext.define('OpenEMap.action.ModifyText', {
-    extend:  OpenEMap.action.Action ,
-
-    constructor: function(config) {
-        var mapPanel = config.mapPanel;
-        var layer = config.mapPanel.drawLayer;
-
-        config.attributes = config.attributes || {};
-        
-        config.control = config.mapPanel.selectControl;
-
-        config.control.events.register('deactivate', this, function(){
-        	console.log('deactivate');
-        	
-        });
-
-        config.control.events.register('activate', this, function(){
-            var self = this;
-            layer.events.register('featureselected', self, function(evt){
-                Ext.Msg.prompt('Text', 'Mata in text:', function(btn, text){
-                    if (btn == 'ok'){
-                        evt.feature.attributes.label = text;
-                        evt.feature.data.label = text;
-                        layer.redraw();
-                    }
-                });
-            });
-        });
-
-        config.control.events.register('deactivate', this, function(){
-            layer.events.unregister('featureselected');
-                
-        });
-
-        config.iconCls = config.iconCls || 'action-selectgeometry';
-        config.tooltip = config.tooltip || '&Auml;ndra text';
-        config.toggleGroup = 'extraTools';
-        
-        this.callParent(arguments);
-    }
-});
-
-/**
- * Action that measure line.
- * {@img Measureline.png measureline}
- * 
- * The example below is from configuration:
- * 
-* The example below is from configuration adding the tool to MapClient.view.Map:
- * 
- *         "tools": [ "FullExtent", "ZoomSelector", "MeasureLine", "MeasureArea"]
- */
- 
-Ext.define('OpenEMap.action.MeasureLine', {
-    extend:  OpenEMap.action.Action ,
-    
-    constructor: function(config) {
-        
-        var mapPanel = config.mapPanel;
-        
-        var sketchSymbolizers = {
-            "Point": {
-                pointRadius: 4,
-                graphicName: "square",
-                fillColor: "white",
-                fillOpacity: 1,
-                strokeWidth: 1,
-                strokeOpacity: 1,
-                strokeColor: "#333333"
-            },
-            "Line": {
-                strokeWidth: 3,
-                strokeOpacity: 1,
-                strokeColor: "#666666",
-                strokeDashstyle: "solid"
-            },
-            "Polygon": {
-                strokeWidth: 2,
-                strokeOpacity: 1,
-                strokeColor: "#666666",
-                fillColor: "white",
-                fillOpacity: 0.3
-            }
-        };
-        var style = new OpenLayers.Style();
-        style.addRules([
-            new OpenLayers.Rule({symbolizer: sketchSymbolizers})
-        ]);
-        var styleMap = new OpenLayers.StyleMap({"default": style});
-        
-        config.control = new OpenLayers.Control.DynamicMeasure(OpenLayers.Handler.Path, {
-            persist: true,
-            maxSegments : null,
-            accuracy: 2,
-            //drawingLayer : mapClient.mapPanel.measureLayer,
-            handlerOptions: {
-                layerOptions: {
-                    styleMap: styleMap
-                }
-            }
-        });        
-        
-        config.iconCls = config.iconCls || 'action-measureline';
-        config.tooltip = config.tooltip || 'Mät str&auml;cka';
-        config.toggleGroup = 'extraTools';
-        
-        this.callParent(arguments);
-    }
-});
-
-/**
- * 
- */
-Ext.define('OpenEMap.view.IdentifyResults', {
-    extend :  Ext.panel.Panel ,
-    autoScroll : true,
-    layout: {
-        type: 'vbox',
-        pack:'start',
-        align: 'stretch'
-    },
-    initComponent : function() {
-        var store = Ext.create('Ext.data.TreeStore', {
-            root : {
-                expanded : true
-            }
-        });
-        
-        this.root = store.getRootNode();
-        
-        var propertryGrid = Ext.create('Ext.grid.property.Grid', {
-            flex: 2,
-            autoScroll : true,
-            title: 'Egenskaper',
-            collapsible : true,
-            collapsed: false,
-            xtype : 'propertygrid',
-            stripeRows: true,
-            clicksToEdit: 100
-        });
-        
-        //propertryGrid.editors = {};
-        
-        this.items = [{
-            xtype : 'treepanel',
-            flex: 1,
-            rootVisible : false,
-            store : store,
-            minHeight: 200,
-            listeners: {
-                select: this.onSelect,
-                scope: this
-            }
-        }, propertryGrid ];
-
-        this.callParent(arguments);
-    },
-    onSelect: function(model, record, index) {
-        var source = {};
-        var feature = record.raw.feature;
-        var layer = record.raw.layer;
-        
-        var filterAttributesMeta = function(key) {
-            if (layer.metadata.attributes[key]) {
-                var alias = layer.metadata.attributes[key].alias || key;
-                source[alias] = feature.attributes[key];
-            }
-        };
-        
-        if (feature) {
-            if (layer.metadata && layer.metadata.attributes) {
-                Object.keys(feature.attributes).forEach(filterAttributesMeta);
-            } else {
-                source = feature.attributes;
-            }
-            this.mapPanel.searchLayer.selectedFeatures.forEach(function(feature) {
-                this.mapPanel.selectControl.unselect(feature);
-            }, this);
-            if (record.raw.feature.layer) {
-                this.mapPanel.selectControl.select(feature);
-            }
-        }
-        
-        var source = Ext.clone(source);
-        var sourceConfig = Ext.clone(source);
-        
-        Object.keys(source).forEach(function(key) {
-            var value = sourceConfig[key];
-            if (value.match('http://') || value.match('//')) {
-                source[key] = '<a href="'+value+'" target="_blank">Länk</a>';
-                sourceConfig[key] = {
-                    renderer: function(value) {return value;},
-                    editor: Ext.create('Ext.form.DisplayField')
-                };
-            } else {
-                sourceConfig[key] = {
-                    editor: Ext.create('Ext.form.DisplayField')
-                };
-            }
-        });
-        
-        this.down('propertygrid').setSource(source, sourceConfig);
-    },
-    /**
-     * @param {Array.<OpenLayers.Feature.Vector>} features
-     */
-    addResult: function(features, layer) {
-        var layerNode = this.root.appendChild({
-            text: layer.name,
-            leaf: false,
-            expanded : true
-        });
-        
-        var processFeature = function(feature) {
-            layerNode.appendChild({
-                text: feature.attributes[Object.keys(feature.attributes)[0]],
-                leaf: true,
-                feature: feature,
-                layer: layer
+                layer.destroyFeatures([feature]);
             });
         };
         
-        features.forEach(processFeature);
+        config.iconCls = config.iconCls || 'action-deletegeometry';
+        config.tooltip = config.tooltip || 'Ta bort ritat objekt';
+        
+        this.callParent(arguments);
     }
 });
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
- * Identify action
- * 
- * TODO: Should be generic, is now hardcoded against search-lm parcels
+ * Action for delete measurements
  */
-Ext.define('OpenEMap.action.Identify', {
+Ext.define('OpenEMap.action.DeleteMeasure', {
     extend:  OpenEMap.action.Action ,
-                                                
-    popup : null,
     
-    getPopup : function(config){
-        if (this.popup){
-            this.popup.destroy();
-        }
-        this.popup = Ext.create('GeoExt.window.Popup', {
-            title: 'Sökresultat',
-            location: config.feature,
-            anchored: false,
-            unpinnable: false,
-            draggable: true,
-            map: config.mapPanel,
-            maximizable : false,
-            minimizable : false,
-            resizable: true,
-            width: 300,
-            height: 400,
-            layout: 'fit',
-            items: config.items,
-            collapsible: false,
-            x : 200,
-            y: 100,
-            listeners : {
-                close : function(){
-                    config.mapPanel.searchLayer.removeAllFeatures();
-                }
-            }
-        });
+    constructor : function(config){
+        
+         config.control = new OpenLayers.Control.Button({
+            trigger: function(){
+            
+                config.mapPanel.measureLayer.removeAllFeatures();
+                config.mapPanel.measureLayerArea.removeAllFeatures();
+                config.mapPanel.measureLayerLength.removeAllFeatures();
+                config.mapPanel.measureLayerSegments.removeAllFeatures();
 
-        return this.popup;
-    },
-
-    
-    constructor: function(config) {
-        var self = this;
-
-        var mapPanel = config.mapPanel;
-        var layer = mapPanel.searchLayer;
-        var map = config.map;
-        var layers = config.layers;
-
-        var Click = OpenLayers.Class(OpenLayers.Control, {
-            initialize: function(options) {
-                OpenLayers.Control.prototype.initialize.apply(
-                    this, arguments
-                );
-                this.handler = new OpenLayers.Handler.Click(
-                    this, {
-                        'click': this.onClick
-                    }, this.handlerOptions
-                );
-            },
-            onClick: function(evt) {
-                mapPanel.setLoading(true);
-                layer.destroyFeatures();
-                
-                var lonlat = map.getLonLatFromPixel(evt.xy);
-                
-                var x = lonlat.lon;
-                var y = lonlat.lat;
-                
-                var point = new OpenLayers.Geometry.Point(x, y);
-                var feature = new OpenLayers.Feature.Vector(point);
-                layer.addFeatures([feature]);
-                
-                var identifyResults = Ext.create('OpenEMap.view.IdentifyResults', {
-                    mapPanel : mapPanel
-                });
-
-                var popup = self.getPopup({mapPanel : mapPanel, location: feature, items: identifyResults});
-                popup.show();
-
-                OpenEMap.requestLM({
-                    url: 'registerenheter?x=' + x + '&y=' + y,
-                    success: function(response) {
-                        var registerenhet = Ext.decode(response.responseText);
-
-                        var feature = new OpenLayers.Feature.Vector(point, {
-                            name: registerenhet.name
-                        });
-                        identifyResults.addResult([feature], {name:"Fastigheter"});
-                    },
-                    failure: function(response) {
-                        Ext.Msg.alert('Fel', response.statusText);
-                    },
-                    callback: function() {
-                        mapPanel.setLoading(false);
+                config.mapPanel.map.controls.forEach(function(c){
+                    if(c instanceof OpenLayers.Control.DynamicMeasure){
+                        c.deactivate();
                     }
                 });
-                
-                var parser = Ext.create('OpenEMap.config.Parser');
-               
-                var wfsLayers =  parser.extractWFS(layers);
-                
-                var wfsIdentify = function(wfsLayer) {
-                    var options = Ext.apply({
-                        version: "1.1.0",
-                        srsName: "EPSG:3006"
-                    }, wfsLayer.wfs);
-                    
-                    var protocol = new OpenLayers.Protocol.WFS(options);
-                    
-                    protocol.read({
-                        filter: new OpenLayers.Filter({
-                            type: OpenLayers.Filter.Spatial.BBOX,
-                            value: point.getBounds()
-                        }),
-                        callback: function(response) {
-                            var features = response.features;
-                            if (features && features.length>0) {
-                                identifyResults.addResult(features, wfsLayer);
-                                layer.addFeatures(features);
-                            }
-                        }
-                    });
-                };
-                
-                wfsLayers.forEach(wfsIdentify);
             }
         });
-        
-        config.control = new Click({
-            type: OpenLayers.Control.TYPE_TOGGLE
-        });
-        
-        config.iconCls = config.iconCls || 'action-identify';
-        config.tooltip = config.tooltip || 'Identifiera';
-        config.toggleGroup = 'extraTools';
+
+        config.iconCls = config.iconCls || 'action-deletegeometry';
+        config.tooltip = config.tooltip || 'Ta bort m&auml;tning(ar).';
         
         this.callParent(arguments);
     }
 });
 
-/**
- * Grid action column that shows layer metadata
- * 
- */
+/*    
+    Copyright (C) 2014 Härnösands kommun
 
-Ext.define('OpenEMap.action.MetadataInfoColumn', {
-    extend:  Ext.grid.column.Action ,
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
 
-    requrires: [
-        'Ext.tip.ToolTip',
-        'OpenEMap.data.DataHandler',
-        'OpenEMap.view.MetadataWindow'
-    ],
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
-    text: '',
-    width: 22,
-    menuDisabled: true,
-    xtype: 'actioncolumn',
-    align: 'center',
-    iconCls: 'action-identify',
-
-    initComponent: function(options) {
-        var me = this;
-
-        this.tip = Ext.create('Ext.tip.ToolTip', {
-            trackMouse: true
-        });
-
-        this.listeners = {
-            mouseover: function(grid, rowIndex, colIndex, actionItem, event, record, row) {
-                me.tip.setTarget(event.target);
-                if(me.dataHandler) {
-                    me.dataHandler.getMetadataAbstract(me.getUUIDFromMetadataUrl(record.get('urlToMetadata')), function(json){
-                        if(json['abstract']) {
-                            me.updateTooltip(json['abstract']);
-                        }
-                    });
-                }
-            },
-            mouseout: function() {
-                me.tip.update(null);
-                me.tip.hide();
-            },
-            click: function(grid, element, rowIndex, colIndex, event, record) {
-                if(me.metadataWindow) {
-                    me.tip.update(null);
-                    me.metadataWindow.showMetadata(me.getUUIDFromMetadataUrl(record.get('urlToMetadata')));
-                }
-                
-            }
-        };
-
-        this.callParent(arguments);
-    },
-
-    /**
-    * Update tooltip for this column
-    * @param {string}  string   string to show in tooltip
-    */
-    updateTooltip: function(str) {
-        if(str) {
-            this.tip.update(str.substr(0,180) + '...');
-            this.tip.show();
-        }
-    },
-
-    /**
-    * Experimetnal function to get metadata uuid from an url
-    * @param  {string}           url  metadata-url containing metadata uuid
-    * @return {string/undefined} 
-    */
-    getUUIDFromMetadataUrl: function(url) {
-        if(url) {
-            var start = url.indexOf('id=');
-            if(start > 0) {
-                return url.substr(start+3,36);
-            }
-        }
-        return url;
-    }
-
-});
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * 
  */
@@ -1163,6 +513,22 @@ Ext.define('OpenEMap.view.DetailReportResults', {
         }
     }
 });
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 Ext.define('OpenEMap.action.DetailReport', {
     extend:  OpenEMap.action.Action ,
                                                     
@@ -1279,202 +645,139 @@ Ext.define('OpenEMap.action.DetailReport', {
     }
 });
 
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
- * Action for delete measurements
- */
-Ext.define('OpenEMap.action.DeleteMeasure', {
-    extend:  OpenEMap.action.Action ,
-    
-    constructor : function(config){
-        
-         config.control = new OpenLayers.Control.Button({
-            trigger: function(){
-                
-                config.mapPanel.measureLayer.removeAllFeatures();
-                config.mapPanel.measureLayerSegmentsLayer.removeAllFeatures();
-
-                config.mapPanel.map.layers.forEach(function(l){
-                    if(l instanceof OpenLayers.Layer.Vector){
-                        // To do clean up
-                        if (/OpenLayers.Control.DynamicMeasure/.test(l.name)){
-                            l.removeAllFeatures();
-                        } else if (/Measure\i/.test(l.name)){
-                            l.removeAllFeatures();
-                        } else if (l.name === 'OpenLayers.Handler.Path'){
-                            l.removeAllFeatures();
-                        }
-                    }
-                });
-            }
-        });
-
-        config.iconCls = config.iconCls || 'action-deletegeometry';
-        config.tooltip = config.tooltip || 'Ta bort m&auml;tning(ar).';
-        
-        this.callParent(arguments);
-    }
-});
-/**
- * Action for delete all features in map
- */
-Ext.define('OpenEMap.action.DeleteAllFeatures', {
-    extend:  OpenEMap.action.Action ,
-    
-    constructor : function(config){
-        
-         config.control = new OpenLayers.Control.Button({
-            trigger: function(){
-                
-                config.mapPanel.measureLayer.removeAllFeatures();
-                config.mapPanel.measureLayerSegmentsLayer.removeAllFeatures();
-
-                config.mapPanel.map.layers.forEach(function(l){
-                    if(l instanceof OpenLayers.Layer.Vector){
-                        l.removeAllFeatures();
-                    }
-                });
-            }
-        });
-
-        config.iconCls = config.iconCls || 'action-deleteallgeometries';
-        config.tooltip = config.tooltip || 'Rensa kartan fr&aring;n ritade objekt.';
-        
-        this.callParent(arguments);
-    }
-});
-/**
- * Action in toolbar that zooms the user to full extent
+ * Action for draw geometry
  * 
  * The snippet below is from configuration to MapClient.view.Map
- * 
- * {@img Fullextent.png fullextent}
- * 
- *        "tools": ["FullExtent"]
+ *
+ *         "tools" : [{
+ *           "type": "DrawGeometry",
+ *           "geometry": "Path",
+ *           "tooltip": "Markera väg",
+ *           "attributes": {
+ *             "type": "Väg"
+ *             "metadata": {
+ *               "type": {
+ *                 "hidden": true
+ *               }
+ *             }
+ *           }
+ *       }]
+ *       
+ * NOTE: metadata attribute can be used to hide another attributes from showing up in ObjectConfig dialog.
+ *  
+ * DrawGeometry can also be used to draw text features, since they are simply point features with an attribute to be labeled with styling.
  */
-Ext.define('OpenEMap.action.FullExtent', {
+Ext.define('OpenEMap.action.DrawGeometry', {
     extend:  OpenEMap.action.Action ,
-    constructor: function(config) {
-        config.control = new OpenLayers.Control.ZoomToMaxExtent();
-        
-        config.iconCls = config.iconCls || 'action-fullextent';
-        config.tooltip = config.tooltip || 'Zooma till full utberedning';
-        
-        this.callParent(arguments);
-    }
-});
 
-/**
- * Action that selelcts geometry.
- */
-Ext.define('OpenEMap.action.SelectGeometry', {
-    extend:  OpenEMap.action.Action ,
-    constructor: function(config) {
-        var mapPanel = config.mapPanel;
-        
-        config.control = mapPanel.selectControl;
-        
-        config.iconCls = config.iconCls || 'action-selectgeometry';
-        config.tooltip = config.tooltip || 'V&auml;lj ritat objekt';
-        config.toggleGroup = 'extraTools';
-        
-        this.callParent(arguments);
-    }
-});
+    isText : function(feature){
+        if (feature){
+            var isPoint = feature.geometry === 'Point' || feature.geometry instanceof OpenLayers.Geometry.Point;
+            if (isPoint){
+                var isText =  feature.attributes && 
+                    feature.attributes.type && 
+                    feature.attributes.type === 'label';
+                return isText;
+            }
+        }
+        return false;
+    },
 
-/**
- * Action that modify geometry
- * 
- * Example configuration using experimental support in OL to customize drag and radius handles:
- *    {
- *      "type": "ModifyGeometry",
- *      "reshape": true,
- *      "tooltip": "Redigera geometri",
- *      "options": {
- *        "dragHandleStyle": {
- *          "pointRadius": 8,
- *          "externalGraphic": "css/images/arrow-move.png",
- *          "fillOpacity": 1
- *        },
- *        "radiusHandleStyle": {
- *          "pointRadius": 8,
- *          "externalGraphic": "css/images/arrow-circle.png",
- *          "fillOpacity": 1
- *        }
- *      }
- *    } 
- *    
- * @param {boolean} config.drag Allow dragging of features
- * @param {boolean} config.rotate Allow rotation of features
- * @param {boolean} config.resize Allow resizing of features
- * @param {boolean} config.reshape Allow reshaping of features
- * @param {Object} config.options Additional options to send to OpenLayers.Control.ModifyFeature
- */
-Ext.define('OpenEMap.action.ModifyGeometry', {
-    extend:  OpenEMap.action.Action ,
-    constructor: function(config) {
-        var mapPanel = config.mapPanel;
-        var layer = mapPanel.drawLayer;
-        
-        if (config.drag === undefined) config.drag = true;
-        if (config.rotate === undefined) config.rotate = true;
-        if (config.reshape === undefined) config.reshape = true;
-        
-        var mode = 0;
-        if (config.drag) mode = mode | OpenLayers.Control.ModifyFeature.DRAG;
-        if (config.rotate) mode = mode | OpenLayers.Control.ModifyFeature.ROTATE;
-        if (config.resize) mode = mode | OpenLayers.Control.ModifyFeature.RESIZE;
-        if (config.reshape) mode = mode | OpenLayers.Control.ModifyFeature.RESHAPE;
-        
-        var options = Ext.apply({mode: mode}, config.options);
-        config.control = new OpenLayers.Control.ModifyFeature(layer, options);
-        config.control._mode = config.control.mode;
-        
-        config.iconCls = config.iconCls || 'action-modifygeometry';
-        config.tooltip = config.tooltip || '&Auml;ndra ritat objekt';
-        config.toggleGroup = 'extraTools';
-        
-        this.callParent(arguments);
-    }
-});
-
-/**
- * Action to delete geometry
- * 
- * The snippet below is from configuration to MapClient.view.Map
- * 
- *      "tools" : [{
- *            "type": "DeleteGeometry",
- *            "tooltip": "Ta bort valt objekt/geometri"
- *        }]
- */
-Ext.define('OpenEMap.action.DeleteGeometry', {
-    extend:  OpenEMap.action.Action ,
     /**
      * @param config
      * @param {string} config.typeAttribute string to write to new feature attribute type
+     * @param {boolean} config.singleObject Set to true to clear layer before adding feature effectively restricing 
      */
     constructor: function(config) {
         var mapPanel = config.mapPanel;
         var layer = mapPanel.drawLayer;
+
+
+        config.attributes = config.attributes || {};
         
-        config.handler = function() {
-            layer.selectedFeatures.forEach(function(feature) {
-                mapPanel.map.controls.forEach(function(control) {
-                    if (control.CLASS_NAME == "OpenLayers.Control.ModifyFeature" && control.active) {
-                        control.unselectFeature(feature);
+        config.geometry = config.geometry || 'Polygon';
+        
+        var Control = OpenLayers.Class(OpenLayers.Control.DrawFeature, {
+            // NOTE: override drawFeature to set custom attributes
+            drawFeature: function(geometry) {
+                var feature = new OpenLayers.Feature.Vector(geometry, config.attributes, config.style);
+                var proceed = this.layer.events.triggerEvent(
+                    "sketchcomplete", {feature: feature}
+                );
+                if(proceed !== false) {
+                    feature.state = OpenLayers.State.INSERT;
+                    this.layer.addFeatures([feature]);
+                    this.featureAdded(feature);
+                    this.events.triggerEvent("featureadded",{feature : feature});
+                }
+            }
+        });
+        
+        config.control = new Control(layer, OpenLayers.Handler[config.geometry]);
+
+        layer.events.register('beforefeatureadded', this, function(evt){
+            if (this.isText(evt.feature)){
+                Ext.Msg.prompt('Text', 'Mata in text:', function(btn, text){
+                    if (btn == 'ok'){
+                        evt.feature.attributes.label = text;
+                        evt.feature.data.label = text;
+                        layer.redraw();
                     }
                 });
-                layer.destroyFeatures([feature]);
-            });
-        };
+            }
+        });
         
-        config.iconCls = config.iconCls || 'action-deletegeometry';
-        config.tooltip = config.tooltip || 'Ta bort ritat objekt';
+                
+        config.iconCls = config.iconCls || 'action-drawgeometry';
+       
+       if (!config.tooltip){
+       		config.tooltip = config.geometry === 'Polygon' ? 'Rita område' :
+         		config.geometry === 'Path' ? 'Rita linje' :
+         		config.geometry === 'Point' ? 'Rita punkt' : 'Rita geometri';
+         		
+         	if (this.isText(config)){
+         		config.tooltip = 'Placera ut text.';	
+         	}
+       }
+        config.toggleGroup = 'extraTools';
         
         this.callParent(arguments);
     }
 });
 
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * Creates predefined objects
  */
@@ -1606,6 +909,22 @@ Ext.define('OpenEMap.ObjectFactory', {
         return feature;
     }
 });
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * 
  */
@@ -1930,6 +1249,22 @@ Ext.define('OpenEMap.view.ObjectConfig', {
         this.down('#objectimage').update('<img src="' + OpenEMap.basePathImages + name + '"></img>');
     }
 });
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * Specialised draw Action that draws predefined objects
  * 
@@ -2003,6 +1338,1264 @@ Ext.define('OpenEMap.action.DrawObject', {
     }
 });
 
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * Action in toolbar that zooms the user to full extent
+ * 
+ * The snippet below is from configuration to MapClient.view.Map
+ * 
+ * {@img Fullextent.png fullextent}
+ * 
+ *        "tools": ["FullExtent"]
+ */
+Ext.define('OpenEMap.action.FullExtent', {
+    extend:  OpenEMap.action.Action ,
+    constructor: function(config) {
+        config.control = new OpenLayers.Control.ZoomToMaxExtent();
+        
+        config.iconCls = config.iconCls || 'action-fullextent';
+        config.tooltip = config.tooltip || 'Zooma till full utberedning';
+        
+        this.callParent(arguments);
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * 
+ */
+Ext.define('OpenEMap.view.IdentifyResults', {
+    extend :  Ext.panel.Panel ,
+    autoScroll : true,
+    layout: {
+        type: 'vbox',
+        pack:'start',
+        align: 'stretch',
+        resizable: true
+    },
+    initComponent : function() {
+        var store = Ext.create('Ext.data.TreeStore', {
+            root : {
+                expanded : true
+            }
+        });
+        
+        this.root = store.getRootNode();
+        
+        var propertyGrid = Ext.create('Ext.grid.property.Grid', {
+            flex: 2,
+            autoScroll : true,
+            title: 'Egenskaper',
+            collapsible : true,
+            collapsed: false,
+            xtype : 'propertygrid',
+            stripeRows: true,
+            clicksToEdit: 100
+        });
+        
+        //propertryGrid.editors = {};
+        
+        this.items = [{
+            xtype : 'treepanel',
+            flex: 1,
+            rootVisible : false,
+            store : store,
+            minHeight: 200,
+            listeners: {
+                select: this.onSelect,
+                scope: this
+            }
+        }, propertyGrid ];
+
+        this.callParent(arguments);
+    },
+    onSelect: function(model, record, index) {
+        var source = {};
+        var feature = record.raw.feature;
+        var layer = record.raw.layer;
+        
+        var filterAttributesMeta = function(key) {
+            if (layer.metadata.attributes[key]) {
+                var alias = layer.metadata.attributes[key].alias || key;
+                source[alias] = feature.attributes[key];
+            }
+        };
+        
+        if (feature) {
+            if (layer.metadata && layer.metadata.attributes) {
+                Object.keys(feature.attributes).forEach(filterAttributesMeta);
+            } else {
+                source = feature.attributes;
+            }
+            this.mapPanel.searchLayer.selectedFeatures.forEach(function(feature) {
+                this.mapPanel.selectControl.unselect(feature);
+            }, this);
+            if (record.raw.feature.layer) {
+                this.mapPanel.selectControl.select(feature);
+            }
+        }
+        
+        source = Ext.clone(source);
+        var sourceConfig = Ext.clone(source);
+        
+        Object.keys(source).forEach(function(key) {
+            var value = sourceConfig[key];
+            value = value ? value : '';
+            if (value.match('http://') || value.match('//') || value.match('https://')) {
+                source[key] = '<a href="'+value+'" target="_blank">Länk</a>';
+                sourceConfig[key] = {
+                    renderer: function(value) {return value;},
+                    editor: Ext.create('Ext.form.DisplayField')
+                };
+            } else {
+                sourceConfig[key] = {
+                    editor: Ext.create('Ext.form.DisplayField')
+                };
+            }
+        });
+        
+        this.down('propertygrid').setSource(source, sourceConfig);
+    },
+    /**
+     * @param {Array.<OpenLayers.Feature.Vector>} features
+     */
+    addResult: function(features, layer) {
+        var layerNode = this.root.appendChild({
+            text: layer.name,
+            leaf: false,
+            expanded : true
+        });
+        
+        var processFeature = function(feature) {
+            layerNode.appendChild({
+                text: feature.attributes[Object.keys(feature.attributes)[0]],
+                leaf: true,
+                feature: feature,
+                layer: layer
+            });
+        };
+        
+        features.forEach(processFeature);
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * Identify action
+ * 
+ * @param {Object} [config] config object to set properties on cretaion
+ * @param {string} [config.feature] not used?
+ * @param {string} [config.mapPanel] mapPanel to add popup window on
+ * @param {string} [config.items] items to show in result window
+ * @param {string} [config.useRegisterenhet=true] wheter or not to use identify on registerenhet 
+ * @param {string} [config.tolerance=3] tolerance to use when identifying in map. Radius in image pixels. 
+ * @param {string} [config.onlyVisibleLayers=false] wheter or not to drill through invisble layers 
+ */
+Ext.define('OpenEMap.action.Identify', {
+    extend:  OpenEMap.action.Action ,
+                                                
+    popup : null,
+    
+    getPopup : function(config){
+        if (this.popup){
+            this.popup.destroy();
+        }
+        this.popup = Ext.create('GeoExt.window.Popup', {
+            title: 'Sökresultat',
+            location: config.feature,
+            anchored: false,
+            unpinnable: false,
+            draggable: true,
+            map: config.mapPanel,
+            maximizable : false,
+            minimizable : false,
+            resizable: true,
+            width: 300,
+            height: 400,
+            layout: 'fit',
+            items: config.items,
+            collapsible: false,
+            x : 200,
+            y: 100,
+            listeners : {
+                close : function(){
+                    config.mapPanel.searchLayer.removeAllFeatures();
+                }
+            }
+        });
+
+        return this.popup;
+    },
+
+    
+    constructor: function(config) {
+        var self = this;
+
+        var mapPanel = config.mapPanel;
+        var layer = mapPanel.searchLayer;
+        var map = config.map;
+        var layers = config.layers;
+        var client = config.client;
+        
+        // Defaults to identify registerenhet
+        if (config.useRegisterenhet === null) {
+        	config.useRegisterenhet = true;
+        }
+        config.tolerance = config.tolerance || 3;
+        if (config.onlyVisibleLayers === null) {
+        	config.onlyVisibleLayers = true;	
+        }   
+
+        var Click = OpenLayers.Class(OpenLayers.Control, {
+            initialize: function(options) {
+                OpenLayers.Control.prototype.initialize.apply(
+                    this, arguments
+                );
+                this.handler = new OpenLayers.Handler.Click(
+                    this, {
+                        'click': this.onClick
+                    }, this.handlerOptions
+                );
+            },
+            onClick: function(evt) {
+                // Show graphhic for start loading
+                mapPanel.setLoading(true);
+                layer.destroyFeatures();
+                
+                var lonlat = map.getLonLatFromPixel(evt.xy);
+                var x = lonlat.lon;
+                var y = lonlat.lat;
+                
+				var lowerLeftImage = {};
+				var upperRightImage = {};
+				upperRightImage.x = evt.xy.x+config.tolerance;
+                lowerLeftImage.x = evt.xy.x-config.tolerance;
+                upperRightImage.y = evt.xy.y+config.tolerance;
+                lowerLeftImage.y = evt.xy.y-config.tolerance;
+                var lowerLeftLonLat = map.getLonLatFromPixel(lowerLeftImage);
+                var upperRightLonLat = map.getLonLatFromPixel(upperRightImage);
+
+                // Create search bounds for identify
+                var point = new OpenLayers.Geometry.Point(x, y);
+                
+                var bounds = new OpenLayers.Bounds();
+                bounds.extend(lowerLeftLonLat);
+                bounds.extend(upperRightLonLat);
+				
+                var feature = new OpenLayers.Feature.Vector(point);
+                layer.addFeatures([feature]);
+                
+                var identifyResults = Ext.create('OpenEMap.view.IdentifyResults', {
+                    mapPanel : mapPanel
+                });
+
+                var popup = self.getPopup({mapPanel : mapPanel, location: feature, items: identifyResults});
+                popup.show();
+
+				// Identify registerenhet
+				if (config.useRegisterenhet) {
+	                OpenEMap.requestLM({
+	                    url: 'registerenheter?x=' + x + '&y=' + y,
+	                    success: function(response) {
+	                        var registerenhet = Ext.decode(response.responseText);
+	
+	                        var feature = new OpenLayers.Feature.Vector(point, {
+	                            name: registerenhet.name
+	                        });
+	                        identifyResults.addResult([feature], {name:"Fastigheter"});
+	                    },
+	                    failure: function(response) {
+	                        Ext.Msg.alert('Fel i fastighetstjänsten', 'Kontakta systemadministratör<br>Felkod: ' + response.status + ' ' + response.statusText);
+	                    }
+	                });
+                }
+               
+               // Identify WFS-layers in map
+                var parser = Ext.create('OpenEMap.config.Parser');
+               
+               	var layers = client.getConfig(true).layers;
+		        layers = parser.extractPlainLayers(layers);
+                var clickableLayers =  parser.extractClickableLayers(layers);
+
+                // Only return layers that are visible
+                if (config.onlyVisibleLayers) {
+                	clickableLayers = parser.extractVisibleLayers(clickableLayers);
+                } 
+  				// Extract layers in draw order
+//  			clickableLayers = parser.extractLayersInDrawOrder(clickableLayers);
+
+             	OpenLayers.ProxyHost = OpenEMap.basePathProxy;
+
+                var wfsLayers = parser.extractWFS(clickableLayers);
+                
+                var wfsIdentify = function(wfsLayer) {
+                	wfsLayer.wfs.url = wfsLayer.wfs.url;
+                    var options = Ext.apply({
+                        version: "1.1.0",
+                        srsName: map.projection
+                    }, wfsLayer.wfs);
+                    
+                    var protocol = new OpenLayers.Protocol.WFS(options);
+                    
+                    protocol.read({
+                        filter: new OpenLayers.Filter({
+                            type: OpenLayers.Filter.Spatial.BBOX,
+                            value: bounds
+                        }),
+                        callback: function(response) {
+                            var features = response.features;
+                            if (features && features.length>0) {
+                                identifyResults.addResult(features, wfsLayer);
+                                layer.addFeatures(features);
+                            }
+                        }
+                    });
+                };
+                
+                wfsLayers.forEach(wfsIdentify);
+
+                var wmsLayers = parser.extractWMS(parser.extractNoWFS(clickableLayers));
+
+                // TODO - use WMSGetFeatureInfo wmsLayers array functionality instead of looping
+//                var wmsLayersOL = [];
+//                for (var i=0; i<wmsLayers.length; i++) {
+//                	wmsLayersOL.push(wmsLayers[i].layer);
+//                }
+                var wmsIdentify = function(wmsLayer) {
+                    var showResults = function(response) {
+                        var features = response.features;
+                        if (features && features.length>0) {
+                            identifyResults.addResult(features, wmsLayer);
+                            layer.addFeatures(features);
+                        }
+                    };
+                    var options = {
+                    	url: wmsLayer.layer.url,
+                        layers: [wmsLayer.layer],
+//                        layers: [wmsLayersOL],
+                        infoFormat: 'application/vnd.ogc.gml',
+                        clickCallback: showResults
+                    };
+                    var wmsctrl = new OpenLayers.Control.WMSGetFeatureInfo(options);
+                    wmsctrl.setMap(map);
+					wmsctrl.events.register('getfeatureinfo', wmsctrl, showResults);
+					wmsctrl.getInfoForClick(evt, {proxy: OpenEMap.basePathProxy});                    
+                };
+                
+                wmsLayers.forEach(wmsIdentify);
+
+                // Hide graphhic for loading
+				mapPanel.setLoading(false);
+            }
+        });
+        
+        config.control = new Click({
+            type: OpenLayers.Control.TYPE_TOGGLE
+        });
+        
+        config.iconCls = config.iconCls || 'action-identify';
+        config.tooltip = config.tooltip || 'Identifiera';
+        config.toggleGroup = 'extraTools';
+        
+        this.callParent(arguments);
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * Action that measure area.
+ *{@img Measurearea.png measurearea}
+ * 
+ * The example below is from configuration adding the tool to MapClient.view.Map:
+ * 
+ *         "tools": [ "FullExtent", "ZoomSelector", "MeasureLine", "MeasureArea"]
+ */
+Ext.define('OpenEMap.action.MeasureArea', {
+    extend:  OpenEMap.action.Action ,
+    
+    constructor: function(config) {
+        
+        var mapPanel = config.mapPanel;
+        if (config.accuracy === null) {
+        	config.accuracy = 2;
+        }
+        
+        config.control = new OpenLayers.Control.DynamicMeasure(OpenLayers.Handler.Polygon, {
+            mapPanel: mapPanel, 
+            accuracy: config.accuracy
+        });
+
+        config.iconCls = config.iconCls || 'action-measurearea';
+        config.tooltip = config.tooltip || 'M&auml;t area';
+        config.toggleGroup = 'extraTools';
+        
+        this.callParent(arguments);
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * Action that measure line.
+ * {@img Measureline.png measureline}
+ * 
+ * The example below is from configuration:
+ * 
+* The example below is from configuration adding the tool to MapClient.view.Map:
+ * 
+ *         "tools": [ "FullExtent", "ZoomSelector", "MeasureLine", "MeasureArea"]
+ */
+ 
+Ext.define('OpenEMap.action.MeasureLine', {
+    extend:  OpenEMap.action.Action ,
+    
+    constructor: function(config) {
+        
+        var mapPanel = config.mapPanel;
+        if (config.accuracy === null) {
+        	config.accuracy = 2;
+        }
+
+        config.control = new OpenLayers.Control.DynamicMeasure(OpenLayers.Handler.Path, {
+            maxSegments : null,
+            accuracy: config.accuracy,
+            mapPanel: mapPanel
+        });        
+        
+        config.iconCls = config.iconCls || 'action-measureline';
+        config.tooltip = config.tooltip || 'Mät str&auml;cka';
+        config.toggleGroup = 'extraTools';
+        
+        this.callParent(arguments);
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * Grid action column that shows layer metadata
+ * 
+ */
+
+Ext.define('OpenEMap.action.MetadataInfoColumn', {
+    extend:  Ext.grid.column.Action ,
+
+    requrires: [
+        'Ext.tip.ToolTip',
+        'OpenEMap.data.DataHandler',
+        'OpenEMap.view.MetadataWindow'
+    ],
+
+    text: '',
+    width: 22,
+    menuDisabled: true,
+    align: 'center',
+    iconCls: 'action-identify',
+
+    initComponent: function(options) {
+        var me = this;
+
+        this.tip = Ext.create('Ext.tip.ToolTip', {
+            trackMouse: true
+        });
+
+        this.listeners = {
+            mouseover: function(grid, rowIndex, colIndex, actionItem, event, record, row) {
+                me.tip.setTarget(event.target);
+                if(me.dataHandler) {
+                    me.dataHandler.getMetadataAbstract(me.getUUIDFromMetadataUrl(record.get('urlToMetadata')), function(json){
+                        if(json['abstract']) {
+                            me.updateTooltip(json['abstract']);
+                        }
+                    });
+                }
+            },
+            mouseout: function() {
+                me.tip.update(null);
+                me.tip.hide();
+            },
+            click: function(grid, element, rowIndex, colIndex, event, record) {
+                if(me.metadataWindow) {
+                    me.tip.update(null);
+                    me.metadataWindow.showMetadata(me.getUUIDFromMetadataUrl(record.get('urlToMetadata')));
+                }
+                
+            }
+        };
+
+        this.callParent(arguments);
+    },
+
+    /**
+    * Update tooltip for this column
+    * @param {string}  string   string to show in tooltip
+    */
+    updateTooltip: function(str) {
+        if(str) {
+            this.tip.update(str.substr(0,180) + '...');
+            this.tip.show();
+        }
+    },
+
+    /**
+    * Experimetnal function to get metadata uuid from an url
+    * @param  {string}           url  metadata-url containing metadata uuid
+    * @return {string/undefined} 
+    */
+    getUUIDFromMetadataUrl: function(url) {
+        if(url) {
+            var start = url.indexOf('id=');
+            if(start > 0) {
+                return url.substr(start+3,36);
+            }
+        }
+        return url;
+    }
+
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * Action that modify geometry
+ * 
+ * Example configuration using experimental support in OL to customize drag and radius handles:
+ *    {
+ *      "type": "ModifyGeometry",
+ *      "reshape": true,
+ *      "tooltip": "Redigera geometri",
+ *      "options": {
+ *        "dragHandleStyle": {
+ *          "pointRadius": 8,
+ *          "externalGraphic": "css/images/arrow-move.png",
+ *          "fillOpacity": 1
+ *        },
+ *        "radiusHandleStyle": {
+ *          "pointRadius": 8,
+ *          "externalGraphic": "css/images/arrow-circle.png",
+ *          "fillOpacity": 1
+ *        }
+ *      }
+ *    } 
+ *    
+ * @param {Object} [config] 
+ * @param {boolean} config.drag Allow dragging of features
+ * @param {boolean} config.rotate Allow rotation of features
+ * @param {boolean} config.resize Allow resizing of features
+ * @param {boolean} config.reshape Allow reshaping of features
+ * @param {Object} config.options Additional options to send to OpenLayers.Control.ModifyFeature
+ */
+Ext.define('OpenEMap.action.ModifyGeometry', {
+    extend:  OpenEMap.action.Action ,
+    constructor: function(config) {
+        var mapPanel = config.mapPanel;
+        var layer = mapPanel.drawLayer;
+        
+        if (config.drag === undefined) config.drag = true;
+        if (config.rotate === undefined) config.rotate = true;
+        if (config.reshape === undefined) config.reshape = true;
+        
+        var mode = 0;
+        if (config.drag) mode = mode | OpenLayers.Control.ModifyFeature.DRAG;
+        if (config.rotate) mode = mode | OpenLayers.Control.ModifyFeature.ROTATE;
+        if (config.resize) mode = mode | OpenLayers.Control.ModifyFeature.RESIZE;
+        if (config.reshape) mode = mode | OpenLayers.Control.ModifyFeature.RESHAPE;
+        
+        var options = Ext.apply({mode: mode}, config.options);
+        config.control = new OpenLayers.Control.ModifyFeature(layer, options);
+        config.control._mode = config.control.mode;
+        
+        config.iconCls = config.iconCls || 'action-modifygeometry';
+        config.tooltip = config.tooltip || '&Auml;ndra ritat objekt';
+        config.toggleGroup = 'extraTools';
+        
+        this.callParent(arguments);
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * Action that selelcts geometry.
+ */
+Ext.define('OpenEMap.action.ModifyText', {
+    extend:  OpenEMap.action.Action ,
+
+    constructor: function(config) {
+        var mapPanel = config.mapPanel;
+        var layer = config.mapPanel.drawLayer;
+
+        config.attributes = config.attributes || {};
+        
+        config.control = config.mapPanel.selectControl;
+
+        config.control.events.register('deactivate', this, function(){
+        	console.log('deactivate');
+        	
+        });
+
+        config.control.events.register('activate', this, function(){
+            var self = this;
+            layer.events.register('featureselected', self, function(evt){
+                Ext.Msg.prompt('Text', 'Mata in text:', function(btn, text){
+                    if (btn == 'ok'){
+                        evt.feature.attributes.label = text;
+                        evt.feature.data.label = text;
+                        layer.redraw();
+                    }
+                });
+            });
+        });
+
+        config.control.events.register('deactivate', this, function(){
+            layer.events.unregister('featureselected');
+                
+        });
+
+        config.iconCls = config.iconCls || 'action-selectgeometry';
+        config.tooltip = config.tooltip || '&Auml;ndra text';
+        config.toggleGroup = 'extraTools';
+        
+        this.callParent(arguments);
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/** 
+ * @class OpenEMap.view.PopupResults
+ * @author Anders Erlandsson, Sundsvalls kommun 
+ * 
+ * Holds the definition for popup window that shows when a feature in a popup layer is
+ * selected
+ */
+Ext.define('OpenEMap.view.PopupResults', {
+    extend :  GeoExt.window.Popup ,
+    autoScroll : true,
+    layout: {
+        type: 'vbox',
+        pack:'start',
+        align: 'stretch'
+    },
+    popup: null,
+	 /** 
+	 * Creates a new popup window for a popup layer
+	 * @param {Object} [config] Configuration of the popup behaviour   
+	 * @param {Number} [config.tolerance=3] Tolerance to use when identifying in map. Radius in image pixels.
+	 * @param {OpenLayers.Feature.Vector} [config.location] Where to anchor the popup
+	 * @param {String} [config.icon] Path to image that should be used as icon in the header of the popup
+	 * @param {String} [config.title] Title in the popup header
+	 * @param {String} [config.popupText] Text to show in the body of the popup. Can be formatted as HTML. Must be URLEncoded
+	 * @param {OpenEMap.view.Map} [config.mapPanel] 
+	 * @param {OpenLayers.Feature.Vector} [feature] Feature that this popup is connected to
+	 */
+   constructor: function(config) {
+        if (this.popup) {
+            this.popup.destroy();
+        }
+	    this.popup = Ext.create('GeoExt.window.Popup', {
+            ancCls: 'oep-popup-anc',
+            popupCls: 'oep-popup',
+            bodyCls: 'oep-popup-body',
+            anchored: true,
+            anchorPosition: 'bottom-left',
+            animCollapse: true,
+            collapsible: false,
+            draggable: false,
+			feature: config.feature,
+		    html: config.popupText,
+			icon: config.icon,
+            layout: 'fit',
+		    location: config.location,
+            map: config.mapPanel,
+            maxWidth: 300,
+            maximizable : false,
+            minimizable : false,
+            resizable: false,
+			title: config.title,
+            unpinnable: false,
+            listeners : {
+                beforeclose : function(){
+			        if (this) {
+			            this.destroy();
+			        }
+		            // Unhiglight feature
+		    		this.feature.renderIntent = 'default';
+		    		this.feature.layer.drawFeature(this.feature);
+			    	// Fire action "popupfeatureunselected" on the feature including layer and featureid
+			    	map.events.triggerEvent("popupfeatureunselected",{layer: this.feature.layer, featureid: this.feature.attributes[this.feature.layer.idAttribute]});
+                }
+            }
+		});
+		return this.popup;
+    }
+});
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/** 
+ * @class OpenEMap.action.Popup
+ * @author Anders Erlandsson, Sundsvalls kommun 
+ * This action is triggered when a feature of an vectorPopup layer is clicked in the map.
+ * A vectorPopup layer must contain an property named popupTextAttribute. Each feature shall have
+ * an attribute whit that name that holds the information that should be shown in the popup.
+ * A vectorPopup layer must also contain an property named idAttribute. Each feature shall have
+ * an attribute whit that name that holds a unique id.
+ * The layer may also contain popupAttributePrefix and popupAttributeSuffix that will be presented
+ * as constant text before and after the popupTextAttribute
+ * @param {Object} [config] Configuration of the popup behaviour   
+ * @param {Number} [config.tolerance=3] Tolerance to use when identifying in map. Radius in image pixels.
+ */
+Ext.define('OpenEMap.action.Popup', {
+    extend:  OpenEMap.action.Action ,
+                                             
+    popup: null,
+    map: null,
+    constructor: function(config) {
+        var self = this;
+        map = config.map;
+        var mapPanel = config.mapPanel;
+        var layers = config.layers;
+        config.popup = null;
+
+        // Defaults to 3 pixels tolerance
+        config.tolerance = config.tolerance || 3;  
+        var Click = OpenLayers.Class(OpenLayers.Control, {
+            initialize: function(options) {
+                OpenLayers.Control.prototype.initialize.apply(
+                    this, arguments
+                );
+                this.handler = new OpenLayers.Handler.Click(
+                    this, {
+                        'click': this.onClick
+                    }, this.handlerOptions
+                );
+            },
+            onClick: function(evt) {
+            	var lonlat = map.getLonLatFromPixel(evt.xy);
+                layers = map.layers;
+                
+                var x = lonlat.lon;
+                var y = lonlat.lat;
+                var clkPoint = new OpenLayers.Geometry.Point(x, y);
+                var clkFeature = new OpenLayers.Feature.Vector(clkPoint);
+
+				// Buffering click point with tolerance  
+				var lowerLeftImage = {};
+				var upperRightImage = {};
+				upperRightImage.x = evt.xy.x+config.tolerance;
+                lowerLeftImage.x = evt.xy.x-config.tolerance;
+                upperRightImage.y = evt.xy.y+config.tolerance;
+                lowerLeftImage.y = evt.xy.y-config.tolerance;
+                var lowerLeftLonLat = map.getLonLatFromPixel(lowerLeftImage);
+                var upperRightLonLat = map.getLonLatFromPixel(upperRightImage);
+
+                
+                // Create search bounds for identify
+                var bounds = new OpenLayers.Bounds();
+                bounds.extend(lowerLeftLonLat);
+                bounds.extend(upperRightLonLat);
+                
+                // get popup layers 
+                var parser = Ext.create('OpenEMap.config.Parser');
+                var popupLayers = parser.extractPopupLayers(layers);
+                
+                var hitFound =  false;
+                var popupIdentify = function(popupLayer) {
+                	// identify features in popup layers
+                	// Remove all popups for this layer
+			    	if (popupLayer.popup) { 
+						// Remove popup window
+						popupLayer.popup.forEach(function(p) {p.destroy();p = null;});
+						popupLayer.popup = [];
+			    	}
+                	var popupFeature = function(feature) {
+                		if (feature.geometry.intersects(bounds.toGeometry())) {
+					    	// get text to populate popup 
+                			var popupText = popupLayer.popupTextPrefix+feature.attributes[popupLayer.popupTextAttribute]+popupLayer.popupTextSuffix;
+					    	var popupTitle = '';
+					    	if (popupLayer.popupTitleAttribute) {
+					    		popupTitle = feature.attributes[popupLayer.popupTitleAttribute];
+					    	}
+					    	
+					    	if (feature.geometry.getVertices().length == 1) {
+					    		clkFeature = feature.clone();
+					    	}
+					    	// Create popup 
+					    	var popup = new OpenEMap.view.PopupResults({mapPanel : mapPanel, location: clkFeature, popupText: popupText, feature: feature, title: popupTitle});
+					
+							// Show popup
+					        popup.show();
+							
+							// TODO - move popup window from layer to feature
+							// Adds popup to array of popups in map  
+					        popupLayer.popup.push(popup);
+					        
+				    		// Highlight feature
+				    		feature.renderIntent = 'select';
+				    		feature.layer.drawFeature(feature);
+					    	
+					    	// Fire action "popupfeatureselected" on the feature including layer and featureid
+					    	map.events.triggerEvent("popupfeatureselected",{layer: popupLayer, featureid: feature.attributes[popupLayer.idAttribute]});
+		                	return true;
+				    	} else {
+				    		// Remove highlight feature if selected
+			    			if (feature.renderIntent == 'select') {
+					    		feature.renderIntent = 'default';
+					    		feature.layer.drawFeature(feature);
+						    	// Fire action "popupfeatureunselected" on the feature including layer and featureid
+						    	map.events.triggerEvent("popupfeatureunselected",{layer: popupLayer, featureid: feature.attributes[popupLayer.idAttribute]});
+					    	}
+				    		return false;
+				    	}
+                	};
+					
+					// Loop throgh each feature in the layer
+                	var featureIndex=0;
+                	var hitFoundInLayer = false;
+                	while ((featureIndex < popupLayer.features.length)  && (!(hitFoundInLayer && config.showOnlyFirstHit))) {
+                		hitFoundInLayer = popupFeature(popupLayer.features[featureIndex]);
+                		featureIndex++;	
+                	}
+                	return hitFound;
+                };
+                
+                // Loop through each popupLayer
+            	var layerIndex=0;
+            	while ((layerIndex<popupLayers.length)  && (!(hitFound && config.showOnlyFirstHit))) {
+            		hitFound = popupIdentify(popupLayers[layerIndex]);
+            		layerIndex++;
+            	}
+            }
+        });
+        
+        config.control = new Click({
+            type: OpenLayers.Control.TYPE_TOGGLE
+        });
+        
+        config.iconCls = config.iconCls || 'action-popup';
+        config.tooltip = config.tooltip || 'Popup';
+        config.toggleGroup = 'extraTools';
+        
+        this.callParent(arguments);
+    },
+
+	/*
+	 * Cleanup on close
+	 */    
+    destroy: function() {
+        if (this.popup){
+            this.popup.destroy();
+        }
+    	this.destroyPopupLayers();
+    }
+    //this.popup.destroy();
+    
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * Action for print using mapfish.
+ */
+Ext.define('OpenEMap.action.Print', {
+    extend :  OpenEMap.action.Action ,
+    constructor : function(config) {
+        var mapPanel = config.mapPanel;
+        var printExtent = mapPanel.plugins[0];
+        var printProvider = printExtent.printProvider;
+        printProvider.customParams = {attribution: config.mapPanel.config.attribution.trim()};
+        var printDialog = null;
+        var page = null;
+
+        var onTransformComplete = function() {
+            var scale = printDialog.down('#scale');
+            scale.select(page.scale);
+        };
+        var onBeforedownload = function() {
+            if (printDialog) printDialog.setLoading(false);
+        };
+        var onPrintexception = function(printProvider, response) {
+            if (printDialog) printDialog.setLoading(false);
+            Ext.Msg.show({
+                 title:'Felmeddelande',
+                 msg: 'Print failed.\n\n' + response.responseText,
+                 icon: Ext.Msg.ERROR
+            });
+        };
+        var close = function() {
+            printProvider.un('beforedownload', onBeforedownload);
+            printProvider.on('printexception', onPrintexception);
+            printExtent.control.events.unregister('transformcomplete', null, onTransformComplete);
+            printExtent.removePage(page);
+            printExtent.hide();
+            printDialog = null;
+        };
+        var onClose = function() {
+            close();
+            control.deactivate();
+        };
+        
+        config.iconCls = config.iconCls || 'action-print';
+        config.tooltip = config.tooltip || 'Skriv ut';
+        config.toggleGroup = 'extraTools';
+        
+        var Custom =  OpenLayers.Class(OpenLayers.Control, {
+            initialize: function(options) {
+                OpenLayers.Control.prototype.initialize.apply(
+                    this, arguments
+                );
+            },
+            type: OpenLayers.Control.TYPE_TOGGLE,
+            activate: function() {
+                if (printDialog) {
+                    return;
+                }
+                // NOTE: doing a hide/show at first display fixes interaction problems with preview extent for unknown reasons
+                printExtent.hide();
+                printExtent.show();
+                page = printExtent.addPage();
+                
+                
+                printProvider.dpis.data.items.forEach(function(d){
+                	var validDpi = false;
+                	if (d.data.name === '56'){
+                		validDpi = true;
+                		d.data.name = 'Låg';
+                	} 
+                	else if (d.data.name === '127'){
+                		validDpi = true;
+                		d.data.name = 'Medel';
+                	}
+                	else if (d.data.name === '254'){
+                		validDpi = true;
+                		d.data.name = 'Hög';
+                	} 
+                });
+                
+                
+                printProvider.layouts.data.items.forEach(function(p){
+                	if (/landscape$/.test(p.data.name)){
+                		p.data.displayName = p.data.name.replace('landscape', 'liggande');
+                	} else if (/portrait$/.test(p.data.name)){
+                		p.data.displayName = p.data.name.replace('portrait', 'stående');	
+                	}
+                });
+
+                
+                
+                printDialog = new Ext.Window({
+                    autoHeight : true,
+                    width : 290,
+                    resizable: false,
+                    layout : 'fit',
+                    bodyPadding : '5 5 0',
+                    title: 'Utskriftsinst&auml;llningar',
+                    listeners: {
+                        close: onClose
+                    },
+                    items : [ {
+                        xtype : 'form',
+                        layout : 'anchor',
+                        defaults : {
+                            anchor : '100%'
+                        },
+                        fieldDefaults : {
+                            labelWidth : 120
+                        },
+                        items : [ {
+                            xtype : 'combo',
+                            fieldLabel: 'Pappersformat',
+                            store : printProvider.layouts,
+                            displayField : 'displayName',
+                            valueField : 'name',
+                            itemId : 'printLayouts',
+                            queryMode: 'local',
+                            value : printProvider.layouts.getAt(0).get("name"),
+                            listeners: {
+                                select: function(combo, records, eOpts) {
+                                    var record = records[0];
+                                    printProvider.setLayout(record);
+                                }
+                            }
+                        }, {
+                            xtype : 'combo',
+                            fieldLabel: 'Kvalité',
+                            store : printProvider.dpis,
+                            displayField : 'name',
+                            valueField : 'value',
+                            queryMode: 'local',
+                            value: printProvider.dpis.first().get("value"),
+                            listeners: {
+                                select: function(combo, records, eOpts) {
+                                    var record = records[0];
+                                    printProvider.setDpi(record);
+                                }
+                            }
+                        }, {
+                            xtype : 'combo',
+                            fieldLabel: 'Skala',
+                            store : printProvider.scales,
+                            displayField : 'name',
+                            valueField : 'value',
+                            queryMode: 'local',
+                            itemId: 'scale',
+                            value: printProvider.scales.first().get("value"),
+                            listeners: {
+                                select: function(combo, records, eOpts) {
+                                    var record = records[0];
+                                    page.setScale(record, "m");
+                                }
+                            }
+                        } ]
+                    } ],
+                    bbar : [ '->', {
+                        text : "Skriv ut",
+                        handler : function() {
+                            printDialog.setLoading(true);
+                            printExtent.print();
+                        }
+                    } ]
+                });
+                printDialog.show();
+                var scale = printDialog.down('#scale');
+                scale.select(page.scale);
+                
+                var layoutId = 6;
+                var printLayouts = printDialog.down('#printLayouts');
+                printLayouts.select(printLayouts.store.data.get(layoutId));
+                var currentPrintLayout = printLayouts.store.data.items[layoutId];
+                printProvider.setLayout(currentPrintLayout);
+                
+                
+                printExtent.control.events.register('transformcomplete', null, onTransformComplete);
+                printExtent.control.events.register('transformcomplete', null, onTransformComplete);
+                printProvider.on('beforedownload', onBeforedownload);
+                printProvider.on('printexception', onPrintexception);
+                
+                OpenLayers.Control.prototype.activate.apply(this, arguments);
+            },
+            deactivate: function() {
+                if (printDialog) printDialog.close();
+                OpenLayers.Control.prototype.deactivate.apply(this, arguments);
+            }
+        });
+        var control = new Custom({
+            type: OpenLayers.Control.TYPE_TOGGLE
+        });
+        config.control = control;
+        
+        this.callParent(arguments);
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * Action that selelcts geometry.
+ */
+Ext.define('OpenEMap.action.SelectGeometry', {
+    extend:  OpenEMap.action.Action ,
+    constructor: function(config) {
+        var mapPanel = config.mapPanel;
+        
+        config.control = mapPanel.selectControl;
+        
+        config.iconCls = config.iconCls || 'action-selectgeometry';
+        config.tooltip = config.tooltip || 'V&auml;lj ritat objekt';
+        config.toggleGroup = 'extraTools';
+        
+        this.callParent(arguments);
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * Custom floating panel to switch baselayers
  */
@@ -2050,6 +2643,22 @@ Ext.define('OpenEMap.view.BaseLayers', {
         });
     }
 });
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * 
  */
@@ -2065,19 +2674,20 @@ Ext.define('OpenEMap.view.Map' ,{
             autoLoad: true,
             timeout: 60*1000,
             listeners: {
-                /*"loadcapabilities": function(printProvider, capabilities) {
-                    // NOTE: need to override to test locally...
-                    capabilities.createURL = "/print/pdf/create.json";
-                },*/
                 "encodelayer": function(printProvider, layer, encodedLayer) {
                     if (encodedLayer && encodedLayer.baseURL) {
                         encodedLayer.baseURL = encodedLayer.baseURL.replace('gwc/service/', '');
                     }
-                }/*,
+                }
+/*                "loadcapabilities": function(printProvider, capabilities) {
+                    // NOTE: need to override to test locally...
+                    capabilities.createURL = "/print/pdf/create.json";
+                }
                 "beforedownload": function(printProvider, url) {
                     console.log("beforedownload");
-                }*/
-            }
+                }
+*/
+               }
         });
         
         var printExtent = Ext.create('GeoExt.plugins.PrintExtent', {
@@ -2093,7 +2703,7 @@ Ext.define('OpenEMap.view.Map' ,{
             var json = printProvider.encode(printExtent.map, printExtent.pages);
             printExtent.removePage(page);
             return json;
-        }
+        };
         
         printProvider.encode = function(map, pages, options) {
             if(map instanceof GeoExt.MapPanel) {
@@ -2115,7 +2725,7 @@ Ext.define('OpenEMap.view.Map' ,{
             var pagesLayer = pages[0].feature.layer;
             var encodedLayers = [];
 
-            // ensure that the baseLayer is the first one in the encoded list
+            // ensure that the baseLayer is the first one in the drawingLayer encoded list
             var layers = map.layers.concat();
 
             Ext.Array.remove(layers, map.baseLayer);
@@ -2149,7 +2759,7 @@ Ext.define('OpenEMap.view.Map' ,{
                 jsonData.overviewLayers = encodedOverviewLayers;
             }
 
-            if(options.legend && !(this.fireEvent("beforeencodelegend", this, jsonData, options.legend) === false)) {
+            if (options.legend && this.fireEvent("beforeencodelegend", this, jsonData, options.legend)) {
                 var legend = options.legend;
                 var rendered = legend.rendered;
                 if (!rendered) {
@@ -2175,7 +2785,7 @@ Ext.define('OpenEMap.view.Map' ,{
             }
             
             return jsonData;
-        }
+        };
         
         config.plugins = [printExtent];
         
@@ -2184,10 +2794,20 @@ Ext.define('OpenEMap.view.Map' ,{
         this.layers.add(this.searchLayer);
         this.layers.add(this.drawLayer);
         this.layers.add(this.measureLayer);
-        this.layers.add(this.measureLayerSegmentsLayer);
+        this.layers.add(this.measureLayerArea);
+        this.layers.add(this.measureLayerLength);
+        this.layers.add(this.measureLayerSegments);
+        
+        this.map.setLayerIndex(this.measureLayer, 98);
+        this.map.setLayerIndex(this.measureLayerArea, 98);
+        this.map.setLayerIndex(this.measureLayerLength, 98);
+        this.map.setLayerIndex(this.measureLayerSegments, 98);
         
         this.selectControl = new OpenLayers.Control.SelectFeature(this.drawLayer);
         this.map.addControl(this.selectControl);
+
+        // Define container for popup windows - initialize when first popupLayer is created. 
+        this.map.popup = [];
     },
     unselectAll: function() {
         this.drawLayer.selectedFeatures.forEach(function(feature) {
@@ -2329,8 +2949,7 @@ Ext.define('OpenEMap.view.Map' ,{
         
         this.drawLayer = new OpenLayers.Layer.Vector('Drawings', {
             displayInLayerSwitcher: false,
-            styleMap: this.parseStyle(config.drawStyle),
-            renderers: ["Canvas", "SVG", "VML"]
+            styleMap: this.parseStyle(config.drawStyle)
         });
         
         if (config.autoClearDrawLayer) {
@@ -2384,72 +3003,42 @@ Ext.define('OpenEMap.view.Map' ,{
         
         this.searchLayer = new OpenLayers.Layer.Vector('Searchresult', {
             displayInLayerSwitcher: false,
-            styleMap: this.parseStyle(searchStyle),
-            renderers: ["Canvas", "SVG", "VML"]
+            styleMap: this.parseStyle(searchStyle)
         });
-
-        var measureStyle = {
-            "Point": {
-                //pointRadius: 4,
-                //graphicName: 'square',
-                //fillColor: 'white',
-                //fillOpacity: 1,
-                //strokeWidth: 1,
-                //strokeOpacity: 1,
-                //strokeColor: '#333333', 
-                label: '${measure} ${units}',
-                fontSize: '12px',
-                fontColor: '#800517',
-                fontFamily: 'Verdana',
-                labelOutlineColor: '#eeeeee',
-                labelAlign: 'cm',
-                labelOutlineWidth: 2
-            },
-            "Line": {
-                strokeWidth: 3,
-                strokeOpacity: 1,
-                strokeColor: '#666666',
-                strokeDashstyle: 'solid'
-            },
-            "Polygon": {
-                strokeWidth: 2,
-                strokeOpacity: 1,
-                strokeColor: '#FFFFFF',
-                strokeDashstyle: 'solid',
-                fillColor: 'white',
-                fillOpacity: 0.3
-            },
-            labelSegments: {
-                label: '${measure} ${units}',
-                fontSize: '12px',
-                fontColor: '#800517',
-                fontFamily: 'Verdana',
-                labelOutlineColor: '#eeeeee',
-                labelAlign: 'cm',
-                labelOutlineWidth: 2
-            },    
-            labelLength: {
-                label: '${measure} ${units}\n',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                fontColor: '#800517',
-                fontFamily: 'Verdana',
-                labelOutlineColor: '#eeeeee',
-                labelAlign: 'lb',
-                labelOutlineWidth: 3
-            }
-        };
-
         
-        this.measureLayer = new OpenLayers.Layer.Vector('MeasureLayer',{
-        	displayInLayerSwitcher : false,
-            styleMap : this.parseStyle(measureStyle),
-            renderers: ["Canvas", "SVG", "VML"]
+        var defaultStyles = OpenLayers.Control.DynamicMeasure.styles;
+        
+        var style = new OpenLayers.Style(null, {rules: [
+            new OpenLayers.Rule({symbolizer: {
+                'Point': defaultStyles.Point,
+                'Line': defaultStyles.Line,
+                'Polygon': defaultStyles.Polygon
+            }})
+        ]});
+        var styleMap = new OpenLayers.StyleMap({"default": style});
+        
+        var createStyleMap = function(name) {
+            return new OpenLayers.StyleMap({ 'default': OpenLayers.Util.applyDefaults(null, defaultStyles[name])});
+        };
+        
+        this.measureLayer = new OpenLayers.Layer.Vector('MeasureLayer', {
+            displayInLayerSwitcher: false,
+            styleMap: styleMap
         });
-
-        this.measureLayerSegmentsLayer = new OpenLayers.Layer.Vector('MeasureLayerSegmentsLayer',{
-            displayInLayerSwitcher : false,
-            styleMap : this.parseStyle(measureStyle)
+        
+        this.measureLayerArea = new OpenLayers.Layer.Vector('MeasureLayerArea', {
+            displayInLayerSwitcher: false,
+            styleMap: createStyleMap('labelArea')
+        });
+        
+        this.measureLayerSegments = new OpenLayers.Layer.Vector('MeasureLayerSegments', {
+            displayInLayerSwitcher: false,
+            styleMap: createStyleMap('labelSegments')
+        });
+        
+        this.measureLayerLength = new OpenLayers.Layer.Vector('MeasureLayerLength', {
+            displayInLayerSwitcher: false,
+            styleMap: createStyleMap('labelLength')
         });
     },
     setInitialExtent: function() {
@@ -2468,8 +3057,25 @@ Ext.define('OpenEMap.view.Map' ,{
     }
 });
 
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
- * @param {number} config.zoom Set to a zoom level to override the default
+ * @param {Object} [config] config object to set properties on cretaion
+ * @param {number} [config.zoom] Set to a zoom level to override the default
  */
 Ext.define('OpenEMap.view.SearchCoordinate', {
     extend :  Ext.container.Container ,
@@ -2513,6 +3119,22 @@ Ext.define('OpenEMap.view.SearchCoordinate', {
         this.callParent(arguments);
     }
 });
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * Combobox that searches from LM with type ahead.
  */
@@ -2521,6 +3143,7 @@ Ext.define('OpenEMap.form.SearchRegisterenhet', {
     alias: 'widget.searchregisterenhet',
     require: ['Ext.data.*',
               'Ext.form.*'],
+    queryDelay: 800,
     initComponent : function() {
         var registeromrade;
         var zoom;
@@ -2574,6 +3197,17 @@ Ext.define('OpenEMap.form.SearchRegisterenhet', {
              ]
         });
         
+        if (this.store.loading && this.store.lastOperation) {
+          var requests = Ext.Ajax.requests;
+          for (var id in requests)
+            if (requests.hasOwnProperty(id) && requests[id].options == this.store.lastOperation.request) {
+              Ext.Ajax.abort(requests[id]);
+            }
+        }
+        this.store.on('beforeload', function(store, operation) {
+          store.lastOperation = operation;
+        }, this, { single: true });
+        
         this.labelWidth = 60;
         this.displayField = 'name';
         this.valueField = 'id';
@@ -2598,6 +3232,22 @@ Ext.define('OpenEMap.form.SearchRegisterenhet', {
     }
 });
 
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * Combobox that searches from LM with type ahead.
  */
@@ -2658,6 +3308,17 @@ Ext.define('OpenEMap.form.SearchAddress', {
             fields: ['id', 'name', 'x', 'y', 'fnr']
         });
         
+        if (this.store.loading && this.store.lastOperation) {
+          var requests = Ext.Ajax.requests;
+          for (var id in requests)
+            if (requests.hasOwnProperty(id) && requests[id].options == this.store.lastOperation.request) {
+              Ext.Ajax.abort(requests[id]);
+            }
+        }
+        this.store.on('beforeload', function(store, operation) {
+          store.lastOperation = operation;
+        }, this, { single: true });
+        
         this.labelWidth = 60;
         this.displayField = 'name';
         this.valueField = 'id';
@@ -2681,6 +3342,22 @@ Ext.define('OpenEMap.form.SearchAddress', {
     }
 });
 
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * Combobox that searches from LM with type ahead.
  */
@@ -2716,6 +3393,17 @@ Ext.define('OpenEMap.form.SearchPlacename', {
              ]
         });
         
+        if (this.store.loading && this.store.lastOperation) {
+          var requests = Ext.Ajax.requests;
+          for (var id in requests)
+            if (requests.hasOwnProperty(id) && requests[id].options == this.store.lastOperation.request) {
+              Ext.Ajax.abort(requests[id]);
+            }
+        }
+        this.store.on('beforeload', function(store, operation) {
+          store.lastOperation = operation;
+        }, this, { single: true });
+        
         this.labelWidth= 60;
         this.displayField= 'name';
         this.valueField= 'id';
@@ -2737,7 +3425,105 @@ Ext.define('OpenEMap.form.SearchPlacename', {
     }
 });
 
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 /**
+ * Combobox that uses ES for generic search
+ */
+Ext.define('OpenEMap.form.SearchES', {
+    extend :  Ext.form.field.ComboBox ,
+    alias: 'widget.searches',
+    require: ['Ext.data.*',
+              'Ext.form.*'],
+    initComponent : function() {
+        var map = this.mapPanel.map;
+        var layer = this.mapPanel.searchLayer;
+
+        this.store = Ext.create('Ext.data.Store', {
+            proxy: {
+                type: 'ajax',
+                url: OpenEMap.basePathES + '_search',
+                reader: {
+                    type: 'json',
+                    root: 'hits.hits',
+                    totalProperty: 'hits.total',
+                    idProperty: '_id'
+                }
+            },
+            fields: [
+                { name: 'type', mapping: '_type' },
+                { name: 'hit', mapping: '_source.properties.PLANNUMMER' },
+                { name: 'geometry', mapping: '_source.geometry' }
+            ]
+        });
+        
+        this.displayField = 'hit';
+        this.valueField = 'id';
+        this.queryParam ='q';
+        this.typeAhead = true;
+        this.forceSelection = true;
+        this.allowBlank = false;
+        this.allowOnlyWhitespace = false;
+        this.minChars = 4;
+        this.minLength = 4;
+        this.preventMark = true;
+        this.hideTrigger = true;
+        
+        this.listeners = {
+            'select':  function(combo, records) {
+                var geojson = records[0].data.geometry;
+                var format = new OpenLayers.Format.GeoJSON({
+                    ignoreExtraDims: true
+                });
+                var geometry = format.read(geojson, 'Geometry');
+                var feature = new OpenLayers.Feature.Vector(geometry);
+                layer.destroyFeatures();
+                layer.addFeatures([feature]);
+                map.zoomToExtent(feature.geometry.getBounds());
+            },
+            'beforequery': function(queryPlan) {
+                queryPlan.query = queryPlan.query + '*';
+            },
+            scope: this
+        };
+        
+        this.callParent(arguments);
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * @param {Object} [config] config object to set properties on cretaion
  * @param {number} config.zoom Set to a zoom level to override default zooming behaviour and always zoom to the desired level
  */
 Ext.define('OpenEMap.view.SearchFastighet', {
@@ -2746,19 +3532,21 @@ Ext.define('OpenEMap.view.SearchFastighet', {
                                                     
                                               
                                                 
+                                         
                                                  
     border: false,
     initComponent : function() {
 
         if (!this.renderTo) {
-            this.title = 'Sök fastighet';
+            this.title = 'Sök';
             this.bodyPadding = 5;
         }
         
         var data = [
                     [ 'searchregisterenhet', 'Fastighet' ],
                     [ 'searchaddress', 'Adress' ],
-                    [ 'searchplacename', 'Ort' ]/*,
+                    [ 'searchplacename', 'Ort' ],
+                    [ 'searches', 'Detaljplaner']/*,
                     [ 'searchbyggnad', 'Byggnad' ]*/
                     ];
 
@@ -2798,11 +3586,9 @@ Ext.define('OpenEMap.view.SearchFastighet', {
             var searchCriteria = null;
             if (type === 'searchregisterenhet'){
                 searchCriteria = this.search && this.search.searchEstates ? this.search.searchEstates : null; 
-            }
-            else if (type === 'searchaddress'){
+            } else if (type === 'searchaddress'){
                 searchCriteria = this.search && this.search.searchAddresses ? this.search.searchAddresses : null;
-            }
-            else {
+            } else {
                 searchCriteria = this.search && this.search.searchPlacenames ? this.search.searchPlacenames : null;
             }
 
@@ -2846,19 +3632,146 @@ Ext.define('OpenEMap.view.SearchFastighet', {
             } ]    }
         ];
         
-        if (!this.renderTo) {
+        //if (!this.renderTo) {
             this.items.push(grid);
-        }
+        //}
 
         this.callParent(arguments);
     }
 });
 
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * Gui for showing coordinates in map
+ * @param {Object} [config] config object to set properties on cretaion
+ * @param {Object} [config.cls] CSS-class to apply when rendering 
+ */
+Ext.define('OpenEMap.view.Scalebar', {
+    extend :  Ext.panel.Panel ,
+    bodyStyle : 'background : transparent',
+    border: false,
+    getTools : function() {
+    },
+
+    constructor : function(config) {
+        Ext.apply(this, config);
+
+    	var scalebarControl = null;
+
+    	var div = document.getElementById(this.renderTo);
+    	if (div) {
+    		// Renders scalebar in div if renderTo
+	    	scalebarControl = new OpenLayers.Control.ScaleLine({div: div});
+    	} else {
+    		// Renders scalebar in map if not renderTo
+    		scalebarControl =  new OpenLayers.Control.ScaleLine();
+    	}
+
+        this.mapPanel.map.addControl(scalebarControl);
+        this.callParent(arguments);
+    }
+
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * Gui for showing coordinates in map
+ * @param {Object} [config] config object to set properties on cretaion
+ * @param {Object} [config.cls] CSS-class to apply when rendering 
+ */
+Ext.define('OpenEMap.view.ShowCoordinate', {
+    extend :  Ext.container.Container ,
+    defaults: {
+        labelWidth: 10
+    },
+    border: false,
+    layout: 'column',
+    width: 150,
+    srs: '',
+    constructor : function(config) {
+        this.items = [ {
+            itemId: 'e',
+            fieldLabel: 'E',
+            xtype : 'textfield',
+            columnWidth: 0.5,
+            baseCls: config.cls,
+            baseBodyCls: config.cls,
+            bodyCls: config.cls,
+            fieldCls: config.cls,
+            fieldBodyCls: config.cls,
+            formItemCls: config.cls, 
+            inputRowCls: config.cls,
+            labelCls: config.cls
+        },{
+            itemId: 'n',
+            fieldLabel: 'N',
+            xtype : 'textfield',
+            columnWidth: 0.5,
+            baseCls: config.cls,
+            baseBodyCls: config.cls,
+            bodyCls: config.cls,
+            fieldCls: config.cls,
+            fieldBodyCls: config.cls,
+            formItemCls: config.cls, 
+            inputRowCls: config.cls,
+            labelCls: config.cls
+        }];
+        
+        this.callParent(arguments);
+    }
+});
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * Custom panel to represent a floating zoom slider
  */
 Ext.define('OpenEMap.view.ZoomTools', {
     extend :  Ext.panel.Panel ,
+                                     
     bodyStyle : 'background : transparent',
     border: false,
     getTools : function() {
@@ -2868,7 +3781,7 @@ Ext.define('OpenEMap.view.ZoomTools', {
         
         var pile = [];
         var slider = Ext.create('GeoExt.slider.Zoom', {
-            height : 200,
+            height : 160,
             vertical : true,
             aggressive : true,
             margin  : margin,
@@ -2913,13 +3826,1683 @@ Ext.define('OpenEMap.view.ZoomTools', {
     }
 
 });
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * OpenEMap layer configuration model
+ * Adds layer configuration specific fields
+ */
+
+Ext.define('OpenEMap.model.GroupedLayerTreeModel' ,{
+    extend:  Ext.data.Model ,
+
+    fields: [ 
+    	{ name: 'text', type: 'string' },
+    	{ name: 'checkedGroup', type: 'string' },
+    	{ name: 'isGroupLayer' },
+    	{ name: 'layer' },
+    	{ name: 'queryable', type: 'boolean' },
+    	{ name: 'clickable', type: 'boolean' },
+    	{ name: 'isGroupLayer', type: 'boolean' },
+
+        { name: 'layerId' },
+    	{ name: 'name', type: 'string' },
+    	{ name: 'urlToMetadata' },
+        { name: 'wms' },
+    	{ name: 'wfs' },
+        { name: 'serverId' },
+        { name: 'metadata' },
+        
+        { name: 'legendURL' },
+        { name: 'layers'}
+    ]
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * Grouped layer tree store
+ * Ext.data.TreeStore extended to support OpenEMap layer configuration including layer groups
+ */
+
+Ext.define('OpenEMap.data.GroupedLayerTree' ,{
+    extend:  Ext.data.TreeStore ,
+
+               
+                                     
+                                              
+      
+
+    model: 'OpenEMap.model.GroupedLayerTreeModel',
+    defaultRootProperty: 'layers',
+
+    proxy: {
+        type: 'memory'
+    },
+
+    maxLayerIndex: 1000,
+
+    listeners: {
+        beforeinsert: function(store, node, refNode, eOpts) { return this.onBeforeInsert(store, node, refNode); },
+        beforeappend: function(store, node, eOpts) { return this.onBeforeAppend(store, node); },
+        insert: function(store, node, refNode, eOpts) { this.onInsertAndAppend(node); },
+        append: function(store, node, index, eOpts) { this.onInsertAndAppend(node); },
+        remove: function(store, node, isMove, eOpts) { this.onRemove(store, node, isMove); }
+    },
+
+    constructor: function(config) {
+        config = Ext.apply({}, config);
+        this.callParent([config]);
+    },
+    
+    /**
+    * Returns all layers as OpenEMap layer configuration tree.
+    * @return {Object} layerConfig  OpenEMap layer configuration
+    */
+    getLayerConfiguration: function(includeLayerRef) {
+        var layerConfig = [];
+        this.getRootNode().childNodes.forEach(function(node, i) {
+            layerConfig[i] = {
+                name: node.get('name'),
+                layers: []
+            };
+            
+            node.childNodes.forEach(function(subnode) {
+                layerConfig[i].layers.push({
+                    name: subnode.get('name'),
+                    isGroupLayer: subnode.get('isGroupLayer'),
+                    queryable: subnode.get('queryable'),
+                    clickable: subnode.get('clickable'),
+                    wms: typeof subnode.get('wms') === 'string' ? {} : subnode.get('wms'),
+                    wfs: typeof subnode.get('wfs') === 'string' ? {} : subnode.get('wfs'),
+                    layer: includeLayerRef ? subnode.get('layer') : undefined,
+                    metadata: typeof subnode.get('metadata') === 'string' ? {} : subnode.get('metadata')
+                });
+            });
+        });
+        return layerConfig;
+    },
+
+    /**
+    * Before append to store
+    * @param {Ext.data.Model} node
+    * @param {Ext.data.Model} appendNode
+    */
+    onBeforeAppend: function(node, appendNode) {
+        // Prevent groups from being added to groups
+        if ((node && !node.isRoot()) && !appendNode.isLeaf()) {
+            return false;
+        }
+        return true;
+    },
+
+    /**
+    * Before insert to store
+    * @param {Ext.data.Store} store
+    * @param {Ext.data.Model} node
+    * @param {Ext.data.Model} refNode
+    */
+    onBeforeInsert: function(store, node, refNode) {
+        // Prevent groups from being added to groups
+        if(!refNode.parentNode.isRoot() && !node.isLeaf()) {
+            return false;
+        }
+        return true;
+    },
+
+    /**
+     * Handler for a store's insert and append event.
+     *
+     * @param {Ext.data.Model} node
+     */
+    onInsertAndAppend: function(node) {
+        if(!this._inserting) {
+            this._inserting = true;
+            
+            // Add this node layers and subnodes to map.
+            node.cascadeBy(function(subnode) {
+                var layer = subnode.get('layer');
+
+                // Add getLayer function to support GeoExt
+                subnode.getLayer = function() {
+                    return this.get('layer');
+                };
+                // Add WMS legened 
+                this.addWMSLegend(subnode);
+
+                if(layer && layer !== '' && this.map) {
+                    var mapLayer = this.map.getLayer(layer);
+                    if(mapLayer === null && layer && layer.displayInLayerSwitcher === true) {
+                        this.map.addLayer(layer);
+                    }
+                }
+            }, this);
+
+            this.reorderLayersOnMap();
+            
+            delete this._inserting;
+        }
+    },
+
+    /**
+     * Handler for a store's remove event.
+     *
+     * @param {Ext.data.Store} store
+     * @param {Ext.data.Model} node
+     * @param {Boolean} isMove
+     * @private
+     */
+    onRemove: function(store, node, isMove) {
+        if(!this._removing && !isMove) {
+            this._removing = true;
+            // Remove layer and sublayers from map
+            node.cascadeBy(function(subnode) {
+                var layer = subnode.get('layer');
+                if(layer && layer.map) {
+                    this.map.removeLayer(layer);
+                }
+            }, this);
+
+            delete this._removing;
+        }
+    },
+
+    /**
+     * Reorder map layers from store order
+     *
+     * @private
+     */
+    reorderLayersOnMap: function() {
+        var node = this.getRootNode();
+        if(node) {
+            var i = this.maxLayerIndex;
+            node.cascadeBy(function(subnode) {
+                var layer = subnode.get('layer');
+                
+                if(layer) {
+                    layer.setZIndex(i);
+                    i--;
+                }
+               
+            }, this);
+        }
+    },
+
+    /**
+    * Adds a WMS-legend to a node
+    * @param {Ext.data.Model} node
+    * @return {Ext.data.Model} node
+    */
+    addWMSLegend: function(node) {
+        var layer = node.get('layer');
+    
+        if (layer) {
+            if (Ext.isIE9) return node;
+            if (layer.legendURL) {
+                node.set('legendURL', layer.legendURL);
+                node.gx_urllegend = Ext.create('GeoExt.container.UrlLegend', {
+                    layerRecord: node,
+                    showTitle: false,
+                    hidden: true,
+                    deferRender: true,
+                    // custom class for css positioning
+                    // see tree-legend.html
+                    cls: "legend"
+                });
+            } else if (layer.CLASS_NAME == "OpenLayers.Layer.WMS") {
+                node.gx_wmslegend = Ext.create('GeoExt.container.WmsLegend', {
+                    layerRecord: node,
+                    showTitle: false,
+                    hidden: true,
+                    deferRender: true,
+                    // custom class for css positioning
+                    // see tree-legend.html
+                    cls: "legend"
+                });
+            }
+        }
+        return node;
+    },
+
+    /**
+     * Unbind this store from the map it is currently bound.
+     */
+    unbind: function() {
+        var me = this;
+        me.un('beforeinsert', me.onBeforeInsert, me);
+        me.un('beforeappend', me.onBeforeAppend, me);
+        me.un('insert', me.onInsertAndAppend, me);
+        me.un('append', me.onInsertAndAppend, me);
+        me.un('remove', me.onRemove, me);
+        me.map = null;
+    },
+
+    /**
+     * Unbinds listeners by calling #unbind prior to being destroyed.
+     *
+     * @private
+     */
+    destroy: function() {
+        //this.unbind();
+        //this.callParent();
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * 
+ */
+Ext.define('OpenEMap.view.layer.Tree' ,{
+    extend:  Ext.tree.Panel ,
+               
+                                         
+                            
+      
+
+    rootVisible: false,
+    hideHeaders: true,
+
+    initComponent: function() {
+        if(!this.store && this.mapPanel) {
+            this.store = Ext.create('OpenEMap.data.GroupedLayerTree', {
+                root: {
+                    text: (this.mapPanel.config && this.mapPanel.config.name ? this.mapPanel.config.name : 'Lager'),
+                    expanded: true,
+                    isGroupLayer: true,
+                    layers: this.mapPanel.map.layerSwitcherLayerTree
+                },
+                map: this.mapPanel.map
+            });
+        }
+
+        this.on('checkchange', function(node, checked, eOpts) {
+            var parent = node.parentNode;
+        
+            // Loop this node and children
+            node.cascadeBy(function(n){
+                n.set('checked', checked);
+                var olLayerRef = n.get('layer');
+                // Change layer visibility (Layer groups have no layer reference)
+                if(olLayerRef) {
+                    olLayerRef.setVisibility(checked);
+                    if (olLayerRef.options) {
+                    	olLayerRef.options.visibility = checked;
+                    }
+                }
+                var wmsRef = n.get('wms');
+                if (wmsRef) {
+                	if (wmsRef.options) {
+                		wmsRef.options.visibility = checked;
+                	}
+                }
+            });
+            // Checking/unchecking parent node
+            if (checked) {
+                // check parent if not root
+                if (!parent.isRoot()) {
+                    parent.set('checked', checked);
+                }
+            } else {
+                if (!parent.isRoot() && !parent.childNodes.some(function(node) { return node.get('checked'); })) {
+                    parent.set('checked', checked);
+                }
+            }
+
+        });
+
+        this.on('cellclick', function(tree, td, cellIndex, node) {
+            // Add legend if node have a wms legend and the node isnt removed
+            if((node.gx_wmslegend || node.gx_urllegend) && node.store) {
+                var legend = node.gx_wmslegend || node.gx_urllegend;
+                if (legend.isHidden()) {
+                    if (!legend.rendered) {
+                        legend.render(td);
+                    }
+                    legend.show();
+                } else {
+                    legend.hide();
+                }
+            }
+        });
+        
+        this.callParent(arguments);
+    },
+    
+    getConfig: function(includeLayerRef) {
+        var config = Ext.clone(this.client.initialConfig);
+        
+        if (config.layers) {
+            // layer tree does not include base layers and WFS layers so extract them from initial config
+        	var baseAndWfsLayers = config.layers.filter(function(layer) {
+        		return (layer.wms && layer.wms.options.isBaseLayer || layer.wfs) ? layer : false;
+        	});
+        	var layers = this.getStore().getLayerConfiguration(includeLayerRef);
+        	config.layers = baseAndWfsLayers.concat(layers);
+    	}
+    	
+    	return config;
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * Data handler, handles ajax-request against ws-backend
+ * Used when no store is associated with the data
+ */
+
+Ext.define('OpenEMap.data.DataHandler', {
+
+    metadataAbstractWsUrl: null,
+    metadataWsUrl: null,
+    layersWsUrl: null,
+
+    metadataAbstractCache: {},
+    
+    constructor: function(options) {
+        this.wsUrls = OpenEMap.wsUrls;
+        Ext.apply(this,options);
+    },
+
+    /**
+    * GET-request to get a specific layer
+    * @param {number}   id          layer id
+    * @param {Function} callback    callback-function on success
+    */
+    getLayer: function(id, callback) {
+        /*if(this.wsUrls.layers && id) {
+            this.doRequest(
+                {
+                    url: this.wsUrls.basePath + this.wsUrls.layers + '/' + id
+                },
+                function(json) {
+                    callback(json);
+                }
+            );
+        }*/
+    },
+
+
+    /**
+    * GET-request to get layers
+    * @param {Function} callback    callback-function on success
+    */
+    getLayers: function(callback) {
+        /*if(this.wsUrls.layers) {
+            this.doRequest(
+                {
+                    url: this.wsUrls.basePath + this.wsUrls.layers
+                },
+                callback
+            );
+        }*/
+    },
+
+    /**
+    * GET-request to get metadata for specific UUID
+    * @param {string}   UUID        layer metadata UUID
+    * @param {Function} callback    callback-function on success
+    */
+    getMetadata: function(UUID, callback) {
+        if(UUID && this.wsUrls.metadata) {
+            this.doRequest(
+                {
+                    url: this.wsUrls.basePath + this.wsUrls.metadata + '/' + UUID
+                },
+                callback
+            );
+        }
+    },
+
+    /**
+    * GET-request to get metadata abstract for specific UUID
+    * @param {string}   UUID        layer metadata UUID
+    * @param {Function} callback    callback-function on success
+    */
+    getMetadataAbstract: function(UUID, callback) {
+        if(UUID && this.wsUrls.metadata_abstract) {
+            var me = this;
+            // Cache metadata temporarily until page reload, to minize ajax requests
+            if(me.metadataAbstractCache[UUID]) {
+                callback(me.metadataAbstractCache[UUID]);
+            } else {
+                this.doRequest(
+                    {
+                        url: this.wsUrls.basePath + this.wsUrls.metadata_abstract + '/' + UUID
+                    },
+                    function(json) {
+                        callback(json);
+                        me.metadataAbstractCache[UUID] = json;
+                    }
+                );
+            }
+        }
+    },
+
+    /**
+    * PUT-request to update a configuration
+    * @param {number}   id         map configuration id
+    * @param {Object}   conf       map config object
+    * @param {Function} callback   callback-function on success
+    */
+    updateConfiguration: function(id, conf, callback) {
+        this.doRequest({
+            url: this.wsUrls.basePath + this.wsUrls.adminconfigs + '/config/' + id,
+            method: 'PUT',
+            jsonData: conf
+        }, callback);
+    },
+
+    /**
+    * POST-request to save a new configuration
+    * @param {Object}   conf       map config object
+    * @param {Function} callback   callback-function on success
+    */
+    saveNewConfiguration: function(conf, callback) {
+        this.doRequest({
+            url: this.wsUrls.basePath + this.wsUrls.adminconfigs + '/config',
+            method: 'POST',
+            jsonData: conf
+        }, callback);
+    },
+
+    /**
+    * DELETE-request to remove a configuration
+    * @param {number}   id         map configuration id
+    * @param {Object}   conf       map config object
+    * @param {Function} callback   callback-function on success
+    */
+    deleteConfiguration: function(id, conf, callback) {
+        this.doRequest({
+            url: this.wsUrls.basePath + this.wsUrls.adminconfigs + '/config/' + id,
+            method: 'DELETE',
+            jsonData: conf
+        }, callback);
+    },
+
+    /**
+    * Handles Ajax-request.
+    * @param {Object}   options     Ext.Ajax.request options 
+    * @param {Function} callback    callback-function on success
+    */
+    doRequest: function(options, callback) {
+        var me = this;
+        if(options && (options.method && options.method === 'POST' && options.method === 'PUT') && !callback) {
+            me.onFailure('no callback function');
+            return false;
+        }
+        Ext.Ajax.request(Ext.apply({
+                success: function(response) {
+                    if(response && response.responseText) {
+                        var json = Ext.decode(response.responseText);
+                        if(callback) {
+                            callback(json);
+                        }
+                    } else {
+                        me.onFailure();
+                    }
+                },
+                failure: function(e) {
+                    me.onFailure(e.status + ' ' + e.statusText + ', ' + options.url);
+                }
+            }, (options ? options : {})));
+    },
+
+    /**
+    * Called on ajax-request failure or data not correct
+    * @param {string}   msg     error message
+    */
+    onFailure: function(msg) {
+        //TODO! handle failure
+        console.error(msg);
+        //Ext.Error.raise(msg);
+    }
+
+
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * @class OpenEMap.view.layer.TreeFilter
+ */
+
+Ext.define('OpenEMap.view.layer.TreeFilter', {
+    extend:  Ext.AbstractPlugin , 
+    alias: 'plugin.treefilter', 
+    
+    collapseOnClear: true, 
+    allowParentFolders: false, 
+
+    init: function (tree) {
+        var me = this;
+        me.tree = tree;
+
+        tree.filter = Ext.Function.bind(me.filter, me);
+        tree.clearFilter = Ext.Function.bind(me.clearFilter, me);
+    },
+
+    filter: function (value, property, re) {
+            var me = this, 
+                tree = me.tree,
+                matches = [],
+                root = tree.getRootNode(),
+                visibleNodes = [],
+                viewNode;
+               
+            // property is optional - will be set to the 'text' propert of the  treeStore record by default 
+            property = property || 'text';
+            
+            // the regExp could be modified to allow for case-sensitive, starts  with, etc.
+            re = re || new RegExp(value, "ig");
+
+            // if the search field is empty
+            if (Ext.isEmpty(value)) {                                           
+                me.clearFilter();
+                return;
+            }
+
+            // expand all nodes for the the following iterative routines
+            tree.expandAll();
+
+            // iterate over all nodes in the tree in order to evalute them against the search criteria
+            root.cascadeBy(function (node) {
+                // if the node matches the search criteria and is a leaf (could be  modified to searh non-leaf nodes)
+                if (node.get(property).match(re)) {
+                    // add the node to the matches array
+                    matches.push(node);
+                }
+            });
+
+            // if me.allowParentFolders is false (default) then remove any  non-leaf nodes from the regex match
+            if (me.allowParentFolders === false) {
+                Ext.each(matches, function (match) {
+                    if (!match.isLeaf()) {
+                        Ext.Array.remove(matches, match);
+                    }
+                });
+            }
+
+            // loop through all matching leaf nodes
+            Ext.each(matches, function (item, i, arr) {
+                // find each parent node containing the node from the matches array
+                root.cascadeBy(function (node) {
+                    if (node.contains(item) === true) {
+                        // if it's an ancestor of the evaluated node add it to the visibleNodes  array
+                        visibleNodes.push(node);
+                    }
+                });
+                // if me.allowParentFolders is true and the item is  a non-leaf item
+                if (me.allowParentFolders === true && !item.isLeaf()) {
+                    // iterate over its children and set them as visible
+                    item.cascadeBy(function (node) {
+                        visibleNodes.push(node);
+                    });
+                }
+                // also add the evaluated node itself to the visibleNodes array
+                visibleNodes.push(item);
+            });
+
+            // finally loop to hide/show each node
+            root.cascadeBy(function (node) {
+                // get the dom element assocaited with each node
+                viewNode = Ext.fly(tree.getView().getNode(node));
+                // the first one is undefined ? escape it with a conditional
+                if (viewNode) {
+                    viewNode.setVisibilityMode(Ext.Element.DISPLAY);
+                    // set the visibility mode of the dom node to display (vs offsets)
+                    viewNode.setVisible(Ext.Array.contains(visibleNodes, node));
+                }
+            });
+        }, 
+
+        clearFilter: function () {
+            var me = this,
+                tree = this.tree,
+                root = tree.getRootNode();
+
+            if (me.collapseOnClear) {
+                // collapse the tree nodes
+                tree.collapseAll();
+            }
+            // final loop to hide/show each node
+            root.cascadeBy(function (node) {
+                // get the dom element assocaited with each node
+                viewNode = Ext.fly(tree.getView().getNode(node));
+                // the first one is undefined ? escape it with a conditional and show  all nodes
+                if (viewNode) {
+                    viewNode.show();
+                }
+            });
+        }
+    });
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * Add layer view
+ * View includes a drag/drop and collapsable layer tree
+ */
+
+Ext.define('OpenEMap.view.layer.Add' ,{
+    extend:  OpenEMap.view.layer.Tree ,
+    
+               
+                                    
+                                         
+                                            
+      
+
+    title: 'Lägg till lager',
+
+    width: 250,
+    height: 550,
+
+    headerPosition: 'top',
+    collapsible: true,
+    collapseMode: 'header',
+    collapseDirection : 'right',
+    titleCollapse: true,
+
+    viewConfig: {
+         plugins: {
+            ptype: 'treeviewdragdrop',
+            enableDrop: false
+        },
+        copy: true
+    },
+
+    // Layer tree filtering
+    plugins: {
+        ptype: 'treefilter',
+        allowParentFolders: true
+    },
+    dockedItems: [
+        {
+            xtype: 'toolbar',
+            dock: 'top',
+            layout: 'fit',
+            items: [{
+                xtype: 'trigger',
+                triggerCls: 'x-form-clear-trigger',
+                onTriggerClick: function () {
+                    this.reset();
+                    this.focus();
+                },
+                listeners: {
+                    change: function (field, newVal) {
+                        var tree = field.up('treepanel');
+                        tree.filter(newVal);
+                    },
+                    buffer: 250
+                }
+            }]
+        }
+    ],
+
+    initComponent: function() {
+        var me = this;
+        
+        this.columns = [
+            {
+                xtype: 'treecolumn',
+                flex: 1,
+                dataIndex: 'text'
+            },
+            me.metadataColumn
+        ];
+
+        this.store = Ext.create('OpenEMap.data.GroupedLayerTree');
+        
+        Ext.Ajax.request({
+            url: OpenEMap.basePathProxy + OpenEMap.wmsURLs.url + '?service=WMS&request=GetCapabilities',
+            success: this.parseCapabilities,
+            scope: this
+        });
+
+        this.callParent(arguments);      
+    },
+    
+    parseCapabilities: function(response) {
+        var format = new OpenLayers.Format.WMSCapabilities();
+        var wms = format.read(response.responseText);
+        
+        var root = this.store.setRootNode({});
+        
+        var stripName = function(name) {
+            var parts = name.split(':');
+            return parts.length > 1 ? parts[1] : name;
+        };
+        
+        wms.capability.layers.sort(function(a, b) {
+            if (stripName(a.name) < stripName(b.name)) {
+                return -1;
+            }
+            if (stripName(a.name) > stripName(b.name)) {
+                return 1;
+            }
+            return 0;
+        });
+        
+        var children = wms.capability.layers.map(function(layer) {
+            var layerConfig = {
+                'text': stripName(layer.name),
+                'leaf': true,
+                'checked': true,
+                'title': layer.title,
+                'name': layer.title,
+                'queryable': layer.queryable,
+                'clickable': layer.queryable,
+                'isGroupLayer': false,
+                'visibility': true,
+                'wms':{
+                    'url': OpenEMap.wmsURLs.url,
+                    'params': {
+                        'layers': layer.name,
+                        'format': 'image/png',
+                        'transparent': true
+                    },
+                    'options': {
+                        'isBaseLayer': false
+                    }
+                }
+            };
+            
+            var parser = Ext.create('OpenEMap.config.Parser');
+            layerConfig.layer = parser.createLayer(layerConfig);
+
+            return layerConfig;
+        });
+        
+        root.appendChild(children);
+    }
+
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+Ext.define('OpenEMap.view.MetadataWindow' ,{
+	extend:  Ext.Window ,
+
+               
+                       
+      
+
+	title: 'Metadata',
+	width: 600,
+	height: 500,
+	border: 0,
+    layout: 'fit',
+	closeAction: 'hide',
+
+    /**
+    * Translation constant
+    */
+    TRANSLATION: {
+        sv: {
+            tag: {
+                // Hide some elements
+                'gmd:citation': '',
+                'gmd:CI_Address': '',
+                'gmd:CI_Citation': '',
+                'gmd:CI_Contact': '',
+                'gmd:CI_Date': '',
+                'gmd:CI_Telephone': '',
+                'gmd:CI_ResponsibleParty': '',
+                'gmd:identificationInfo': '',
+                'gmd:EX_BoundingPolygon': '',
+                'gmd:EX_Extent': '',
+                'gmd:EX_GeographicBoundingBox': '',
+                'gmd:EX_GeographicDescription': '',
+                'gmd:EX_TemporalExtent': '',
+                'gmd:EX_VerticalExtent': '',
+                'gmd:MD_BrowseGraphic': '',
+                'gmd:MD_Constraints': '',
+                'gmd:MD_Identifier': '',
+                'gmd:MD_Keywords': '',
+                'gmd:MD_LegalConstraints': '',
+                'gmd:MD_Metadata': '',
+                'gmd:MD_MaintenanceInformation': '',
+                'gmd:MD_SecurityConstraints': '',
+                'gmd:thesaurusName': '',
+                'gmd:voice': '',
+                'srv:SV_ServiceIdentification': '',
+
+                // Swedish translation
+                'gmd:accessConstraints': 'Nyttjanderestriktioner',
+                'gmd:abstract': 'Sammanfattning',
+                'gmd:address': 'Adress',
+                'gmd:alternateTitle': 'Alternativ titel',
+                'gmd:city': 'Stad',
+                'gmd:classification': 'Klassificering',
+                'gmd:contact': 'Metadatakontakt',
+                'gmd:contactInfo': 'Kontaktinformation',
+                'gmd:date': 'Datum',
+                'gmd:dateStamp': 'Datum',
+                'gmd:dateType': 'Datumtyp',
+                'gmd:descriptiveKeywords': 'Nyckelordslista',
+                'gmd:electronicMailAddress': 'E-post',
+                'gmd:fileIdentifier': 'Identifierare för metadatamängden',
+                'gmd:graphicOverview': 'Exempelbild',
+                'gmd:hierarchyLevel': 'Hierarkisk nivå (Resurstyp)',
+                'gmd:individualName': 'Person',
+                'gmd:identifier': 'Identifierare',
+                'gmd:keyword': 'Nyckelord',
+                'gmd:language': 'Språk',
+                'gmd:metadataStandardName': 'Metadatastandardversion',
+                'gmd:metadataStandardVersion': 'Metadatastandard',
+                'gmd:organisationName': 'Organisation',
+                'gmd:otherConstraints': 'Andra restriktioner',
+                'gmd:phone': 'Telefonnummer',
+                'gmd:pointOfContact': 'Kontakt',
+                'gmd:resourceConstraints': 'Restriktioner och begränsningar',
+                'gmd:role': 'Ansvarsområde',
+                'gmd:status': 'Status',
+                'gmd:title': 'Titel',
+                'gmd:type': 'Typ',
+                'gmd:useLimitation': 'Användbarhetsbegränsningar'
+            },
+            codeListValue: {
+                'swe': 'Svenska',
+                'service': 'Tjänst',
+                'pointOfContact': 'Kontakt'
+            }
+        }
+    },
+
+    /**
+    * Init component
+    */
+    initComponent : function() {
+        
+        this.overviewTab = new Ext.Panel ({
+            title: 'Översikt'
+        });
+
+        this.metadataTab = new Ext.Panel ({
+            title: 'Information om metadata'
+        });
+
+        this.dataTab = new Ext.Panel ({
+            title: 'Information om data'
+        });
+      
+        this.qualityTab = new Ext.Panel ({
+            title: 'Kvalitet'
+        });
+
+        this.distributionTab = new Ext.Panel ({
+            title: 'Distribution'
+        });
+
+        this.restTab = new Ext.Panel ({
+            title: 'Rest'
+        });
+
+        this.items = Ext.create('Ext.tab.Panel', {
+            activeTab: 0,
+            defaults: {
+                autoScroll: true
+            },
+            items: [
+                this.overviewTab,
+                this.metadataTab,
+                this.dataTab,
+                this.qualityTab,
+                this.distributionTab,
+                this.restTab
+            ]
+        });
+
+        this.callParent(arguments);
+    },
+
+    /**
+    * Render metadata into tab-panel for specific UUID
+    * @param {string}   UUID    metadata uuid
+    */
+	showMetadata: function(UUID) {
+		var me = this;
+		this.dataHandler.getMetadata(UUID, function(json) {
+			if(json.children) {
+                var result = me.parseMetadata(json.children);
+                me.overviewTab.html = result.overview;
+    			me.metadataTab.html = result.metadata_info;
+                me.dataTab.html = result.data_info;
+                me.qualityTab.html = result.quality;
+                me.distributionTab.html = result.distribution;
+                me.restTab.html = result.rest;
+    			me.show();
+            }
+		});
+	},
+
+
+
+    /**
+    * Try to translate value of specific type
+    * @param {string}   type    tag-type
+    * @param {string}   value   value to translate
+    */
+    translate: function(type, value) {
+        var language = 'sv';
+        var traslatedTag = null;
+        try {
+            traslatedTag = this.TRANSLATION[language][type][value];
+            if(typeof traslatedTag !== 'string') {
+                traslatedTag = value;
+            }
+        }
+        catch(err) {
+            translateTag = null;
+        }
+        return traslatedTag;
+        
+    },
+
+    /**
+    * Parse text element for specific node
+    * @param {Object} [node] xml-node
+    */
+    parseMetadataTextTag: function (node) {
+        var text = null;
+        if(node.tag) {
+            text = this.translate('tag', node.tag);
+            text = (text !== null) ? (text !== '' ? '<b>' + text + '</b>' : '') : null;
+        }
+        if(node.text) {
+            text = node.text;
+        }
+        if(node.attributes) {
+            if(node.attributes.codeListValue) {
+                text = this.translate('codeListValue',node.attributes.codeListValue);
+            }
+        }
+        
+        return text;
+    },
+
+    /**
+    * Get groups for specific metadata node key. If no matching group place it in rest.
+    * @param {string} [str] string to group
+    * @param {Object} [group_by] object to group by
+    **/
+    getGroups: function(str, group_by) {
+        var groups = [];
+        for (var key in group_by) {
+            for (var i = 0; i < group_by[key].length; i++) {
+                if(str.indexOf(group_by[key][i]) !== -1) {
+                    groups.push(key);
+                }
+            }
+        }
+        if(groups.length === 0) {
+            groups.push('rest');
+        }
+        return groups;
+    },
+
+    /**
+    * Iterates over metadata json to convert to renderable html
+    * @param {Object} [node] xml-node
+    * @param {Object} [result] resulting object
+    * @param {Object} [group_by] object to group by
+    * @param {string} [parent_node_tag] parent tag name
+    */
+    metadataIterator: function(node, result, group_by, parent_node_tag) {
+        // Node tag
+        var nodeTag = this.parseMetadataTextTag(node);
+        // Current node identifier
+        var currentTag = (typeof parent_node_tag !== 'undefined' ? (parent_node_tag + '>') : '') + node.tag;
+        // Goups to include tag in
+        var groups = this.getGroups(currentTag, group_by);
+        // For each group
+        for (var i = 0; i < groups.length; i++) {
+            var group = groups[i];
+            if(typeof result[group] !== 'string') {
+                result[group] = '';
+            }
+
+            if(nodeTag !== null) {
+                result[group] += '<li>';
+                result[group] += nodeTag;
+
+                // Loop over child nodes
+                if(node.children && i === 0) {
+                    result[group] += nodeTag !== '' ? '<ul>' : '';
+                    for (var j = 0; j < node.children.length; j++) {
+                        this.metadataIterator(node.children[j], result, group_by, currentTag);
+                    }
+                    result[group] += nodeTag !== '' ? '</ul>' : '';
+                }
+
+                result[group] += '</li>';
+            }
+        }
+    },
+
+    /**
+    * Parse metadata-json-response into html
+    * @param  {Object} [json] json response object
+    * @return {Object} [result] grouped result object  
+    */
+    parseMetadata: function(json) {
+        var result = {};
+        // Group metadata to prepare to show in tabs
+        var group_by = {
+            overview: [
+                'gmd:MD_Metadata>gmd:identificationInfo>srv:SV_ServiceIdentification>gmd:citation>gmd:CI_Citation>gmd:title',
+                'gmd:MD_Metadata>gmd:identificationInfo>srv:SV_ServiceIdentification>gmd:abstract',
+                'gmd:MD_Metadata>gmd:identificationInfo>srv:SV_ServiceIdentification>gmd:descriptiveKeywords',
+                'gmd:MD_Metadata>gmd:identificationInfo>srv:SV_ServiceIdentification>gmd:graphicOverview'
+            ],
+            metadata_info: [
+                'gmd:MD_Metadata>gmd:fileIdentifier',
+                'gmd:MD_Metadata>gmd:language',
+                'gmd:MD_Metadata>gmd:dateStamp',
+                'gmd:MD_Metadata>gmd:hierarchyLevel',
+                'gmd:MD_Metadata>gmd:metadataStandardName',
+                'gmd:MD_Metadata>gmd:metadataStandardVersion',
+                'gmd:MD_Metadata>gmd:contact'
+            ],
+            data_info: [
+                'gmd:MD_Metadata>gmd:identificationInfo'
+            ],
+            quality: [
+                'gmd:MD_Metadata>gmd:dataQualityInfo'
+            ],
+            distribution: [
+                'gmd:MD_Metadata>gmd:distributionInfo'
+            ]
+        };
+
+        // Iterate over metadata to render html
+    	this.metadataIterator(json[0], result, group_by);
+        return result;
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * OpenEMap map configuration model
+ */
+
+Ext.define('OpenEMap.model.MapConfig' ,{
+    extend:  Ext.data.Model ,
+
+    fields: [ 
+    	'configId', 
+    	'name' 
+    ]
+});
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+//@requires OpenEMap
+
+/**
+ * Map configuration store
+ * Store to list map configurations
+ */
+
+Ext.define('OpenEMap.data.SavedMapConfigs' ,{
+    extend:  Ext.data.Store ,
+
+               
+                                  
+      
+
+    model: 'OpenEMap.model.MapConfig',
+
+    storeId: 'savedMapConfigs',
+
+    autoLoad: true,
+    
+    constructor: function(config) {
+        this.proxy = {
+            type: 'rest',
+            appendId: true,
+	        url: ((OpenEMap && OpenEMap.wsUrls && OpenEMap.wsUrls.basePath) ? OpenEMap.wsUrls.basePath : '') + 
+	        		((OpenEMap && OpenEMap.wsUrls && OpenEMap.wsUrls.adminconfigs) ? OpenEMap.wsUrls.adminconfigs : ''),
+            reader: {
+                type: 'json',
+                root: 'configs'
+            },
+            writer: {            
+                type: 'json'
+            }
+        };
+        this.callParent(arguments);
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * @class OpenEMap.view.SavedMapConfigs
+ */
+Ext.define('OpenEMap.view.SavedMapConfigs' ,{
+    extend:  Ext.grid.Panel ,
+                                                
+    autoScroll: true,
+    hideHeaders: true,
+
+    id: 'savedMapConfigsGrid',
+
+    constructor: function() {
+        /*this.selModel = Ext.create('Ext.selection.CheckboxModel', {
+		    mode: 'SINGLE',
+            checkOnly: true,
+		    listeners: { 
+			    select: function( t, record, index, eOpts ) {
+			        this.client.destroy();
+			        this.client.configure(record.raw, this.client.initialOptions);
+				    //var configId = record.get('configId');
+				    //init(OpenEMap.wsUrls.basePath + OpenEMap.wsUrls.configs + '/' + configId);
+			    },
+			    scope: this
+		    }
+	    });*/
+	
+	    this.store = Ext.create('OpenEMap.data.SavedMapConfigs');
+        this.columns = [
+            { 
+            	header: 'Name',  
+            	dataIndex: 'name',
+            	flex: 1
+            },
+            {
+                xtype: 'actioncolumn',
+                width: 40,
+                iconCls: 'action-load',
+                tooltip: 'Ladda',
+                handler: function(grid, rowIndex, cellIndex, column, e, record, tr) {
+                    this.client.destroy();
+			        this.client.configure(record.raw, this.client.initialOptions);
+                    e.stopEvent();
+                    return false;
+                }.bind(this)
+            },
+            {
+                xtype: 'actioncolumn',
+                width: 40,
+                iconCls: 'action-remove',
+                tooltip: 'Ta bort',
+                handler: function(grid, rowIndex, cellIndex, column, e, record, tr) {
+                    //TODO! change to proper rest store delete
+                    Ext.MessageBox.confirm('Ta bort', 'Vill du verkligen ta bort konfigurationen?', function(btn) {
+                        if(btn === 'yes') {
+                            var store = grid.getStore();
+                            grid.panel.dataHandler.deleteConfiguration(record.get('configId'),{ configId: record.get('configId') });
+                            store.removeAt(rowIndex);
+                        }
+                    });
+                    e.stopEvent();
+                    return false;
+                }
+            }
+        ];
+    
+    	this.callParent(arguments);
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * 
+ */
+
+Ext.define('OpenEMap.view.layer.Advanced' ,{
+	extend:  Ext.container.Container ,
+
+	           
+		                                     
+		                          
+		                           
+		                               
+		                                
+		                            
+		                                   
+		                                                           
+	  
+
+	layout: {
+		type: 'hbox',
+	    pack: 'end',
+	    align: 'stretch'
+	},
+	width: 500,
+	height: 650,
+
+ 	initComponent: function(config) {
+ 		var me = this;
+
+ 		this.dataHandler = Ext.create('OpenEMap.data.DataHandler');
+
+ 		this.metadataWindow = Ext.create('OpenEMap.view.MetadataWindow', {
+ 			dataHandler: this.dataHandler
+ 		});
+
+ 		this.savedMapConfigs = Ext.create('OpenEMap.view.SavedMapConfigs', {
+ 			dataHandler: this.dataHandler,
+ 			client: this.client
+ 		});
+ 		
+ 		var renameAction = Ext.create('Ext.Action', {
+            //iconCls: 'action-load',
+            text: 'Byt namn...',
+            disabled: true,
+            handler: function(widget, event) {
+                var node = this.showOnMapLayerView.getSelectionModel().getSelection()[0];
+                if (node) {
+                    Ext.Msg.prompt('Byt namn...', 'Ange nytt namn:', function(btn, text) {
+                        if (btn == 'ok'){
+                            node.set('text', text);
+                        }
+                    });
+                }
+            }.bind(this)
+        });
+ 		
+ 		var createGroupAction = Ext.create('Ext.Action', {
+            //iconCls: 'action-load',
+            text: 'Nytt grupplager',
+            disabled: true,
+            handler: function(widget, event) {
+                var node = this.showOnMapLayerView.getSelectionModel().getSelection()[0];
+                if (node) {
+                    Ext.Msg.prompt('Nytt grupplager', 'Ange namn:', function(btn, text) {
+                        if (btn == 'ok'){
+                            var group = Ext.create('OpenEMap.model.GroupedLayerTreeModel', {
+                                text: text,
+                                checked: true,
+                                isGroupLayer: true
+                            });
+                            node.appendChild(group);
+                        }
+                    });
+                }
+            }.bind(this)
+        });
+ 		
+ 		var contextMenu = Ext.create('Ext.menu.Menu', {
+            items: [
+                renameAction,
+                createGroupAction
+            ]
+        });
+
+		this.showOnMapLayerView = Ext.create('OpenEMap.view.layer.Tree', {
+			title: 'Visas på kartan',
+			width: 250,
+			height: 500,
+			region: 'north',
+    		mapPanel: this.mapPanel,
+    		client: this.client,
+    		rootVisible: true,
+    		
+    		viewConfig: {
+		        plugins: {
+	                ptype: 'treeviewdragdrop',
+	                allowContainerDrops: true,
+	                allowParentInserts: true
+	            },
+	            listeners: {
+                    itemcontextmenu: function(view, rec, node, index, e) {
+                        e.stopEvent();
+                        contextMenu.showAt(e.getXY());
+                        return false;
+                    }
+                }
+		    },
+
+    		columns: [
+	            {
+	                xtype: 'gx_treecolumn',
+	                flex: 1,
+	                dataIndex: 'text'
+	            }, 
+	            Ext.create('OpenEMap.action.MetadataInfoColumn', {
+		 			metadataWindow: this.metadataWindow,
+		 			dataHandler: this.dataHandler
+		 		}),
+	            {
+	                xtype: 'actioncolumn',
+	                width: 40,
+	                iconCls: 'action-remove',
+	                tooltip: 'Ta bort',
+	                handler: function(grid, rowIndex, colIndex) {
+	                	var node = grid.getStore().getAt(rowIndex);
+	                	// Remove childs
+	                	for (var i = 0; i < node.childNodes.length; i++) {
+	                		node.removeChild(node.childNodes[i]);
+	                	}
+					    node.remove();
+					},
+					dataHandler: this.dataHandler
+	            }
+	        ],
+	        buttons: [
+	        	{
+		            text: 'Spara kartinnehåll',
+		            handler: function() {
+		            	if(me.orginalConfig) {
+		            		var conf = Ext.clone(me.orginalConfig);
+		            		Ext.MessageBox.prompt(
+		            			'Namn', 
+		            			'Ange ett namn:', 
+		            			function(btn, text) {
+		            				if (btn == 'ok' && text.length > 0) {
+		            				    conf = me.getConfig();
+						            	if(text !== conf.name) {
+						            		// Save new config
+						            		conf.name = text;
+						            		me.dataHandler.saveNewConfiguration(conf, function() {
+						            			me.savedMapConfigs.getStore().load();
+						            		});
+						            	} else if(conf.configId){
+						            		// Update config
+						            		me.dataHandler.updateConfiguration(conf.configId, conf);
+						            	}
+						            }
+		            			},
+		            			this,
+		            			false,
+		            			conf.name
+		            		);
+			            	
+		            	}
+		            }
+		        }
+		    ]
+    	});
+    	
+    	this.showOnMapLayerView.getSelectionModel().on({
+            selectionchange: function(sm, selections) {
+                if (selections.length === 1 && selections[0].data.isGroupLayer) {
+                    renameAction.enable();
+                    if (selections[0].internalId === 'root') {
+                        createGroupAction.enable();
+                    } else {
+                        createGroupAction.disable();
+                    }
+                } else {
+                    renameAction.disable();
+                    createGroupAction.disable();
+                }
+            }
+        });
+
+	  	this.items = [
+			Ext.create('OpenEMap.view.layer.Add', {
+			    mapPanel: this.mapPanel,
+			    dataHandler: this.dataHandler,
+			    metadataColumn: Ext.create('OpenEMap.action.MetadataInfoColumn',{
+		 			metadataWindow: this.metadataWindow,
+		 			dataHandler: this.dataHandler
+		 		})
+			}),
+	    	{
+	    		xtype: 'panel',
+	    		layout: 'border',
+	    		width: '50%',
+	    		border: false,
+	    		items: [
+	    			me.showOnMapLayerView,
+			    	{
+						title: 'Sparade kartor',
+						region: 'center',
+						xtype: 'panel',
+						border: false,
+						layout: 'fit',
+						collapsible: true,
+						titleCollapse: true,
+						items: me.savedMapConfigs
+					}
+	    		]
+	    	}
+		];
+    	this.callParent(arguments);
+    },
+    getConfig: function(includeLayerRef) {
+        return this.showOnMapLayerView.getConfig(includeLayerRef);
+    }
+});
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+Ext.define('OpenEMap.view.layer.Basic' ,{
+    extend:  OpenEMap.view.layer.Tree ,
+
+    //autoScroll: true,
+    //lines: false,
+    overflowY: 'auto',
+    rootVisible: false,
+    //width: 300,
+    height: 300,
+    border: false,
+
+    initComponent: function() {
+        if (!this.renderTo) {
+            this.title = 'Lager';
+            this.bodyPadding = 5;
+            this.collapsible = true;
+        }
+        
+        this.callParent(arguments);
+    }
+
+
+});
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * Initializes GUI from configuration
- * Initialize where to place the different GUI components, and if they should be floating components or 
+ * Initialize where to place the different GUI components, and if they should be floating components or not 
  */
 Ext.define('OpenEMap.Gui', {
     activeAction: null,
-                                   
+                                                   
+                                                
+                                               
+                                              
+                                              
+                                            
+                                            
+                                          
+                                             
+                                             
+                                                    
+                                                
+                                            
+                                       
+                                       
+                                                
                                           
                                                    
                                                
@@ -2927,7 +5510,11 @@ Ext.define('OpenEMap.Gui', {
                                             
                                                 
                                                
+                                        
+                                              
                                          
+                                              
+                                           
                                             
                                             
                                                 
@@ -2939,20 +5526,14 @@ Ext.define('OpenEMap.Gui', {
         this.orginalConfig = config.orginalConfig;
         this.serverStore = config.serverStore;
         this.search = config.config.search;
+        this.client = config.client;
 
         // GUI defaults
         if (this.gui === undefined) {
-            this.gui = {
-                "map": false,
-                "toolbar": {},
-                "zoomTools":  {},
-                "baseLayers": {},
-                "layers": {},
-                "searchFastighet": {},
-                "objectConfig": {},
-                "searchCoordinate": false
-            };
+            this.gui = {};
         }
+        if (this.gui.map === undefined) {this.gui.map = false;}
+        if (this.gui.rightPanel === undefined) {this.gui.rightPanel = {};}
         
         this.mapPanel = Ext.create('OpenEMap.view.Map', {
             map: this.map,
@@ -2969,15 +5550,36 @@ Ext.define('OpenEMap.Gui', {
             }
         });
                 
-        this.createPanels();
         this.createToolbar();
+        this.createZoomToolPanel();
+        this.createObjectConfigPanel();
+        this.createScalebarPanel();
+        this.createShowCoordinatePanel();
+        this.createSearchCoordinatePanel();
+        this.createRightPanel();
+        this.createBaseLayersPanel();
         
         var items = [];
         items.push(this.mapPanel);
-        if (this.zoomTools) items.push(this.zoomTools);
-        if (this.leftPanel) items.push(this.leftPanel);
-        if (this.rightPanel) items.push(this.rightPanel);
-        if (this.baseLayers) items.push(this.baseLayers);
+        if (this.zoomTools && !this.gui.zoomTools.renderTo) items.push(this.zoomTools);
+        if (this.objectConfig && !this.gui.objectConfig.renderTo) items.push(this.objectConfig);
+        if (this.scalebar && !this.gui.scalebar.renderTo) items.push(this.scalebar);
+        if (this.showCoordinate && !this.gui.showCoordinate.renderTo) items.push(this.showCoordinate);
+        if (this.searchCoordinate && !this.gui.searchCoordinate.renderTo) items.push(this.searchCoordinate);
+        if (this.rightPanel && !this.gui.rightPanel.renderTo) items.push(this.rightPanel);
+        if (this.baseLayers && !this.gui.baseLayers.renderTo) items.push(this.baseLayers);
+        if (this.toolbar && !this.gui.toolbar.renderTo) items.push(this.toolbar);
+        
+        // NOTE: Generic ES search as a floating centered field
+        /*this.search = Ext.create('OpenEMap.form.Search', {
+            mapPanel : this.mapPanel,
+            width: 300,
+            style: {
+                right: '20px',
+                bottom: '76px'
+            }
+        });
+        items.push(this.search);*/
         
         // create map rendered to a target element or as viewport depending on config
         if (this.gui.map) {
@@ -3002,13 +5604,15 @@ Ext.define('OpenEMap.Gui', {
         if (this.mapLayers) this.mapLayers.destroy();
         if (this.searchFastighet) this.searchFastighet.destroy();
         if (this.searchCoordinate) this.searchCoordinate.destroy();
+        if (this.showCoordinate) this.showCoordinate.destroy();
         if (this.toolbar) this.toolbar.destroy();
-        if (this.leftPanel) this.leftPanel.destroy();
         if (this.rightPanel) this.rightPanel.destroy();
         if (this.baseLayers) this.baseLayers.destroy();
         if (this.objectConfig) this.objectConfig.destroy();
         if (this.objectConfigWindow) this.objectConfigWindow.destroy();
+        if (this.scalebar) this.scalebar.destroy();
         if (this.container) this.container.destroy();
+        //if (this.search) this.search.destroy();
     },
     onToggle: function(button, pressed) {
         var action = button.baseAction;
@@ -3024,6 +5628,10 @@ Ext.define('OpenEMap.Gui', {
         
         action.toggle(pressed);
     },
+	/**
+	 * Create toolbar
+     * @private
+	 */
     createToolbar: function() {
         var basePath = this.config.basePath;
         var layers = this.config.layers;
@@ -3047,22 +5655,26 @@ Ext.define('OpenEMap.Gui', {
 
                 if (type == 'ZoomSelector') {
                     return Ext.create('OpenEMap.form.ZoomSelector', {map: this.map});
+                } else if (type == 'DrawObject') {
+                     config.objectConfigView = this.objectConfig;
+                } else if (type == 'Identify') {
+                    config.basePath = basePath;
+                    config.layers = layers;
+                    config.client = this.client;
+                } else if (type == 'Popup') {
+                    config.layers = layers;
+					if ((config.showOnlyFirstHit === undefined) || (config.showOnlyFirstHit === null)) {
+						config.showOnlyFirstHit = true;
+	                }
+				}
+				
+                var action = Ext.create('OpenEMap.action.' + type, config);
+                if (config.activate && action.control) {
+                    this.controlToActivate = action.control;
                 }
-                else {
-                    if (type == 'DrawObject') {
-                        config.objectConfigView = this.objectConfig;
-                    } else if (type == 'Identify') {
-                        config.basePath = basePath;
-                        config.layers = layers;
-                    }
-                    var action = Ext.create('OpenEMap.action.' + type, config);
-                    if (config.activate && action.control) {
-                        this.controlToActivate = action.control;
-                    }
-                    var button = Ext.create('Ext.button.Button', action);
-                    button.on('toggle', this.onToggle, this);
-                    return button;
-                }
+                var button = Ext.create('Ext.button.Button', action);
+                button.on('toggle', this.onToggle, this);
+                return button;
             }
         };
         
@@ -3077,25 +5689,27 @@ Ext.define('OpenEMap.Gui', {
         var width = 6; // padding
         tbar.forEach(function(item) {
             if (item){
-                if (item.constructor == String) {
-                    width += 1; // separator
-                } else if (item.width) {
-                    width += item.width;
-                } else {
-                    width += 24; // button
+                if (!item.hideFromToolbar) {
+	                if (item.constructor == String) {
+	                    width += 1; // separator
+	                } else if (item.width) {
+	                    width += item.width;
+	                } else {
+	                    width += 24; // button
+	                }
+	                // add spacing to next control
+	                width += 8;
                 }
-                // add spacing to next control
-                width += 8;
             }
         });
         width += 3; // padding
                 
         // create toolbar as floating left panel if no renderTo target is configured
         if (this.gui.toolbar && !this.gui.toolbar.renderTo) {
-            this.leftPanel = Ext.create('Ext.toolbar.Toolbar', Ext.apply({
+            this.toolbar = Ext.create('Ext.toolbar.Toolbar', Ext.apply({
                 cls: 'oep-tools',
                 y : 20,
-                x : 80,
+                x : 20,
                 width: width,
                 items: tbar
             }, this.gui.toolbar));
@@ -3107,95 +5721,143 @@ Ext.define('OpenEMap.Gui', {
             }, this.gui.toolbar));
         }
     },
-    createPanels: function(items) {
+    /**
+     * Create right panel including 
+     * - Layers panel
+     * - SearchParcel panel
+     * @private
+     */
+    createRightPanel: function() {
         
-        // Checks whether the advanced or basic Layer control should be used
-        if (this.gui.layers && this.gui.layers.type === 'advanced') {
-            this.mapLayers = Ext.create('OpenEMap.view.layer.Advanced', Ext.apply({
-                mapPanel : this.mapPanel,
-                orginalConfig: this.orginalConfig
-            }, this.gui.layers));
-        } else {
-            this.mapLayers = Ext.create('OpenEMap.view.layer.Basic', Ext.apply({
-                mapPanel : this.mapPanel
-            }, this.gui.layers));
-        }
+        var rightPanelItems = [];
+        // default position for rightPanel
+        if (!this.gui.rightPanel.y) {this.gui.rightPanel.y = 20;}
+        if (!this.gui.rightPanel.style) {this.gui.rightPanel.style = 'right: 20px';}
         
-        // Create SearchParcel control
-        this.searchFastighet = Ext.create('OpenEMap.view.SearchFastighet', Ext.apply({
-            mapPanel : this.mapPanel,
-            basePath: this.config.basePath,
-            search: this.search 
-        }, this.gui.searchFastighet));
+        if (this.gui.layers) {
+	        // Checks whether the advanced or basic Layer control should be used
+	        if (this.gui.layers && this.gui.layers.type === 'advanced') {
+	            this.mapLayers = Ext.create('OpenEMap.view.layer.Advanced', Ext.apply({
+	                mapPanel : this.mapPanel,
+	                orginalConfig: this.orginalConfig,
+	                client: this.client
+	            }, this.gui.layers));
+	        } else {
+	            this.mapLayers = Ext.create('OpenEMap.view.layer.Basic', Ext.apply({
+	                mapPanel : this.mapPanel,
+	                client: this.client
+	            }, this.gui.layers));
+	        }
+	        
+	        // If the layers panel not should be rendered to div, add it to the right panels items
+	        if (!this.gui.layers.renderTo) {
+	        	rightPanelItems.push(this.mapLayers);
+	        }
+	    }
         
-        // Create Layer control
-        // NOTE: only create right panel if layers panel isn't rendered
-        // create right panel containing layers and search panels if no renderTo target is configured
-        if (this.gui.layers && !this.gui.layers.renderTo) {
-            
-            var rightPanelItems = [this.mapLayers];
-            
-            if (this.gui.searchFastighet && !this.gui.searchFastighet.renderTo) {
+        
+        if (this.gui.searchFastighet)  {
+	        // Create SearchParcel control
+	        this.searchFastighet = Ext.create('OpenEMap.view.SearchFastighet', Ext.apply({
+	            mapPanel : this.mapPanel,
+	            basePath: this.config.basePath,
+	            search: this.search 
+	        }, this.gui.searchFastighet));
+            if (!this.gui.searchFastighet.renderTo) {
                 rightPanelItems.push(this.searchFastighet);
             }
-            
+        }
+
+        // Create right panel including both layrer control and searchParcel
+        // create right panel containing layers and search panels if no renderTo target is configured
+        if (rightPanelItems.length > 0) {
             this.rightPanel = Ext.create('Ext.panel.Panel', {
-                y : 20,
+            	renderTo: this.gui.rightPanel.renderTo,
+                y : this.gui.rightPanel.y,
                 layout : {
                     type: 'vbox',
                     align : 'stretch'
                 },
                 width : 300,
                 border: false,
-                style : {
-                    'right' : '20px'
-                },
+                style : this.gui.rightPanel.style,
                 bodyStyle: {
                     background: 'transparent'
                 },
                 items : rightPanelItems
-            });
-        }
+	        });
+	    }
+	},
         
-        // Create BaselLayers control
-        // TODO: only create if config has baselayers
+	/** 
+	 * Create base layers control
+	 * @private
+	 */ 
+    createBaseLayersPanel: function() {
+        // Create BaseLayers control
         if (!this.map.allOverlays && this.gui.baseLayers) {
-            this.baseLayers = Ext.create("OpenEMap.view.BaseLayers", Ext.apply({
-                mapPanel : this.mapPanel,
-                y: 20,
-                style: {
-                    'right' : '45%'
-                },
-                width: 115
-            }, this.gui.baseLayers));
+            var layers = this.map.layers;
+            var parser = Ext.create('OpenEMap.config.Parser');
+            var baseLayers = parser.extractBaseLayers(layers);
+	        // Only create if config has baselayers
+        	if (baseLayers) {
+        		if (!(this.gui.baseLayers.renderTo || this.gui.baseLayers.style)) {
+    				this.gui.baseLayers.style = {
+    					right: '20px',
+    					bottom: '20px'
+    				};
+        		}
+	            this.baseLayers = Ext.create("OpenEMap.view.BaseLayers", Ext.apply({
+	                mapPanel : this.mapPanel,
+	                renderTo : this.gui.baseLayers.renderTo
+	            }, this.gui.baseLayers));
+	        }
         }
-        
+	},
+
+	/**
+	 * Create ZoomTool panel
+	 * @private 
+	 */	
+    createZoomToolPanel: function() {
         // Create ZoomTool control
-        if (this.gui.zoomTools && !this.gui.zoomTools.renderTo) {
+        if (this.gui.zoomTools) {
+    		if (!(this.gui.zoomTools.renderTo || this.gui.zoomTools.style)) {
+				this.gui.zoomTools.style = {
+					left: '20px',
+					top: '76px'
+				};
+    		}
             this.zoomTools = Ext.create('OpenEMap.view.ZoomTools', Ext.apply({
                 mapPanel : this.mapPanel,
-                x: 20,
-                y: 20,
+                renderTo : this.gui.zoomTools.renderTo,
                 width: 36
             }, this.gui.zoomTools));
         }
-        
-        // Create SearchCoordinate" control                
+    },
+
+	/**
+	 * Create search coodinates panel
+	 * @private 
+	 */	
+    createSearchCoordinatePanel: function() {
+        // Create SearchCoordinate control                
         // only create if renderTo
         if (this.gui.searchCoordinate && this.gui.searchCoordinate.renderTo) {
             this.searchCoordinate = Ext.create('OpenEMap.view.SearchCoordinate', Ext.apply({
                 mapPanel : this.mapPanel
             }, this.gui.searchCoordinate));
         }
-        
+    },
+
+	/** 
+	 * Create object config window
+	 * always created inside map div 
+	 * @private
+	 */ 
+    createObjectConfigPanel: function() {
         // Create Object config
-        // only create if renderTo
-        if (this.gui.objectConfig && this.gui.objectConfig.renderTo) {
-            this.objectConfig = Ext.create('OpenEMap.view.ObjectConfig', Ext.apply({
-                mapPanel : this.mapPanel,
-                gui: this
-            }, this.gui.objectConfig));
-        } else if (this.gui.objectConfig) {
+        if (this.gui.objectConfig) {
             this.objectConfig = Ext.create('OpenEMap.view.ObjectConfig', Ext.apply({
                 mapPanel : this.mapPanel,
                 gui: this
@@ -3211,8 +5873,67 @@ Ext.define('OpenEMap.Gui', {
             }, this.gui.objectConfig));
             this.objectConfigWindow.show();
         }
+	},
+
+	/**
+	 * Create show coordinate panel
+	 * @private 
+	 */	
+    createShowCoordinatePanel: function() {
+        // Create Show Coordinate control 
+        // only create if renderTo 
+        if (this.gui.showCoordinate && this.gui.showCoordinate.renderTo) {
+        	if (!this.cls) {
+        		this.cls = 'oep-show-coordinate';
+        	} 
+        	var cfg = {
+                mapPanel : this.mapPanel,
+                cls : this.cls,
+			    setCoord: function(e) {
+			    	var lonlat = this.getLonLatFromPixel(e.xy);
+			    	var eC = parent.mapClient.gui.showCoordinate.getComponent('e');
+			    	var nC = parent.mapClient.gui.showCoordinate.getComponent('n');
+			    	eC.setValue(Math.round(lonlat.lon));
+			    	nC.setValue(Math.round(lonlat.lat));
+			    }
+        	};
+            this.showCoordinate = Ext.create('OpenEMap.view.ShowCoordinate', Ext.apply(cfg, this.gui.showCoordinate));
+
+		    this.map.events.register("mousemove", this.map, this.showCoordinate.setCoord);
+        }
+	},
+
+	/**
+	 * Create scalebar panel
+	 * @private 
+	 */	
+    createScalebarPanel: function() {
+        // Create scalebar control
+       	// Position defined in CSS - defaults to lower left corner of map
+        if (this.gui.scalebar) {
+            this.scalebar = Ext.create('OpenEMap.view.Scalebar', Ext.apply({
+                mapPanel : this.mapPanel
+            }, this.gui.scalebar));
+        }
     }
 });
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * Server configuration model
  */
@@ -3228,6 +5949,22 @@ Ext.define('OpenEMap.model.Server' ,{
     ]
 
 });
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * Server configuration store
  * Stores server configruations
@@ -3248,7 +5985,7 @@ Ext.define('OpenEMap.data.Servers' ,{
 
     constructor: function(config) {
         config = Ext.apply(this, config);
-        if(this.url) {
+        /*if(this.url) {
             this.proxy = {
                 type: 'ajax',
                 url: this.url,
@@ -3257,13 +5994,32 @@ Ext.define('OpenEMap.data.Servers' ,{
                     root: 'configs'
                 }
             };
-        }
+        }*/
         this.callParent([config]);
     }
 });
+
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
- * Parser for configuration JSON
- * Set defaults, initializes OpenLayers and Ext JS stuff.
+ * ###Parser for configuration JSON
+ * Sets defaults, initializes OpenLayers and Ext JS stuff.
+ * ###[Config documentation](https://github.com/Sundsvallskommun/OpenEMap-WebUserInterface/blob/master/doc/config.md)
+ * ###[Config example](https://github.com/Sundsvallskommun/OpenEMap-WebUserInterface/blob/develop/doc/testAll.json)
  */
 Ext.define('OpenEMap.config.Parser', {
                  
@@ -3336,6 +6092,7 @@ Ext.define('OpenEMap.config.Parser', {
 
     /**
     * Iterate over the layertree and create a ExtJS-tree structure
+    * @private
     */
     parseLayerTree: function(layers) {
         layers.forEach(this.iterateLayers, this);
@@ -3345,6 +6102,7 @@ Ext.define('OpenEMap.config.Parser', {
     /**
     * Get all layers and layer groups that should show up in the layer switcher
     */
+    // TODO - implement support for config tag layer.wms.options.displayInLayerSwitcher
     getLayerSwitcherLayers: function(layers) {
         return layers.filter(function(layer) { 
             return (layer.layers || (this.isWMSLayer(layer) && !this.isBaseLayer(layer))) ? true : false;
@@ -3357,8 +6115,15 @@ Ext.define('OpenEMap.config.Parser', {
     extractLayers: function(layers) {
         // filter out plain layer definitions (no group)
         var plainLayers = layers.filter(function(layer) { return !layer.layers; });
+/*        var plainLayers = layers.filter(function(layer) {
+        	// Checking layer.layers for backward compability
+        	if (layer.isGroupLayer === undefined) {layer.isGroupLayer = layer.layers ? true : false} 
+        	return !layer.isGroupLayer; 
+        });
+*/
         // filter out groups
-        var groups = layers.filter(function(layer) { return layer.layers; }).map(function(layer) { return layer.layers; });
+        var groups = layers.filter(function(layer) { return layer.layers; }).map(function(layer) { return layer.layers; });  
+        
         // flatten groups into an array of layer definitions 
         var flattenedGroups = [].concat.apply([], groups);
         // concat all layer definitions
@@ -3368,9 +6133,93 @@ Ext.define('OpenEMap.config.Parser', {
 
         return layers;
     },
+    /**
+     * Extract plain layers from a layertree structure
+     * @param layers [Array] array of layers in a tree structure 
+     */
+    extractPlainLayers: function(layers) {
+    	var plainLayers = [];
+    	for (var i=0,  tot=layers.length; i < tot; i++) {
+   			plainLayers.push(layers[i]);
+    		if (layers[i].layers) {
+    			plainLayers = plainLayers.concat(this.extractPlainLayers(layers[i].layers));
+    		}
+    	}
+    	return plainLayers;
+    },
+    /**
+     * Extracts WFS-layers
+     * @param layers [Array] array of layers
+     */
     extractWFS: function(layers) {
+        layers = layers.filter(function(layer){ return (layer.wfs && layer.wfs.url); });
+        return layers;
+    },
+    /**
+     * Extracts layers missing WFS-tag
+     * @param layers [Array] array of layers
+     */
+    extractNoWFS: function(layers) {
+        layers = layers.filter(function(layer){ return !(layer.wfs && layer.wfs.url); });
+        return layers;
+    },
+    /**
+     * Extracts layers with valid WMS-tag
+     * @param layers [Array] array of layers
+     */
+    extractWMS: function(layers) {
+        layers = layers.filter(function(layer){ return (layer.wms && layer.wms.url); });
+        return layers;
+    },
+    /**
+     * Extracts queryable layers
+     * @param plainLayers [array] array of flattened layers. 
+     */
+    extractClickableLayers: function(plainLayers) {
+        plainLayers = plainLayers.filter(function(layer) { 
+        	return (layer.clickable && layer.queryable); 
+        });
+        return plainLayers;
+    },
+    /**
+     * Extracts visible layers
+     * @param plainLayers [array] array of flattened layers. 
+     */
+    extractVisibleLayers: function(plainLayers) {
+        plainLayers = plainLayers.filter(function(layer) { 
+        	return (layer.layer && layer.layer.visibility); 
+        });
+        return plainLayers;
+    },
+    /**
+     * Extracts Vector-layers
+     */
+    extractVector: function(layers) {
         layers = this.extractLayers(layers);
-        layers = layers.filter(function(layer){ return layer.wfs; });
+        layers = layers.filter(function(layer){ return layer.vector; });
+        return layers;
+    },
+    /**
+     * Extracts base-layers
+     */
+    extractBaseLayers: function(layers) {
+        layers = this.extractLayers(layers);
+        layers = layers.filter(function(layer){ return layer.isBaseLayer; });
+        return layers;
+    },
+    /**
+     * Process layers config to return a flat array with popupLayer definitions
+     */
+    extractPopupLayers: function(layers) {
+        layers = this.extractLayers(layers);
+        layers = layers.filter(function(layer) {
+        	if (layer.idAttribute && layer.popupTextAttribute) {
+        		return true;
+        	} else {
+        		return false;
+        	} 
+    	});
+    	layers = layers.filter(function(layer){return layer.visibility;});
         return layers;
     },
     getOptions: function(layer) {
@@ -3441,7 +6290,7 @@ Ext.define('OpenEMap.config.Parser', {
         // Set node text
         layer.text = layer.name;
         // Is node checked?
-        layer.checked = layer.wms && layer.wms.options ? layer.wms.options.visibility : false;
+        layer.checked = layer.wms && layer.wms.options && layer.wms.options.visibility ? layer.wms.options.visibility : false;
         // Get url from Server and set to layer
         if(typeof layer.serverId !== 'undefined' && layer.serverId !== '') {
             var server = this.serverStore.getById(layer.serverId);
@@ -3463,10 +6312,12 @@ Ext.define('OpenEMap.config.Parser', {
         // Create and store a reference to OpenLayers layer for this node
         if(this.isOpenLayersLayer(layer)) {
             layer.layer = this.createLayer(layer);
+            layer.layer.queryable = layer.queryable ? layer.queryable : false;
         }
         // Do the node have sublayers, iterate over them
         if(layer.layers) {
-            layer.expanded = layer.expanded == undefined ? true : layer.expanded;
+            layer.isGroupLayer = true;
+            layer.expanded = layer.expanded === undefined ? true : layer.expanded;
             layer.layers.forEach(arguments.callee, this);
         } else {
             // If no sublayers, this is a leaf
@@ -3476,6 +6327,22 @@ Ext.define('OpenEMap.config.Parser', {
 
 });
 
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * Form field based on combobox to select zoom level
  */
@@ -3525,6 +6392,7 @@ Ext.define('OpenEMap.form.ZoomSelector' ,{
  * full text of the license. */
 
 /**
+ * @class OpenEMap.OpenLayers.Control.ModifyFeature
  * @requires OpenLayers/Control.js
  * @requires OpenLayers/Handler/Drag.js
  * @requires OpenLayers/Handler/Keyboard.js
@@ -4053,7 +6921,7 @@ OpenLayers.Control.ModifyFeature = OpenLayers.Class(OpenLayers.Control, {
         var geom = vertex.geometry;
         geom.move(pos.lon - geom.x, pos.lat - geom.y);
         this.modified = true;
-        /**
+        /*
          * Five cases:
          * 1) dragging a simple point
          * 2) dragging a virtual vertex
@@ -4427,6 +7295,8 @@ OpenLayers.Control.ModifyFeature.DRAG = 8;
  * Published under MIT license. */
 
 /**
+ * @class OpenEMap.OpenLayers.Control.DynamicMeasure
+ *
  * @requires OpenLayers/Control/Measure.js
  * @requires OpenLayers/Rule.js
  * @requires OpenLayers/StyleMap.js
@@ -4447,9 +7317,9 @@ OpenLayers.Control.DynamicMeasure = OpenLayers.Class(
 
     /**
      * APIProperty: accuracy
-     * {Integer} Digits measurement accuracy, default is 5.
+     * {Integer} Digits measurement accuracy, default is 2.
      */
-    accuracy: 5,
+    accuracy: 2,
 
     /**
      * APIProperty: persist
@@ -4458,7 +7328,7 @@ OpenLayers.Control.DynamicMeasure = OpenLayers.Class(
      *     measurement is started, the control is deactivated, or <cancel> is
      *     called. Default is true.
      */
-    persist: true,
+    persist: false,
 
     /**
      * APIProperty: styles
@@ -4825,6 +7695,7 @@ OpenLayers.Control.DynamicMeasure = OpenLayers.Class(
                 var layer = new OpenLayers.Layer.Vector(
                                    _self.CLASS_NAME + ' ' + styleName, options);
                 _self.map.addLayer(layer);
+                _self.map.setLayerIndex(layer, 99);
                 return layer;
             };
             this.layerSegments =
@@ -4894,16 +7765,14 @@ OpenLayers.Control.DynamicMeasure = OpenLayers.Class(
      * geometry - {<OpenLayers.Geometry>}
      */
     callbackDone: function(geometry) {
-        /*if (geometry){
-             var newLayerSegments = [];
-             this.layerSegments.features.forEach(function deepCopyFeatures(f){
-                newLayerSegments.push(f.clone());
-             });
-             mapClient.mapPanel.measureLayer.addFeatures(newLayerSegments);
-
-             var newLayerLength = [this.layerLength.features[0].clone()];
-             mapClient.mapPanel.measureLayer.addFeatures(newLayerLength);
-         }*/
+        var feature = new OpenLayers.Feature.Vector(geometry);
+        this.mapPanel.measureLayer.addFeatures([feature.clone()]);
+        var clone = function(e) { return e.clone(); };
+        if (this.layerArea) {
+            this.mapPanel.measureLayerArea.addFeatures(this.layerArea.features.map(clone));
+        }
+        this.mapPanel.measureLayerLength.addFeatures(this.layerLength.features.map(clone));
+        this.mapPanel.measureLayerSegments.addFeatures(this.layerSegments.features.map(clone));
 
         this.measureComplete(geometry);
         if (!this.persist) {
@@ -4921,7 +7790,7 @@ OpenLayers.Control.DynamicMeasure = OpenLayers.Class(
         );
         if (proceed !== false) {
             feature.state = OpenLayers.State.INSERT;
-            this.drawingLayer.addFeatures([feature]);
+            //this.drawingLayer.addFeatures(this.layerArea.features.map(function(feature) { return feature.clone(); }));
             this.featureAdded && this.featureAdded(feature);// for compatibility
             this.events.triggerEvent('featureadded', {feature: feature});
         }
@@ -5215,7 +8084,7 @@ OpenLayers.Control.DynamicMeasure = OpenLayers.Class(
      * measure - Array({*})
      */
     setMesureAttributes: function(attributes, measure) {
-        attributes.measure = OpenLayers.Number.format(measure[0].toFixed(2), null);
+        attributes.measure = OpenLayers.Number.format(measure[0].toFixed(this.accuracy), null);
                            //Number(measure[0].toPrecision(this.accuracy)), null);
         attributes.units = measure[1];
     },
@@ -5308,19 +8177,37 @@ OpenLayers.Control.DynamicMeasure.positions = {
     labelHeading: 'start'
 };
 
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
- * Main map client class
+ * ###Main map client class
  *  
  * Typical use case is to call the method configure(config) where config is a valid configuration object (usually parsed from JSON).
+ * ###[Integration example](https://github.com/Sundsvallskommun/OpenEMap-WebUserInterface/blob/master/README.md)
  */
 Ext.define('OpenEMap.Client', {
                                                   
                               
                                         
                                             
+                                            
                                                            
                                                              
-    version: '1.0.4',
+    version: '1.5.0-rc.2',
     /**
      * OpenLayers Map instance
      * 
@@ -5380,16 +8267,6 @@ Ext.define('OpenEMap.Client', {
      */
     drawLayer: null,
     /**
-     * Clean up rendered elements
-     */
-    destroy: function() {
-        if (this.map) {
-            this.map.controls.forEach(function(control) { control.destroy(); });
-            this.map.controls = null;
-        }
-        if (this.gui) this.gui.destroy();
-    },
-    /**
      * Configure map
      * 
      * If this method is to be used multiple times, make sure to call destroy before calling it.
@@ -5408,16 +8285,17 @@ Ext.define('OpenEMap.Client', {
      * @param {Object} options.gui.objectConfig A generic form to configure feature attributes similar to a PropertyList
      * @param {Object} options.gui.zoomTools Zoom slider and buttons intended to be used as a floating control
      * @param {Object} options.gui.searchFastighet Search "fastighet" control
+     * @param {Object} options.gui.showCoordinate Simple control to show map coordinates 
      * 
      * For more information about the possible config properties for Ext JS components see Ext.container.Container.
      */
-    configure: function(config, options) {
+     configure: function(config, options) {
         options = Ext.apply({}, options);
         
         this.initialConfig = Ext.clone(config);
+        this.initialOptions = Ext.clone(options);
         
         Ext.tip.QuickTipManager.init();
-        
         
         var parser = Ext.create('OpenEMap.config.Parser');
 
@@ -5426,6 +8304,7 @@ Ext.define('OpenEMap.Client', {
             config: config,
             gui: options.gui,
             map: this.map,
+            client: this,
             orginalConfig: this.initialConfig
         });
         this.mapPanel = this.gui.mapPanel;
@@ -5434,6 +8313,13 @@ Ext.define('OpenEMap.Client', {
         if (this.gui.controlToActivate) {
             this.gui.controlToActivate.activate();
         }
+    },
+    /**
+     * @param {boolean} includeLayerRef include reference to OpenLayers layer if available
+     * @return {Object} Object representation of current Open eMap configuration
+     */
+    getConfig: function(includeLayerRef) {
+       return this.gui.mapLayers.getConfig(includeLayerRef); 
     },
     /**
      * @param {String=} Name of layout to use (default is to use first layout as reported by server)
@@ -5505,7 +8391,7 @@ Ext.define('OpenEMap.Client', {
                 });
                 
                 return edgeLabels;
-            }
+            };
             
             this.labelLayer.destroyFeatures();
             
@@ -5518,7 +8404,7 @@ Ext.define('OpenEMap.Client', {
             }
         };
         
-        if (this.labelLayer == null) {
+        if (this.labelLayer === null) {
             this.labelLayer = new OpenLayers.Layer.Vector();
             this.map.addLayer(this.labelLayer);
             
@@ -5534,6 +8420,235 @@ Ext.define('OpenEMap.Client', {
         }
         
         drawLabels.apply(this);
+    },
+    /**
+     * Helper method to add add a new vector layer to map.
+     * @param {string} geojson GeoJSON with features that should be added to map 
+     * @param {string} layername Layer name 
+     * @param {string} [idAttribute='id'] Name of the attribute stored in each feture that holds the a unique id. Defaults to 'id'. Must be unique.
+     * @param {string} [popupTextAttribute='popupText'] Name of the attribute stored in each feture that holds the information to be shown in a popup defaults to 'popupText'
+     * @param {string} [popupTextPrefix=''] Prefix to be shown in popup before the value in popupTextAttribute 
+     * @param {string} [popupTextSuffix=''] Suffix to be shown in popup before the value in popupTextAttribute
+     * @param {string} [popupTitleAttribute=null] Title for the popup
+     * @param {OpenLayers.Feature.Vector.Stylemap} [stylemap=deafult style] Stylemap used when drawing features in the layer. Uses default style if not specified
+     * @param {string} [epsg='EPSG:3006'] Coordinate system reference according to EPSG-standard, defaults to 'EPSG:3006' (Sweref 99 TM) 
+     * @param {Boolean} [zoomToBounds=true] Flags whether map should be zoomed to extent of features when the layer is added, defaults to true
+     * @return {OpenLayers.Layer} Returns the layer added. null if layer cant be created
+     */
+    addPopupLayer: function(geojson, layername, idAttribute, popupTextAttribute, popupTextPrefix, popupTextSuffix, popupTitleAttribute, stylemap, epsg, zoomToBounds) {
+        if (!geojson) {
+			Ext.Error.raise('GeoJSON-string is null.');
+        }
+        if (!layername) {
+        	// set default layer name 
+        	layername = "VectorLayer";
+        } 
+        if (!idAttribute) {
+        	idAttribute = 'id';
+        }
+        
+        if (!popupTextAttribute) {
+        	popupTextAttribute = 'popupText';
+        }
+
+		if (!popupTextPrefix) {
+			popupTextPrefix ='';
+		}
+		if (!popupTextSuffix) {
+			popupTextSuffix = '';
+		}
+		if (!popupTitleAttribute) {
+			popupTitleAttribute =null;
+		}
+		if (!epsg) {
+			epsg = 'EPSG:3006';
+		} 
+		if (!proj4(epsg))
+		{
+			Ext.Error.raise('Unknown coordinate system: ' + epsg + '\nAdd coordinate system using proj4.defs(\'Name\', \'Definition\')');
+		}
+		if (zoomToBounds === null) {
+			zoomToBounds = true;
+		} 
+
+        var format = new OpenLayers.Format.GeoJSON();
+
+		//  Projection settings 
+ 		var fromProjection = epsg;
+        var toProjection = this.map.projection;
+        format.internalProjection = new OpenLayers.Projection(toProjection);
+        format.externalProjection = new OpenLayers.Projection(fromProjection);
+
+        var features = format.read(geojson, "FeatureCollection");
+	    if (!features) {
+			Ext.Error.raise('Can not read features from GeoJSON due to malformed syntax.' );
+	    }
+ 		
+        // allow testing of specific renderers via "?renderer=Canvas", etc
+        var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
+        renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
+		
+	    // creating a vector layer with specific options that apply to popup layers
+	    var popupLayer = new OpenLayers.Layer.Vector(layername, {renderers: renderer, idAttribute: idAttribute, popupTextAttribute: popupTextAttribute, popupTextPrefix: popupTextPrefix, popupTextSuffix: popupTextSuffix, popupTitleAttribute: popupTitleAttribute} );
+	    if (!popupLayer){
+			Ext.Error.raise('Can not create popup layer: ' + layername);
+	    }
+
+		// Creates stylemap to use when drawing features of popup layer
+        if (stylemap) {
+			popupLayer.styleMap = stylemap;
+        }
+        
+        // Add layer to map 
+	  	this.map.addLayer(popupLayer);
+ 
+		// Add features to layer
+		popupLayer.addFeatures(features);
+		
+		// Set feature render intent an draws them
+		var featureBounds = new OpenLayers.Bounds();
+ 		features.forEach(function(feature) {
+ 			feature.renderIntent='default';
+ 			featureBounds.extend(feature.geometry.getBounds());
+ 			popupLayer.drawFeature(feature);
+		});
+		
+		popupLayer.popup = [];
+		
+		// Zoom to bounds of all features
+		if (zoomToBounds) {
+			popupLayer.map.zoomToExtent(featureBounds);
+		}
+
+	    return popupLayer;
+    },
+    /**
+     * Helper method to remove a popup layer
+     * @param {OpenLayers.Layer.Vector} [layer] Layer to remove
+     */
+    removePopupLayer: function(layer) {
+		// remove any popup windows too
+		if (layer.popup) { 
+			// Remove any popup window
+			layer.popup.forEach(function(p) {
+				p.destroy();
+				p = null;
+			});
+			layer.popup = [];
+    	}
+    	// Remove the layer
+		mapClient.map.removeLayer(layer);
+    },
+    /**
+     * Show popup for a feature
+     * @private 
+     * @param {OpenLayers.Layer.Vector} [popupLayer] layer to search for features
+     * @param {OpenLayers.Feature} [feature] feature to show popup on
+     */
+	showPopupFeaturePopup: function(popupLayer, feature) {
+    	// Destroy previously created popup
+    	if (popupLayer.popup) { 
+			// Remove any popup window
+			popupLayer.popup.forEach(function(item) {item.destroy();});
+    	}
+
+    	// get text to populate popup 
+    	var popupText = popupLayer.popupTextPrefix+feature.attributes[popupLayer.popupTextAttribute]+popupLayer.popupTextSuffix;
+    	var popupTitle = '';
+    	if (popupLayer.popupTitleAttribute) {
+    		popupTitle = feature.attributes[popupLayer.popupTitleAttribute];
+    	}
+
+    	// Create popup 
+    	var popup = new OpenEMap.view.PopupResults({mapPanel : this.gui.mapPanel, location: feature, popupText: popupText, feature: feature, title: popupTitle});
+
+		// Show popup
+        popup.show();
+		
+		// Adds popup to array of popups in map  
+        popupLayer.popup.push(popup);
+	},
+    /**
+     * Search for a feature inside a popup layer and show a popup if it matches. 
+     * @param {OpenLayers.Layer.Vector} [popupLayer] Layer to search for features
+     * @param {number} [featureId] Feature-id to search for
+     * @param {boolean} [center] Whether to center over clicked position or not.  
+     */
+    showPopupFeature: function(popupLayer, featureId, center) {
+    	if (!popupLayer) {
+			Ext.Error.raise('Popup layer undefined.');
+    	}
+    	if (!featureId) {
+			Ext.Error.raise('Feature id undefined.');
+    	}
+   	
+    	var features = popupLayer.getFeaturesByAttribute(popupLayer.idAttribute, featureId);
+    	// Check if there are any features matching id
+    	if (features) {
+    		// Check if there are more then one feature matching id
+    		if (features.length == 1) {
+	    		// Remove highlight feature
+                var parser = Ext.create('OpenEMap.config.Parser');
+                var popupLayers = parser.extractPopupLayers(popupLayer.map.layers);
+				popupLayers.forEach(function(popupLayer) {
+		    		popupLayer.features.forEach(function(feature) {
+		    			if (feature.renderIntent == 'select') {
+				    		feature.renderIntent = 'default';
+				    		feature.layer.drawFeature(feature);
+					    	// Fire action "popupfeatureunselected" on the feature including layer and featureid
+					    	feature.layer.map.events.triggerEvent("popupfeatureunselected",{layer: popupLayer, featureid: feature.attributes[popupLayer.idAttribute]});
+				    	}
+		    		});
+				});
+				
+	    		// Shows the first feature matching the id
+	    		this.showPopupFeaturePopup(popupLayer, features[0]);
+
+	    		// Highlight feature
+	    		features[0].renderIntent = 'select';
+	    		if (center) {
+	    			var centerPoint = features[0].geometry.getCentroid();
+	    			features[0].layer.map.setCenter([centerPoint.x,centerPoint.y]);
+	    		}
+	    		features[0].layer.drawFeature(features[0]);
+
+		    	// Fire action "popupfeatureselected" on the feature including layer and featureid
+		    	features[0].layer.map.events.triggerEvent("popupfeatureselected",{layer: popupLayer, featureid: features[0].attributes[popupLayer.idAttribute]});
+    		} else {
+				Ext.Error.raise('More then one feature with specified id: ' + featureId);
+    		}    		
+    	} else {
+			Ext.Error.raise('No feature with specified id: ' + featureId);
+    	}
+    },
+    /**
+     * Helper method to destroy all popup layers 
+     */
+    destroyPopupLayers: function() {
+        var parser = Ext.create('OpenEMap.config.Parser');
+    	var popupLayers = parser.extractPopupLayers(this.map.layers);
+		if (popupLayers) {
+			// Remove popup layers
+			popupLayers.forEach(function(layer) {
+				this.removePopupLayer(layer);
+			});
+		}
+    },
+    /**
+     * Clean up rendered elements
+     */
+    destroy: function() {
+        if (this.map) {
+        	if (this.map.controls) {
+	            this.map.controls.forEach(function(control) { control.destroy(); });
+	            this.map.controls = null;
+            }
+	        if (this.map.layers) {
+				// Remove popup layers
+				this.destroyPopupLayers();
+	        }
+        }
+        if (this.gui) this.gui.destroy();
     }
 });
 
@@ -5554,23 +8669,49 @@ Ext.apply(OpenEMap, {
      */
     basePathLM: '/search/lm/',
     /**
+     * @property {string} 
+     * Base path to be used for all AJAX requests against Elasticsearch REST API
+     */
+    basePathES: '/search/es/',
+    /**
      * Base path to be used for all image resources
      * 
      * @property {string}
      */
     basePathImages: 'resources/images/',
 
+    basePathWMS: '/geoserver/wms',
+    
     /**
-     * WS paths to be used for AJAX requests
-     * 
-     * @property {object}
+     * URL/paths related to WMS usage / advanced layer list
+     */
+    wmsURLs: {
+        /**
+         * URL to be used to fetch WMS capabilities etc. for add layer UI
+         */
+        basePath: '/geoserver/wms',
+        /**
+         * URL to be used when WMS layer has been added to config
+         */
+        url: 'https://extmaptest.sundsvall.se/geoserver/wms'
+    },
+
+    /**
+     * @property {string} 
+     * Base path to proxy to be used for WFS-post
+     */
+    basePathProxy: '/cgi-bin/proxy.py?url=',
+
+    /**
+     * @property {Object} [wsUrls] WS paths to be used for AJAX requests
      */
     wsUrls: {
-        basePath:   '/openemapadmin/',
-        configs:    'configurations/configs',
-        servers:    'settings/servers',
-        layers:     'layers/layers',
-        metadata:   'geometadata/getmetadatabyid', 
+        basePath:   	'/openemapadmin-1.5.0-rc.3/',
+        configs:    	'configs',
+        adminconfigs: 	'adminconfigs',
+        servers:    	'settings/servers',
+        layers:     	'layers/layers',
+        metadata:   	'geometadata/getmetadatabyid', 
         metadata_abstract: 'geometadata/getabstractbyid'
     }
 });
@@ -5585,13 +8726,31 @@ Ext.apply(OpenEMap, {
     }
 });
 
+
+OpenLayers.Layer.Vector.prototype.renderers = ["Canvas", "SVG", "VML"];
+	/**
+	 * @event popupfeatureselected 
+	 * fires when a feature in a popup layer is selected
+	 * @param {OpenLayers.layer} layer popup layer
+	 * @param {number} featureid id of selected feature 
+	 */
+	/**
+	 * @event popupfeatureunselected 
+	 * fires when a previously selected feature in a popup layer gets unselected
+	 * @param {OpenLayers.layer} layer popup layer
+	 * @param {number} featureid id of unselected feature 
+	 */
+
 Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 	extend :  Ext.window.Window ,
 	alias : 'widget.layerDetails',
 
 	           
 		                    
-		                                       
+		                    
+		                                        
+		                                        
+		                            
 	  
 	layout: {
 		type : 'border',
@@ -5621,6 +8780,21 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 		this.callParent(arguments);
 	},
 
+	getAttributeCollection: function(attributes){
+		var items = [];
+		for (var key in attributes){
+				var item = [key, '', false];
+				items.push(item);
+		}
+		return items;
+	},
+
+	getItem: function(item){
+		item.forEach(function(row){
+			console.log(row);
+		});
+	},
+
 	initComponent : function() {
 
 		var self = this;
@@ -5628,22 +8802,100 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 		this.y = Math.ceil(window.innerHeight / 2 - this.innerHeight / 2);
 
 		this.modal = true;
-		var pathArray = this.layer.wms.url.split('/');
-		var wfsUrl = 'adminproxy?url=' + pathArray[0] + '//' + pathArray[2] + (this.layer.wfs.url || '/wfs') + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + this.layer.name;
-		this.store = Ext.create('AdmClient.store.LayerDetails');
+		
+		
+		if (this.layer.wfs){
+			var wfsUrl = 'adminproxy?url=' + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + this.layer.name;
+			this.store = Ext.create('GeoExt.data.AttributeStore');
+			this.store.setUrl(wfsUrl);
+			this.store.load();
+		}
+		else if (this.layer.wms){
+			var pathArray = this.layer.wms.url.split('/');
 
-		this.store.addListener('load', function(store, records, successful, eOpts){
-			records.forEach(function(l){
-				if (self.layer.metadata && self.layer.metadata.attributes && self.layer.metadata.attributes[l.data.name] instanceof Object){
-					l.data.alias = self.layer.metadata.attributes[l.data.name].alias;
-					l.data.visible = true;
-				}
+			this.store = Ext.create('Ext.data.ArrayStore', {fields: [
+				{name: 'name'},
+                {name: 'alias'},
+                {name: 'visible', type: 'boolean', defaultValue: true}
+                ]
+            });
+
+			this.wmsStore = Ext.create('GeoExt.data.WmsCapabilitiesLayerStore',{
+				url: wmsGetCapabilities
 			});
-			store.update();
-		}); 
 
-		this.store.setUrl(wfsUrl);
-		this.store.load();
+			
+			
+				this.wmsStore.load({
+	                scope: this,
+	                callback: function(records, operation, success) {
+	                	var layerName = this.layer.name;
+	                    if(records && records.length > 0) {
+	                        
+	                        //var args = this;
+	                        records.forEach(function(record) {
+	                        	if (!this.layer.name) return;
+
+	                            var layerName = this.layer.name;
+	                            var currentLayerName = record.get('name');
+	                            if (layerName === currentLayerName){
+	                            	var boundaryBox = record.get('bbox');
+	                            	for (var srsName in boundaryBox){
+	                            		var boundary = boundaryBox[srsName].bbox;
+	                            		var extent = new OpenLayers.Bounds.fromArray(boundary);
+
+	                            		var requestUrl = 'adminproxy?url=' + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
+	                            		 	'&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
+	                            		 Ext.Ajax.request({
+	                            		 	scope: this,
+	                            		 	url: requestUrl,
+	                            		 	success: function(){
+	                            		 		var format = new OpenLayers.Format.GML();
+	                            		 		var feature = format.read(arguments[0].responseXML);
+	                            		 		var fields = this.getAttributeCollection(feature[0].attributes);
+	                            		 		
+
+	                            		 		if (this.layer.metadata && this.layer.metadata.attributes && this.layer.metadata.attributes instanceof Object){
+	                            		 			var attributesInLayer = this.layer.metadata.attributes;
+	                            		 			for (var attribute in attributesInLayer){
+	                            		 				var item = fields.filter(function(f){
+	                            		 					return f[0] === attribute;
+	                            		 				});
+	                            		 				if (item.length > 0){
+	                            		 					item[0][1] = item[0][1] === '' ? attributesInLayer[attribute].alias : item[0][1];
+	                            		 					item[0][2] = true;
+	                            		 				}
+	                            		 			}
+	                            		 			
+	                            		 			
+
+	                            		 		}
+	                            		 		this.store.loadData(fields);
+											}
+	                            		 	
+	                            		 });
+	                            	}
+	                            }
+	                        }, this);
+	                    } else {
+	                        // !TODO Throw error
+	                    }
+	                }
+	            });
+			
+
+		}
+		if (this.store){
+			this.store.addListener('load', function(store, records, successful, eOpts){
+				records.forEach(function(l){
+					if (self.layer.metadata && self.layer.metadata.attributes && self.layer.metadata.attributes[l.data.name] instanceof Object){
+						l.data.alias = self.layer.metadata.attributes[l.data.name].alias;
+						l.data.visible = true;
+					}
+				});
+				store.update();
+			});
+		}
 
 		this.cellEditing = new Ext.grid.plugin.CellEditing({
 			clicksToEdit : 1
@@ -5653,7 +8905,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 			region: 'center',
 			xtype: 'grid',
 			itemId: 'layerDetailsGrid',
-			store: this.store,
+			store: this.store || undefined,
 
 			plugins : [ this.cellEditing ],
 			columns: [{
@@ -5697,7 +8949,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 				}
 			}
 			]
-		}]
+		}],
 
 		this.callParent(arguments);
 	}
@@ -5736,7 +8988,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 						height : 30,
 		            	width: 500,
 						enableKeyEvents : true,
-						value: typeof defaultWMSServer !== 'undefined' ? defaultWMSServer : ''
+						value: typeof wmsGetCapabilities !== 'undefined' ? wmsGetCapabilities : ''
 					},
 					{
 			            xtype : 'treepanel',
@@ -5807,21 +9059,47 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		                tooltip: 'Baslager',
 		                text: 'Baslager',
 		                width: 70,
-		               	dataIndex: 'isBaseLayer'
+		               	dataIndex: 'isBaseLayer',
+		               	renderer: function(value, meta){
+		                	if ((meta.record.get('isGroupLayer')) || (meta.record.get('id') === 'root')){
+		                		return '<span></span>';
+		                	}
+		                	return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
+		                }
 		            },
 		            {
 		                xtype: 'checkcolumn',
 		                width: 70,
 		                tooltip: 'Synlig',
 		                text: 'Synlig',
-		                dataIndex: 'visibility'
+		                dataIndex: 'visibility',
+		                renderer: function(value, meta){
+		                	if ((meta.record.get('isGroupLayer')) || (meta.record.get('id') === 'root')){
+		                		return '<span></span>';
+		                	}
+		                	return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
+		                }
 		            },
 		            {
 		                xtype: 'checkcolumn',
 		                width: 70,
-		                tooltip: 'S&ouml;kbar',
-		                text: 'S&ouml;kbar',
-		                dataIndex: 'searchable'
+		                tooltip: 'Klickbart lager',
+		                text: 'Klickbar',
+		                dataIndex: 'clickable',
+		                renderer: function(value, meta){
+		                	if ((meta.record.get('isGroupLayer')) || (meta.record.get('id') === 'root')){
+		                		return '<span></span>';
+		                	}
+
+		                	if (!meta.record.get('queryable')){
+		                		return '<span></span>';
+		                	}
+
+		                	if (meta.record.get('clickable')){
+		                		return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
+		                	}
+		                	return Ext.grid.column.CheckColumn.prototype.renderer.apply(this, arguments);
+		                }
 		            },
 		            {
 		                xtype: 'actioncolumn',
@@ -5840,11 +9118,20 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 						}
 		            },{
 		            	xtype: 'actioncolumn',
-		            	with: 70,
-		            	tooltip: 'Alias kolumner, sökbart etc',
+		            	width: 70,
+		            	tooltip: 'Alias kolumner, s&ouml;kbart etc',
 		            	align: 'center',
 		            	text: 'Inst&auml;llningar',
-		            	icon: '/openemap-admin/font-awesome/black/png/16/table.png',
+		            	isDisabled: function(view, ri, ci, item, record){
+		            		return record.data.isGroupLayer;
+		            	},
+		            	//icon: '/openemap-admin/font-awesome/black/png/16/table.png',
+		            	renderer:function(value, meta){
+		            		if (!meta.record.get('queryable')){
+		            			return '<span></span>';
+		            		}
+		            		return '<img role="button" class="x-action-col-icon x-action-col-0" src="/openemap-admin/font-awesome/black/png/16/table.png" />';
+		            	},
 		            	handler : function(grid, rowIdex, colIndex){
 		            		var selectedLayer = null;
 		            		if (grid.getStore().data.items[rowIdex].childNodes.length === 0){
@@ -6014,6 +9301,8 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 			Ext.MessageBox.alert('"Default" is an invalid configuration name.', 'You are trying to write to a write protected template. Choose another template name');
 			return;
 		}
+		
+		AdmClient.app.config.isPublic = true;
 		var url = appPath + '/adminconfigs/config';
 		url += AdmClient.app.config.configId === undefined ? '' : ('/' + AdmClient.app.config.configId);
 		var method = AdmClient.app.config.configId === undefined ? 'POST' : 'PUT';
@@ -6507,9 +9796,12 @@ Ext.define('AdmClient.model.Layer', {
     	'isSearchable',
     	'urlToMetadata',
     	'serverId',
+        {name: 'queryable', type: 'boolean', defaultValue: false},
+    	{name: 'clickable', type: 'boolean', defaultValue: false},
+    	{name: 'isGroupLayer', type: 'boolean', defaultValue: false},
     	{name: 'isBaseLayer', mapping: 'wms.options.isBaseLayer',  type : 'boolean'},
         {name: 'visibility', mapping: 'wms.options.visibility', type: 'boolean'},
-        {name: 'searchable', mapping: 'wfs', type: 'object'},
+        {name: 'wfs', mapping: 'wfs', type: 'object'},
     	'layer' // OpenLayers reference
     ],
     proxy: {
@@ -6715,6 +10007,7 @@ Ext.define('AdmClient.controller.Layers', {
         
         var layer = Ext.create('AdmClient.model.Layer', {
             name: wmslayer.get('name'),
+            isGroupLayer : null,
             wms: {
                 params: {
                     layers: wmslayer.get('name')
@@ -6925,9 +10218,507 @@ Ext.define('AdmClient.controller.PreviewMap', {
 	
 	
 });
+/**
+ * Grouped layer tree store
+ * Ext.data.TreeStore extended to support OpenEMap layer configuration including layer groups
+ */
+
+Ext.define('AdmClient.store.GroupedLayerTree' ,{
+    extend:  Ext.data.TreeStore ,
+
+               
+                            
+                                     
+                                                
+                                                
+                               
+      
+    id: 'configurationTreeStore',
+
+    model: 'AdmClient.model.Layer',
+    defaultRootProperty: 'layers',
+
+    proxy: {
+        type: 'memory'
+    },
+
+    maxLayerIndex: 1000,
+
+    listeners: {
+        beforeinsert: function(store, node, refNode, eOpts) { return this.onBeforeInsert(store, node, refNode); },
+        beforeappend: function(store, node, eOpts) { return this.onBeforeAppend(store, node); },
+        insert: function(store, node, refNode, eOpts) { this.onInsert(node); },
+        append: function(store, node, index, eOpts) { this.onAppend(node); },// this.onInsertAndAppend(node); },
+        remove: function(store, node, isMove, eOpts) { this.onRemove(store, node, isMove); },
+        datachanged: function() { this.onUpdate(); },
+        layerMetadataChange: function(){
+            AdmClient.app.config.layers = this.getLayerConfiguration(null);
+        }
+    },
+
+    constructor: function(config) {
+        config = Ext.apply({}, config);
+        this.callParent([config]);
+        
+    },
+
+    /*
+    * Since not all models include all AdmClient attributes, like wms and wfs
+    * try to get attributes from the raw json data. As a last solution set defaults
+    * @param    {Ext.data.NodeInterface}    node        node to search for attributes in
+    * @param    {string}                    attribute   searched attribute
+    */
+    tryToGetRecordAttribute: function(node, attribute) {
+        var attr = null;
+        var modelNodeAttr = node.get(attribute);
+        
+        if( (modelNodeAttr && typeof modelNodeAttr !== 'undefined')) {
+            attr = modelNodeAttr;
+        } else if(typeof node.data[attribute] !== 'undefined') {
+            attr = node.data[attribute];
+        }
+        
+        // Set defaults
+        if(attribute === 'wms' && typeof modelNodeAttr === 'string') {
+            attr = { url: '', options: {}, params: {} };
+        } else if(attribute === 'wfs' && typeof modelNodeAttr === 'string') {
+            attr = { url: '', featureType: '', featurePrefix: '' };
+        }
+        
+        if (attribute === 'wms' && !modelNodeAttr){
+        	attr = attr || {};
+        	attr.params = node.raw.params;
+        	attr.url = node.raw.url;
+        	attr.options = {
+        	     "isBaseLayer": false,
+        	     "visibility": false
+        	    };
+        	if (node.raw.options && node.raw.options.metadata && node.raw.options.metadata.metadataURLs && node.raw.options.metadata.metadataURLs.length > 0){
+        		attr.metadataUrl = node.raw.options.metadata.metadataURLs[0].href;
+        	}
+        }
+        
+        return attr;
+    },
+    
+    /*
+    * Converts a store node to layer configuration
+    * !TODO Change into writer and add something like nameProperty: 'mapping' to get mapped JSON
+    * @param  {Ext.data.NodeInterface}    node    Node to convert
+    * @return {object}                    layer   OpenEMap layer
+    */
+    nodeToLayerConfig: function(node, data) {
+        var attributeList = ['name','wms','wfs','metadataUrl', 'isGroupLayer', 'queryable', 'clickable'];
+        var layer = {};
+
+        if(node.hasChildNodes()) {
+            layer.layers = [];
+            return layer;
+        }
+        
+        attributeList.forEach(function(attributeName) {
+            var attr = this.tryToGetRecordAttribute(node, attributeName);
+            if(attr !== undefined) {
+                layer[attributeName] = attr;
+            }
+        }, this);
+
+        if(layer.wms && layer.wms.options) {
+            var isBaseLayer = this.tryToGetRecordAttribute(node, 'isBaseLayer');
+            if(!isBaseLayer) {
+                isBaseLayer = false;
+            }
+            
+            layer.wms.options.isBaseLayer = isBaseLayer;
+            layer.wms.options.visibility = this.tryToGetRecordAttribute(node, 'visibility');
+            
+            if (layer.wms.options.visibility === undefined || layer.wms.options.visibility === null){
+                layer.wms.options.visibility = false;
+            }
+
+            if (node.data.metadata && node.data.metadata !== ''){
+                layer.metadata = node.data.metadata;
+            }
+            node.set('wms', layer.wms);
+            
+            var queryable = this.tryToGetRecordAttribute(node, 'queryable');
+            var clickable = this.tryToGetRecordAttribute(node, 'clickable');
+            var isWmsInfo = this.tryToGetRecordAttribute(node, 'isWmsInfo');
+            if ((queryable && clickable) || (clickable && this._updating)){
+            	//OK rebuild logic here to determine of there is WFS get Feature, or WMSGetFeatureInfo
+            	var layerPieces = layer.wms.params.LAYERS.split(':');
+            	
+                if (!isWmsInfo){
+                    layer.wfs = {};
+                    layer.wfs.featurePrefix = layerPieces[0];
+                    layer.wfs.featureType = layerPieces[1];
+                    layer.wfs.url = wfsServer;
+                    node.set('wfs', layer.wfs);
+                }else{
+                    node.set('description', 'Added by OpeEMap Admin');
+                }
+                
+            }else {
+                if (layer.wfs) delete layer.wfs;
+            }
+            
+            /*if (data && data.name && node.get('name') === data.name){ // handle visibility
+            	layer.wms.options.visibility = data.checked;
+            }*/
+        }
+        
+        return layer;
+    },
+
+    /**
+    * Returns all layers as OpenEMap layer configuration tree.
+    * @return {object} layerConfig  OpenEMap layer configuration
+    */
+    getLayerConfiguration: function(data) {
+
+    	var layerConfig  = [];
+    
+        // Get layers and sublayers.
+        // TODO: clean up
+    	var offset = layerConfig.length;
+        var index = 0;
+        this.getRootNode().childNodes.forEach(function(node, i) {
+            index = offset + i;
+            layerConfig[index] = this.nodeToLayerConfig(node, data);
+            
+            node.childNodes.forEach(function(subnode) {
+                if(layerConfig[index].layers) {
+                    layerConfig[index].name = subnode.parentNode.get('name');
+                    layerConfig[index].isGroupLayer = subnode.parentNode.get('isGroupLayer');
+                    layerConfig[index].layers.push(this.nodeToLayerConfig(subnode));
+                }
+            }, this);
+        }, this);
+        return layerConfig;
+    },
+
+    /**
+    * Before append to store
+    * @param {Ext.data.Model} node
+    * @param {Ext.data.Model} appendNode
+    */
+    onBeforeAppend: function(node, appendNode) {
+        // Prevent groups from being added to groups
+        if(node && !node.isRoot() && !appendNode.isLeaf()) {
+            return false;
+        }
+        
+        return true;
+    },
+
+    /**
+    * Before insert to store
+    * @param {Ext.data.Store} store
+    * @param {Ext.data.Model} node
+    * @param {Ext.data.Model} refNode
+    */
+    onBeforeInsert: function(store, node, refNode) {
+        // Prevent groups from being added to groups
+        if(!refNode.parentNode.isRoot() && !node.isLeaf()) {
+            return false;
+        }
+        
+        return true;
+    },
+    
+    onInsert: function(node) {
+    	//console.log(node);
+        this.newNodeUpdate(node.data);
+    },
+    
+    onAppend: function(node) {
+    	this.newNodeUpdate(node.data);
+    },
+
+    /**
+     * Handler for a store's insert and append event.
+     *
+     * @param {Ext.data.Model} node
+     */
+    
+    //this function is obselete??
+    onInsertAndAppend: function(node) {
+        if(!this._inserting) {
+            this._inserting = true;
+            
+            // Add this node layers and subnodes to map. 
+            node.cascadeBy(function(subnode) {
+
+                // If this node is a GeoExt layer, then the raw model is an OpenLayers layer
+                if(subnode.raw && subnode.raw.CLASS_NAME && subnode.raw.CLASS_NAME.indexOf('OpenLayers.Layer') > -1) {
+                    // Store a reference to the OpenLayers layer.
+                    subnode.set('layer',subnode.raw);
+
+                    // Insert WMS params
+                    if(subnode.raw.CLASS_NAME.indexOf('OpenLayers.Layer.WMS') > -1) {
+                        subnode.set('wms',{
+                            url: subnode.raw.url,
+                            params: subnode.raw.params,
+                            options: {
+                                isBaseLayer: false,
+                                visibility: false
+                            }
+                        });
+                        subnode.set('checked', false);
+                        if(subnode.raw.options && subnode.raw.options.metadata && subnode.raw.options.metadata.metadataURLs && subnode.raw.options.metadata.metadataURLs.length > 0) {
+                            subnode.set('metadataUrl', subnode.raw.options.metadata.metadataURLs[0].href);
+                        }
+                    }
+                }
+
+                var layer = subnode.get('layer');
+
+                // Add getLayer function to support GeoExt
+                subnode.getLayer = function() {
+                    return this.get('layer');
+                };
+                // Add WMS legened 
+                this.addWMSLegend(subnode);
+
+                // If store is connected to a map, add layer to map
+                if(layer && layer !== '' && this.map) {
+                    var mapLayer = this.map.getLayer(layer);
+                    if(mapLayer === null && layer && layer.displayInLayerSwitcher === true) {
+                        this.map.addLayer(layer);
+                    }
+                }
+            }, this);
+
+            // Reorder layers on map
+            this.reorderLayersOnMap();
+    
+            delete this._inserting;
+        }
+        
+    },
+
+    layerUpdate : function(){
+         AdmClient.app.config.layers = this.getLayerConfiguration(null);
+    },
+
+    newNodeUpdate: function(data){
+        this.data = data;
+        if (!data.wfs){ // new layer
+                    // first check for wfs then wms
+            var wfsUrl = 'adminproxy?url=' + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + data.name || data.wms.params.LAYERS;
+            var localWfsStore = Ext.create('GeoExt.data.AttributeStore');
+            localWfsStore.setUrl(wfsUrl);
+            localWfsStore.load({
+                scope: this,
+                callback: function(records, operation, success) {
+            	if (records.length === 0){ // Not wfs then wms
+                    var layerName = data.name;
+                    var wmsStore = Ext.create('GeoExt.data.WmsCapabilitiesLayerStore',{
+                        url: wmsGetCapabilities
+                    });
+
+                    if (records.length === 0){
+
+                        wmsStore.load({
+                            scope: this,
+                            callback: function(records, operation, success) {
+                            
+                            if(records && records.length > 0) {
+                            
+                                //var args = this;
+                                records.forEach(function(record) {
+                                    
+                                    var layerName = this.data.name;
+                                    var currentLayerName = record.get('name');
+                                    if (layerName === currentLayerName){
+                                        var boundaryBox = record.get('bbox');
+                                        for (var srsName in boundaryBox){
+                                            var boundary = boundaryBox[srsName].bbox;
+                                            var extent = new OpenLayers.Bounds.fromArray(boundary);
+
+                                            var requestUrl = 'adminproxy?url=' + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
+                                                '&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
+                                            Ext.Ajax.request({
+                                                scope: this,
+                                                url: requestUrl,
+                                                success: function(){
+                                                    var format = new OpenLayers.Format.GML();
+                                                    var feature = format.read(arguments[0].responseXML);
+                                                
+                                                    
+                                                    
+                                                    if (this.data.metadata === '' || !this.data.metadata){
+                                                        this.data.metadata = {};
+                                                        this.data.metadata.attributes = {};
+                                                    }
+                                                    for (var attribute in feature[0].attributes){
+                                                        //var item = [attribute, attribute, true];
+                                                        this.data.metadata.attributes[attribute] = {
+                                                            "alias" : attribute
+                                                        };
+                                                    }
+                                                    this.data.clickable = true; 
+                                                    this.data.isWmsInfo = true;
+                                                    AdmClient.app.config.layers = this.getLayerConfiguration(this.data);
+                                                }
+                                            });
+                                        }
+                                    }
+                                }, this);
+                            }
+                            } // callback
+                        }); // load wms
+                    }
+                } else{ // it is wfs
+                    records.forEach(function(a){
+                        if (this.data.metadata === '' || !this.data.metadata){
+                            this.data.metadata = {};
+                            this.data.metadata.attributes = {};
+                        }
+                        this.data.metadata.attributes[a.data.name] = {
+                            "alias" : a.data.name
+                        };
+                    }, this);
+                    this.data.clickable = true;
+                    this.data.isWmsInfo = false;
+                    AdmClient.app.config.layers = this.getLayerConfiguration(this.data);
+                }
+                }
+            });
+        }
+    },
+
+    onUpdate: function(chkBox, opt, eOpts ) {
+        if(!this._updating) {
+            this._updating = true;
+
+            var data = null;
+            if (chkBox && chkBox.data)
+            	data = chkBox.data;
+
+            if (data && data.id === "root"){
+                this._updating = false;
+                return;
+            }
+
+            if (data && data.clickable){
+                //determine wfs or wms
+            	this.newNodeUpdate(data);
+                //check if wms or wfs already in configuration
+
+
+            }else if (data && !data.clickable){
+                delete data.wfs;
+                delete data.metadata;
+                data.clickable = false;
+                var s = Ext.getStore('configurationTreeStore');
+                AdmClient.app.config.layers = s.getLayerConfiguration(data);
+            }
+            else{
+                AdmClient.app.config.layers = this.getLayerConfiguration(data);
+            }
+        }
+        this._updating = false;
+    },
+
+    /**
+     * Handler for a store's remove event.
+     *
+     * @param {Ext.data.Store} store
+     * @param {Ext.data.Model} node
+     * @param {Boolean} isMove
+     * @private
+     */
+    onRemove: function(store, node, isMove) {
+        if(!this._removing && !isMove) {
+            this._removing = true;
+            // Remove layer and sublayers from map
+            node.cascadeBy(function(subnode) {
+                var layer = subnode.get('layer');
+                if(layer && layer.map) {
+                    this.map.removeLayer(layer);
+                }
+            }, this);
+
+            // Remove layers from app configuration
+            //AdmClient.app.config.layers = this.getLayerConfiguration();
+
+            delete this._removing;
+        }
+    },
+
+    /**
+     * Reorder map layers from store order
+     *
+     * @private
+     */
+    reorderLayersOnMap: function() {
+        if(this.map) {
+            var node = this.getRootNode();
+            if(node) {
+                var i = this.maxLayerIndex;
+                node.cascadeBy(function(subnode) {
+                    var layer = subnode.get('layer');
+                    if(layer) {
+                        layer.setZIndex(i);
+                        i--;
+                    }
+                   
+                }, this);
+            }
+        }
+    },
+
+    /**
+    * Adds a WMS-legend to a node
+    * @param {Ext.data.Model} node
+    * @return {Ext.data.Model} node
+    */
+    addWMSLegend: function(node) {
+        if(node.get('layer')) {
+            node.gx_wmslegend = Ext.create('GeoExt.container.WmsLegend',{
+                layerRecord: node,
+                showTitle: false,
+                hidden: true,
+                deferRender: true,
+                // custom class for css positioning
+                // see tree-legend.html
+                cls: "legend"
+            });
+        }
+        return node;
+    },
+
+    /**
+     * Unbind this store from the map it is currently bound.
+     */
+    unbind: function() {
+        var me = this;
+        me.un('beforeinsert', me.onBeforeInsert, me);
+        me.un('beforeappend', me.onBeforeAppend, me);
+        me.un('insert', me.onInsertAndAppend, me);
+        me.un('append', me.onInsertAndAppend, me);
+        me.un('remove', me.onRemove, me);
+        me.map = null;
+    },
+
+    /**
+     * Unbinds listeners by calling #unbind prior to being destroyed.
+     *
+     * @private
+     */
+    destroy: function() {
+        //this.unbind();
+        //this.callParent();
+    }
+});
+
 Ext.define('AdmClient.controller.ConfigLayers', {
     extend :  Ext.app.Controller ,
-                                                                    
+                                                                   
+                                                        
+                                                  
+                  
     refs: [
         {
             ref: 'mapConfigLayerTree',
@@ -6943,6 +10734,7 @@ Ext.define('AdmClient.controller.ConfigLayers', {
         }
     ],
     views: ['mapconfiguration.layer.LayerPanel'],
+    stores :['GroupedLayerTree'],
     
     init : function() {
         this.control({
@@ -6961,7 +10753,7 @@ Ext.define('AdmClient.controller.ConfigLayers', {
                 scope: this
             },
             'checkcolumn' : {
-            	checkchange : this.onBaseLayer
+            	checkchange : this.onChangeLayer
             }
         });
 
@@ -6980,13 +10772,14 @@ Ext.define('AdmClient.controller.ConfigLayers', {
                 var tree = self.getMapConfigLayerTree();
                 var root = tree.getRootNode();
                 root.appendChild({
-                    name : text
+                    name : text,
+                    isGroupLayer: true
                 });
             }
         });
     },
     
-    onBaseLayer : function(chkBox, rowIndex, checked, eOpts){
+    onChangeLayer : function(chkBox, rowIndex, checked, eOpts){
     	var layerTree = this.getMapConfigLayerTree();
     	layerTree.store.save();
     },
@@ -7476,7 +11269,7 @@ Ext.define('AdmClient.controller.toolDetails.DetailReport', {
 			}
 		}
 		else{
-			if (/DetailsReport/.test(toolObject.toolName)){
+			if (/DetailReport/.test(toolObject.toolName)){
 				
 				for (var i = 0; i < AdmClient.app.config.tools.length; i++){
 					var tool = AdmClient.app.config.tools[i];
@@ -7929,6 +11722,7 @@ Ext.define('AdmClient.store.ToolStore', {
 			[ 'Print', 'Print', 'Tool for printing.', false ],
 			[ 'ModifyGeometry', 'Modify geometry', 'Tool for modify geometry.', false ],
 			[ 'DetailReport', 'Detail report', 'Tool for detail report.', false]
+			//[ 'A', 'Detail report', 'Tool for detail report.', false]
 	]
 	
 });
@@ -7974,369 +11768,6 @@ Ext.define('AdmClient.store.Municipalities', {
 	         [ 'Nordmaling', '2401', false ]
 	]
 });
-Ext.define('AdmClient.store.LayerDetails', {
-    extend:  GeoExt.data.AttributeStore 
-});
-/**
- * Grouped layer tree store
- * Ext.data.TreeStore extended to support OpenEMap layer configuration including layer groups
- */
-
-Ext.define('AdmClient.store.GroupedLayerTree' ,{
-    extend:  Ext.data.TreeStore ,
-
-               
-                                     
-                               
-      
-
-    model: 'AdmClient.model.Layer',
-    defaultRootProperty: 'layers',
-
-    proxy: {
-        type: 'memory'
-    },
-
-    maxLayerIndex: 1000,
-
-    listeners: {
-        beforeinsert: function(store, node, refNode, eOpts) { return this.onBeforeInsert(store, node, refNode); },
-        beforeappend: function(store, node, eOpts) { return this.onBeforeAppend(store, node); },
-        //insert: function(store, node, refNode, eOpts) { this.onInsertAndAppend(node); },
-        //append: function(store, node, index, eOpts) { this.onInsertAndAppend(node); },
-        remove: function(store, node, isMove, eOpts) { this.onRemove(store, node, isMove); },
-        datachanged: function() { this.onUpdate(); },
-        layerMetadataChange: function(){
-            AdmClient.app.config.layers = this.getLayerConfiguration(null);
-        }
-    },
-
-    constructor: function(config) {
-        config = Ext.apply({}, config);
-        this.callParent([config]);
-        
-    },
-
-    /*
-    * Since not all models include all AdmClient attributes, like wms and wfs
-    * try to get attributes from the raw json data. As a last solution set defaults
-    * @param    {Ext.data.NodeInterface}    node        node to search for attributes in
-    * @param    {string}                    attribute   searched attribute
-    */
-    tryToGetRecordAttribute: function(node, attribute) {
-        var attr = null;
-        var modelNodeAttr = node.get(attribute);
-        
-        if( (modelNodeAttr && typeof modelNodeAttr !== 'undefined')) {
-            attr = modelNodeAttr;
-        } else if(typeof node.raw[attribute] !== 'undefined') {
-            attr = node.raw[attribute];
-        }
-        
-        // Set defaults
-        if(attribute === 'wms' && typeof modelNodeAttr === 'string') {
-            attr = { url: '', options: {}, params: {} };
-        } else if(attribute === 'wfs' && typeof modelNodeAttr === 'string') {
-            attr = { url: '', featureType: '', featurePrefix: '' };
-        }
-        
-        if (attribute === 'wms' && !modelNodeAttr){
-        	attr = attr || {};
-        	attr.params = node.raw.params;
-        	attr.url = node.raw.url;
-        	attr.options = {
-        	     "isBaseLayer": false,
-        	     "visibility": false
-        	    };
-        	if (node.raw.options && node.raw.options.metadata && node.raw.options.metadata.metadataURLs && node.raw.options.metadata.metadataURLs.length > 0){
-        		attr.metadataUrl = node.raw.options.metadata.metadataURLs[0].href;
-        	}
-        }
-        
-        return attr;
-    },
-    
-    /*
-    * Converts a store node to layer configuration
-    * !TODO Change into writer and add something like nameProperty: 'mapping' to get mapped JSON
-    * @param  {Ext.data.NodeInterface}    node    Node to convert
-    * @return {object}                    layer   OpenEMap layer
-    */
-    nodeToLayerConfig: function(node, data) {
-        var attributeList = ['name','wms','wfs','metadataUrl'];
-        var layer = {};
-
-        if(node.hasChildNodes()) {
-            layer.layers = [];
-            return layer;
-        }
-        
-        attributeList.forEach(function(attributeName) {
-            var attr = this.tryToGetRecordAttribute(node, attributeName);
-            if(attr) {
-                layer[attributeName] = attr;
-            }
-        }, this);
-
-        if(layer.wms && layer.wms.options) {
-            var isBaseLayer = this.tryToGetRecordAttribute(node, 'isBaseLayer');
-            if(!isBaseLayer) {
-                isBaseLayer = false;
-            }
-            layer.wms.options.isBaseLayer = isBaseLayer;
-            layer.wms.options.visibility = this.tryToGetRecordAttribute(node, 'visibility');
-            
-            if (layer.wms.options.visibility === undefined || layer.wms.options.visibility === null){
-                layer.wms.options.visibility = false;
-            }
-
-            if (node.data.metadata && node.data.metadata !== ''){
-                layer.metadata = node.data.metadata;
-            }
-            
-            var searchable = this.tryToGetRecordAttribute(node, 'searchable');
-            if (searchable){
-                if (!layer.wfs){
-                    layer.wfs = {};
-                }
-                var layerPieces = layer.wms.params.LAYERS.split(':');
-                layer.wfs.featurePrefix = layerPieces[0];
-                layer.wfs.featureType = layerPieces[1];
-                layer.wfs.url = '/wfs';
-            }else {
-                if (layer.wfs) delete layer.wfs;
-            }
-            
-            /*if (data && data.name && node.get('name') === data.name){ // handle visibility
-            	layer.wms.options.visibility = data.checked;
-            }*/
-        }
-        
-        return layer;
-    },
-
-    /**
-    * Returns all layers as OpenEMap layer configuration tree.
-    * @return {object} layerConfig  OpenEMap layer configuration
-    */
-    getLayerConfiguration: function(data) {
-
-    	var layerConfig  = [];
-    
-        // Get layers and sublayers.
-        // TODO: clean up
-    	var offset = layerConfig.length;
-        var index = 0;
-        this.getRootNode().childNodes.forEach(function(node, i) {
-            index = offset + i;
-            layerConfig[index] = this.nodeToLayerConfig(node, data);
-            
-            node.childNodes.forEach(function(subnode) {
-                if(layerConfig[index].layers) {
-                    layerConfig[index].name = subnode.parentNode.get('name');
-                    layerConfig[index].layers.push(this.nodeToLayerConfig(subnode));
-                }
-            }, this);
-        }, this);
-        return layerConfig;
-    },
-
-    /**
-    * Before append to store
-    * @param {Ext.data.Model} node
-    * @param {Ext.data.Model} appendNode
-    */
-    onBeforeAppend: function(node, appendNode) {
-        // Prevent groups from being added to groups
-        if(node && !node.isRoot() && !appendNode.isLeaf()) {
-            return false;
-        }
-        return true;
-    },
-
-    /**
-    * Before insert to store
-    * @param {Ext.data.Store} store
-    * @param {Ext.data.Model} node
-    * @param {Ext.data.Model} refNode
-    */
-    onBeforeInsert: function(store, node, refNode) {
-        // Prevent groups from being added to groups
-        if(!refNode.parentNode.isRoot() && !node.isLeaf()) {
-            return false;
-        }
-        return true;
-    },
-
-    /**
-     * Handler for a store's insert and append event.
-     *
-     * @param {Ext.data.Model} node
-     */
-    onInsertAndAppend: function(node) {
-        if(!this._inserting) {
-            this._inserting = true;
-            
-            // Add this node layers and subnodes to map. 
-            node.cascadeBy(function(subnode) {
-
-                // If this node is a GeoExt layer, then the raw model is an OpenLayers layer
-                if(subnode.raw && subnode.raw.CLASS_NAME && subnode.raw.CLASS_NAME.indexOf('OpenLayers.Layer') > -1) {
-                    // Store a reference to the OpenLayers layer.
-                    subnode.set('layer',subnode.raw);
-
-                    // Insert WMS params
-                    if(subnode.raw.CLASS_NAME.indexOf('OpenLayers.Layer.WMS') > -1) {
-                        subnode.set('wms',{
-                            url: subnode.raw.url,
-                            params: subnode.raw.params,
-                            options: {
-                                isBaseLayer: false,
-                                visibility: false
-                            }
-                        });
-                        subnode.set('checked', false);
-                        if(subnode.raw.options && subnode.raw.options.metadata && subnode.raw.options.metadata.metadataURLs && subnode.raw.options.metadata.metadataURLs.length > 0) {
-                            subnode.set('metadataUrl', subnode.raw.options.metadata.metadataURLs[0].href);
-                        }
-                    }
-                }
-
-                var layer = subnode.get('layer');
-
-                // Add getLayer function to support GeoExt
-                subnode.getLayer = function() {
-                    return this.get('layer');
-                };
-                // Add WMS legened 
-                this.addWMSLegend(subnode);
-
-                // If store is connected to a map, add layer to map
-                if(layer && layer !== '' && this.map) {
-                    var mapLayer = this.map.getLayer(layer);
-                    if(mapLayer === null && layer && layer.displayInLayerSwitcher === true) {
-                        this.map.addLayer(layer);
-                    }
-                }
-            }, this);
-
-            // Reorder layers on map
-            this.reorderLayersOnMap();
-    
-            delete this._inserting;
-        }
-        
-    },
-
-    layerUpdate : function(){
-         AdmClient.app.config.layers = this.getLayerConfiguration(null);
-    },
-
-    onUpdate: function(chkBox, opt, eOpts ) {
-        if(!this._updating) {
-            this._updating = true;
-
-            var data = null
-            if (chkBox && chkBox.data)
-            	data = chkBox.data;
-            AdmClient.app.config.layers = this.getLayerConfiguration(data);
-
-            delete this._updating;
-        }
-    },
-
-    /**
-     * Handler for a store's remove event.
-     *
-     * @param {Ext.data.Store} store
-     * @param {Ext.data.Model} node
-     * @param {Boolean} isMove
-     * @private
-     */
-    onRemove: function(store, node, isMove) {
-        if(!this._removing && !isMove) {
-            this._removing = true;
-            // Remove layer and sublayers from map
-            node.cascadeBy(function(subnode) {
-                var layer = subnode.get('layer');
-                if(layer && layer.map) {
-                    this.map.removeLayer(layer);
-                }
-            }, this);
-
-            // Remove layers from app configuration
-            AdmClient.app.config.layers = this.getLayerConfiguration();
-
-            delete this._removing;
-        }
-    },
-
-    /**
-     * Reorder map layers from store order
-     *
-     * @private
-     */
-    reorderLayersOnMap: function() {
-        if(this.map) {
-            var node = this.getRootNode();
-            if(node) {
-                var i = this.maxLayerIndex;
-                node.cascadeBy(function(subnode) {
-                    var layer = subnode.get('layer');
-                    if(layer) {
-                        layer.setZIndex(i);
-                        i--;
-                    }
-                   
-                }, this);
-            }
-        }
-    },
-
-    /**
-    * Adds a WMS-legend to a node
-    * @param {Ext.data.Model} node
-    * @return {Ext.data.Model} node
-    */
-    addWMSLegend: function(node) {
-        if(node.get('layer')) {
-            node.gx_wmslegend = Ext.create('GeoExt.container.WmsLegend',{
-                layerRecord: node,
-                showTitle: false,
-                hidden: true,
-                deferRender: true,
-                // custom class for css positioning
-                // see tree-legend.html
-                cls: "legend"
-            });
-        }
-        return node;
-    },
-
-    /**
-     * Unbind this store from the map it is currently bound.
-     */
-    unbind: function() {
-        var me = this;
-        me.un('beforeinsert', me.onBeforeInsert, me);
-        me.un('beforeappend', me.onBeforeAppend, me);
-        me.un('insert', me.onInsertAndAppend, me);
-        me.un('append', me.onInsertAndAppend, me);
-        me.un('remove', me.onRemove, me);
-        me.map = null;
-    },
-
-    /**
-     * Unbinds listeners by calling #unbind prior to being destroyed.
-     *
-     * @private
-     */
-    destroy: function() {
-        //this.unbind();
-        //this.callParent();
-    }
-});
-
 Ext.define('AdmClient.view.main.MainToolbar', {
 	extend :  Ext.toolbar.Toolbar ,
 	alias : 'widget.mainToolbar',
@@ -8631,25 +12062,23 @@ Ext.application({
 	                                                          
 	                                                          
 	                                                             
-                                                                  
+	                                                                
 	                                                             
 	                                                             
-                                                              
-                                                 
+	                                                            
+	                                               
 	           
 	                                     
 	                                       
 	                                    
 	                                          
 	                                            
-                                            
-                                                
 	           
-                                               
-                                   
-                                                               
-                                                                     
-                                                                          
+	                                             
+	                                 
+	                                                             
+	                                                                   
+	                                                                        
                                                                             
                                                                         
                                                                         
@@ -8678,7 +12107,7 @@ Ext.application({
                                        
                  
     name: 'AdmClient',
-    appFolder: 'src/main/javascript',
+    appFolder: 'http://localhost/OpenEMap-Admin-WebUserInterface/UI/src/main/javascript',
     controllers: ['Main', 
                   'Layers', 
                   'MainToolbar', 
@@ -8711,12 +12140,28 @@ Ext.application({
       this.admClient =  Ext.create('Ext.container.Container', {
         	layout: 'border',
           renderTo: 'contentitem',
-        	height : 800,
+        	height : (window.innerHeight - 70),
         	items : [{xtype: 'main'}]
         });
     }
 });
 
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 Ext.define("OpenEMap.locale.sv_SE.Gui", {
     override: "OpenEMap.Gui",
     objectConfigWindowTitle: "Objektkonfiguration"
@@ -8730,6 +12175,12 @@ Ext.define("OpenEMap.locale.sv_SE.view.ObjectConfig", {
     m1Label: "M1",
     m2Label: "M2",
     angleLabel: "Vinkel"
+});
+Ext.define('AdmClient.store.WmsCapabilitiesLayerStore',{
+    extend:  Ext.data.JsonStore ,
+                                                     
+    model: 'GeoExt.data.WmsCapabilitiesLayerModel',
+    alias: 'widget.wmsCapabilities'
 });
 Ext.define('AdmClient.store.WmsCapabilitiesLayerTree',{
     extend:  Ext.data.TreeStore ,
@@ -8768,6 +12219,22 @@ Ext.define('AdmClient.view.mapconfiguration.map.Extent', {
 		this.callParent(arguments);
 	}
 });
+/*    
+    Copyright (C) 2014 Härnösands kommun
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 /**
  * TODO: needs to be implemented
  * Is not in use
@@ -8781,1348 +12248,3 @@ Ext.define('OpenEMap.Search', {
     }
 });
 
-/**
- * Data handler, handles ajax-request against ws-backend
- * Used when no store is associated with the data
- */
-
-Ext.define('OpenEMap.data.DataHandler', {
-
-    metadataAbstractWsUrl: null,
-    metadataWsUrl: null,
-    layersWsUrl: null,
-
-    metadataAbstractCache: {},
-    
-    constructor: function(options) {
-        this.wsUrls = OpenEMap.wsUrls;
-        Ext.apply(this,options);
-    },
-
-    /**
-    * GET-request to get a specific layer
-    * @param {number}   id          layer id
-    * @param {Function} callback    callback-function on success
-    */
-    getLayer: function(id, callback) {
-        if(this.wsUrls.layers && id) {
-            this.doRequest(
-                {
-                    url: this.wsUrls.basePath + this.wsUrls.layers + '/' + id
-                },
-                function(json) {
-                    callback(json);
-                }
-            );
-        }
-    },
-
-
-    /**
-    * GET-request to get layers
-    * @param {Function} callback    callback-function on success
-    */
-    getLayers: function(callback) {
-        if(this.wsUrls.layers) {
-            this.doRequest(
-                {
-                    url: this.wsUrls.basePath + this.wsUrls.layers
-                },
-                callback
-            );
-        }
-    },
-
-    /**
-    * GET-request to get metadata for specific UUID
-    * @param {string}   UUID        layer metadata UUID
-    * @param {Function} callback    callback-function on success
-    */
-    getMetadata: function(UUID, callback) {
-        if(UUID && this.wsUrls.metadata) {
-            this.doRequest(
-                {
-                    url: this.wsUrls.basePath + this.wsUrls.metadata + '/' + UUID
-                },
-                callback
-            );
-        }
-    },
-
-    /**
-    * GET-request to get metadata abstract for specific UUID
-    * @param {string}   UUID        layer metadata UUID
-    * @param {Function} callback    callback-function on success
-    */
-    getMetadataAbstract: function(UUID, callback) {
-        if(UUID && this.wsUrls.metadata_abstract) {
-            var me = this;
-            // Cache metadata temporarily until page reload, to minize ajax requests
-            if(me.metadataAbstractCache[UUID]) {
-                callback(me.metadataAbstractCache[UUID]);
-            } else {
-                this.doRequest(
-                    {
-                        url: this.wsUrls.basePath + this.wsUrls.metadata_abstract + '/' + UUID
-                    },
-                    function(json) {
-                        callback(json);
-                        me.metadataAbstractCache[UUID] = json;
-                    }
-                );
-            }
-        }
-    },
-
-    /**
-    * PUT-request to update a configuration
-    * @param {number}   id         map configuration id
-    * @param {Object}   conf       map config object
-    * @param {Function} callback   callback-function on success
-    */
-    updateConfiguration: function(id, conf, callback) {
-        this.doRequest({
-            url: this.wsUrls.basePath + this.wsUrls.configs + '/' + id,
-            method: 'PUT',
-            jsonData: conf
-        }, callback);
-    },
-
-    /**
-    * POST-request to save a new configuration
-    * @param {Object}   conf       map config object
-    * @param {Function} callback   callback-function on success
-    */
-    saveNewConfiguration: function(conf, callback) {
-        this.doRequest({
-            url: this.wsUrls.basePath + this.wsUrls.configs,
-            method: 'POST',
-            jsonData: conf
-        }, callback);
-    },
-
-    /**
-    * DELETE-request to remove a configuration
-    * @param {number}   id         map configuration id
-    * @param {Object}   conf       map config object
-    * @param {Function} callback   callback-function on success
-    */
-    deleteConfiguration: function(id, conf, callback) {
-        this.doRequest({
-            url: this.wsUrls.basePath + this.wsUrls.configs + '/' + id,
-            method: 'DELETE',
-            jsonData: conf
-        }, callback);
-    },
-
-    /**
-    * Handles Ajax-request.
-    * @param {Object}   options     Ext.Ajax.request options 
-    * @param {Function} callback    callback-function on success
-    */
-    doRequest: function(options, callback) {
-        var me = this;
-        if(options && (options.method && options.method === 'POST' && options.method === 'PUT') && !callback) {
-            me.onFailure('no callback function');
-            return false;
-        };
-        Ext.Ajax.request(Ext.apply({
-                success: function(response) {
-                    if(response && response.responseText) {
-                        var json = Ext.decode(response.responseText);
-                        if(callback) {
-                            callback(json);
-                        }
-                    } else {
-                        me.onFailure();
-                    }
-                },
-                failure: function(e) {
-                    me.onFailure(e.status + ' ' + e.statusText + ', ' + options.url);
-                }
-            }, (options ? options : {})));
-    },
-
-    /**
-    * Called on ajax-request failure or data not correct
-    * @param {string}   msg     error message
-    */
-    onFailure: function(msg) {
-        //TODO! handle failure
-        console.error(msg);
-        //Ext.Error.raise(msg);
-    }
-
-
-});
-/**
- * OpenEMap layer configuration model
- * Adds layer configuration specific fields
- */
-
-Ext.define('OpenEMap.model.GroupedLayerTreeModel' ,{
-    extend:  Ext.data.Model ,
-
-    fields: [ 
-    	{ name: 'text', type: 'string' },
-    	{ name: 'checkedGroup', type: 'string' },
-    	{ name: 'layer' },
-
-        { name: 'layerId' },
-    	{ name: 'name', type: 'string' },
-        { name: 'isSearchable' },
-    	{ name: 'urlToMetadata' },
-        { name: 'wms' },
-    	{ name: 'wfs' },
-        { name: 'serverId' },
-        
-        { name: 'legendURL' }
-    ]
-});
-
-/**
- * Grouped layer tree store
- * Ext.data.TreeStore extended to support OpenEMap layer configuration including layer groups
- */
-
-Ext.define('OpenEMap.data.GroupedLayerTree' ,{
-    extend:  Ext.data.TreeStore ,
-
-               
-                                     
-                                              
-      
-
-    model: 'OpenEMap.model.GroupedLayerTreeModel',
-    defaultRootProperty: 'layers',
-
-    proxy: {
-        type: 'memory'
-
-    },
-
-    maxLayerIndex: 1000,
-
-    listeners: {
-        beforeinsert: function(store, node, refNode, eOpts) { return this.onBeforeInsert(store, node, refNode); },
-        beforeappend: function(store, node, eOpts) { return this.onBeforeAppend(store, node); },
-        insert: function(store, node, refNode, eOpts) { this.onInsertAndAppend(node); },
-        append: function(store, node, index, eOpts) { this.onInsertAndAppend(node); },
-        remove: function(store, node, isMove, eOpts) { this.onRemove(store, node, isMove); }
-    },
-
-    constructor: function(config) {
-        config = Ext.apply({}, config);
-        this.callParent([config]);
-        
-    },
-    
-    /**
-    * Returns all layers as OpenEMap layer configuration tree.
-    * @return {object} layerConfig  OpenEMap layer configuration
-    */
-    getLayerConfiguration: function() {
-        var layerConfig = [];
-        this.getRootNode().childNodes.forEach(function(node, i) {
-            layerConfig[i] = {
-                name: node.get('name'),
-                layers: []
-            };
-            
-            node.childNodes.forEach(function(subnode) {
-                layerConfig[i].layers.push({
-                    name: subnode.get('name'),
-                    wms: typeof subnode.get('wms') === 'string' ? {} : subnode.get('wms'),
-                    wfs: typeof subnode.get('wfs') === 'string' ? {} : subnode.get('wfs'),
-                    metadata: typeof subnode.get('metadata') === 'string' ? {} : subnode.get('metadata')
-                });
-            });
-        });
-        return layerConfig;
-    },
-
-    /**
-    * Before append to store
-    * @param {Ext.data.Model} node
-    * @param {Ext.data.Model} appendNode
-    */
-    onBeforeAppend: function(node, appendNode) {
-        // Prevent groups from being added to groups
-        if((node && !node.isRoot()) && !appendNode.isLeaf()) {
-            return false;
-        }
-        return true;
-    },
-
-    /**
-    * Before insert to store
-    * @param {Ext.data.Store} store
-    * @param {Ext.data.Model} node
-    * @param {Ext.data.Model} refNode
-    */
-    onBeforeInsert: function(store, node, refNode) {
-        // Prevent groups from being added to groups
-        if(!refNode.parentNode.isRoot() && !node.isLeaf()) {
-            return false;
-        }
-        return true;
-    },
-
-    /**
-     * Handler for a store's insert and append event.
-     *
-     * @param {Ext.data.Model} node
-     */
-    onInsertAndAppend: function(node) {
-        if(!this._inserting) {
-            this._inserting = true;
-            
-            // Add this node layers and subnodes to map.
-            node.cascadeBy(function(subnode) {
-                var layer = subnode.get('layer');
-
-                // Add getLayer function to support GeoExt
-                subnode.getLayer = function() {
-                    return this.get('layer');
-                };
-                // Add WMS legened 
-                this.addWMSLegend(subnode);
-
-                if(layer && layer !== '' && this.map) {
-                    var mapLayer = this.map.getLayer(layer);
-                    if(mapLayer === null && layer && layer.displayInLayerSwitcher === true) {
-                        this.map.addLayer(layer);
-                    }
-                }
-            }, this);
-
-            this.reorderLayersOnMap();
-            
-            delete this._inserting;
-        }
-    },
-
-    /**
-     * Handler for a store's remove event.
-     *
-     * @param {Ext.data.Store} store
-     * @param {Ext.data.Model} node
-     * @param {Boolean} isMove
-     * @private
-     */
-    onRemove: function(store, node, isMove) {
-        if(!this._removing && !isMove) {
-            this._removing = true;
-            // Remove layer and sublayers from map
-            node.cascadeBy(function(subnode) {
-                var layer = subnode.get('layer');
-                if(layer && layer.map) {
-                    this.map.removeLayer(layer);
-                }
-            }, this);
-
-            delete this._removing;
-        }
-    },
-
-    /**
-     * Reorder map layers from store order
-     *
-     * @private
-     */
-    reorderLayersOnMap: function() {
-        var node = this.getRootNode();
-        if(node) {
-            var i = this.maxLayerIndex;
-            node.cascadeBy(function(subnode) {
-                var layer = subnode.get('layer');
-                
-                if(layer) {
-                    layer.setZIndex(i);
-                    i--;
-                }
-               
-            }, this);
-        }
-    },
-
-    /**
-    * Adds a WMS-legend to a node
-    * @param {Ext.data.Model} node
-    * @return {Ext.data.Model} node
-    */
-    addWMSLegend: function(node) {
-        var layer = node.get('layer');
-    
-        if (layer) {
-            if (Ext.isIE9) return node;
-            if (layer.legendURL) {
-                node.set('legendURL', layer.legendURL);
-                node.gx_urllegend = Ext.create('GeoExt.container.UrlLegend', {
-                    layerRecord: node,
-                    showTitle: false,
-                    hidden: true,
-                    deferRender: true,
-                    // custom class for css positioning
-                    // see tree-legend.html
-                    cls: "legend"
-                });
-            } else if (layer.CLASS_NAME == "OpenLayers.Layer.WMS") {
-                node.gx_wmslegend = Ext.create('GeoExt.container.WmsLegend', {
-                    layerRecord: node,
-                    showTitle: false,
-                    hidden: true,
-                    deferRender: true,
-                    // custom class for css positioning
-                    // see tree-legend.html
-                    cls: "legend"
-                });
-            }
-        }
-        return node;
-    },
-
-    /**
-     * Unbind this store from the map it is currently bound.
-     */
-    unbind: function() {
-        var me = this;
-        me.un('beforeinsert', me.onBeforeInsert, me);
-        me.un('beforeappend', me.onBeforeAppend, me);
-        me.un('insert', me.onInsertAndAppend, me);
-        me.un('append', me.onInsertAndAppend, me)
-        me.un('remove', me.onRemove, me);
-        me.map = null;
-    },
-
-    /**
-     * Unbinds listeners by calling #unbind prior to being destroyed.
-     *
-     * @private
-     */
-    destroy: function() {
-        //this.unbind();
-        //this.callParent();
-    }
-});
-
-/**
- * OpenEMap map configuration model
- */
-
-Ext.define('OpenEMap.model.MapConfig' ,{
-    extend:  Ext.data.Model ,
-
-    fields: [ 
-    	'configId', 
-    	'name' 
-    ]
-});
-//@requires OpenEMap
-
-/**
- * Map configuration store
- * Store to list map configurations
- */
-
-Ext.define('OpenEMap.data.SavedMapConfigs' ,{
-    extend:  Ext.data.Store ,
-
-               
-                                  
-      
-
-    model: 'OpenEMap.model.MapConfig',
-
-    storeId: 'savedMapConfigs',
-
-    autoLoad: true,
-
-    proxy: {
-        type: 'rest',
-        appendId: true,
-        url: (OpenEMap && OpenEMap.wsUrls && OpenEMap.wsUrls.basePath) ? OpenEMap.wsUrls.basePath : '' + 
-        		(OpenEMap && OpenEMap.wsUrls && OpenEMap.wsUrls.configs) ? OpenEMap.wsUrls.configs : '',
-        reader: {
-            type: 'json',
-            root: 'configs'
-        },
-        writer: {            
-            type: 'json'
-        }
-    }
-});
-/**
- * Combobox that searches from LM with type ahead.
- */
-Ext.define('OpenEMap.form.SearchBase', {
-    extend :  Ext.form.field.ComboBox ,
-    alias: 'widget.search',
-    require: ['Ext.data.*',
-              'Ext.form.*'],
-    initComponent : function() {
-        this.municipalities = null;
-        if (this.search && this.search.options){
-            this.municipalities = this.search.options.municipalities.join(',');
-        }
-        this.layer = this.mapPanel.searchLayer;
-        
-        this.callParent(arguments);
-    }
-});
-Ext.define('OpenEMap.view.MetadataWindow' ,{
-	extend:  Ext.Window ,
-
-               
-                       
-      
-
-	title: 'Metadata',
-	width: 600,
-	height: 500,
-	border: 0,
-    layout: 'fit',
-	closeAction: 'hide',
-
-    /**
-    * Translation constant
-    */
-    TRANSLATION: {
-        sv: {
-            tag: {
-                // Hide some elements
-                'gmd:citation': '',
-                'gmd:CI_Address': '',
-                'gmd:CI_Citation': '',
-                'gmd:CI_Contact': '',
-                'gmd:CI_Date': '',
-                'gmd:CI_Telephone': '',
-                'gmd:CI_ResponsibleParty': '',
-                'gmd:identificationInfo': '',
-                'gmd:EX_BoundingPolygon': '',
-                'gmd:EX_Extent': '',
-                'gmd:EX_GeographicBoundingBox': '',
-                'gmd:EX_GeographicDescription': '',
-                'gmd:EX_TemporalExtent': '',
-                'gmd:EX_VerticalExtent': '',
-                'gmd:MD_BrowseGraphic': '',
-                'gmd:MD_Constraints': '',
-                'gmd:MD_Identifier': '',
-                'gmd:MD_Keywords': '',
-                'gmd:MD_LegalConstraints': '',
-                'gmd:MD_Metadata': '',
-                'gmd:MD_MaintenanceInformation': '',
-                'gmd:MD_SecurityConstraints': '',
-                'gmd:thesaurusName': '',
-                'gmd:voice': '',
-                'srv:SV_ServiceIdentification': '',
-
-                // Swedish translation
-                'gmd:accessConstraints': 'Nyttjanderestriktioner',
-                'gmd:abstract': 'Sammanfattning',
-                'gmd:address': 'Adress',
-                'gmd:alternateTitle': 'Alternativ titel',
-                'gmd:city': 'Stad',
-                'gmd:classification': 'Klassificering',
-                'gmd:contact': 'Metadatakontakt',
-                'gmd:contactInfo': 'Kontaktinformation',
-                'gmd:date': 'Datum',
-                'gmd:dateStamp': 'Datum',
-                'gmd:dateType': 'Datumtyp',
-                'gmd:descriptiveKeywords': 'Nyckelordslista',
-                'gmd:electronicMailAddress': 'E-post',
-                'gmd:fileIdentifier': 'Identifierare för metadatamängden',
-                'gmd:graphicOverview': 'Exempelbild',
-                'gmd:hierarchyLevel': 'Hierarkisk nivå (Resurstyp)',
-                'gmd:individualName': 'Person',
-                'gmd:identifier': 'Identifierare',
-                'gmd:keyword': 'Nyckelord',
-                'gmd:language': 'Språk',
-                'gmd:metadataStandardName': 'Metadatastandardversion',
-                'gmd:metadataStandardVersion': 'Metadatastandard',
-                'gmd:organisationName': 'Organisation',
-                'gmd:otherConstraints': 'Andra restriktioner',
-                'gmd:phone': 'Telefonnummer',
-                'gmd:pointOfContact': 'Kontakt',
-                'gmd:resourceConstraints': 'Restriktioner och begränsningar',
-                'gmd:role': 'Ansvarsområde',
-                'gmd:status': 'Status',
-                'gmd:title': 'Titel',
-                'gmd:type': 'Typ',
-                'gmd:useLimitation': 'Användbarhetsbegränsningar'
-            },
-            codeListValue: {
-                'swe': 'Svenska',
-                'service': 'Tjänst',
-                'pointOfContact': 'Kontakt'
-            }
-        }
-    },
-
-    /**
-    * Init component
-    */
-    initComponent : function() {
-        
-        this.overviewTab = new Ext.Panel ({
-            title: 'Översikt'
-        });
-
-        this.metadataTab = new Ext.Panel ({
-            title: 'Information om metadata'
-        });
-
-        this.dataTab = new Ext.Panel ({
-            title: 'Information om data'
-        });
-      
-        this.qualityTab = new Ext.Panel ({
-            title: 'Kvalitet'
-        });
-
-        this.distributionTab = new Ext.Panel ({
-            title: 'Distribution'
-        });
-
-        this.restTab = new Ext.Panel ({
-            title: 'Rest'
-        });
-
-        this.items = Ext.create('Ext.tab.Panel', {
-            activeTab: 0,
-            defaults: {
-                autoScroll: true
-            },
-            items: [
-                this.overviewTab,
-                this.metadataTab,
-                this.dataTab,
-                this.qualityTab,
-                this.distributionTab,
-                this.restTab
-            ]
-        });
-
-        this.callParent(arguments);
-    },
-
-    /**
-    * Render metadata into tab-panel for specific UUID
-    * @param {string}   UUID    metadata uuid
-    */
-	showMetadata: function(UUID) {
-		var me = this;
-		this.dataHandler.getMetadata(UUID, function(json) {
-			if(json.children) {
-                var result = me.parseMetadata(json.children);
-                me.overviewTab.html = result.overview;
-    			me.metadataTab.html = result.metadata_info;
-                me.dataTab.html = result.data_info;
-                me.qualityTab.html = result.quality;
-                me.distributionTab.html = result.distribution;
-                me.restTab.html = result.rest;
-    			me.show();
-            }
-		});
-	},
-
-
-
-    /**
-    * Try to translate value of specific type
-    * @param {string}   type    tag-type
-    * @param {string}   value   value to translate
-    */
-    translate: function(type, value) {
-        var language = 'sv';
-        var traslatedTag = null;
-        try {
-            traslatedTag = this.TRANSLATION[language][type][value];
-            if(typeof traslatedTag !== 'string') {
-                traslatedTag = value;
-            }
-        }
-        catch(err) {
-            translateTag = null;
-        }
-        return traslatedTag;
-        
-    },
-
-    /**
-    * Parse text element for specific node
-    * @param {object}   node    xml-node
-    */
-    parseMetadataTextTag: function (node) {
-        var text = null;
-        if(node.tag) {
-            var text = this.translate('tag', node.tag);
-            text = (text !== null) ? (text !== '' ? '<b>' + text + '</b>' : '') : null;
-        }
-        if(node.text) {
-            text = node.text;
-        }
-        if(node.attributes) {
-            if(node.attributes.codeListValue) {
-                text = this.translate('codeListValue',node.attributes.codeListValue);
-            }
-        }
-        
-        return text;
-    },
-
-    /**
-    * Get groups for specific metadata node key. If no matching group place it in rest.
-    * @param {string}   str         string to group
-    * @param {object}   group_by    object to group by
-    **/
-    getGroups: function(str, group_by) {
-        var groups = [];
-        for (key in group_by) {
-            for (var i = 0; i < group_by[key].length; i++) {
-                if(str.indexOf(group_by[key][i]) !== -1) {
-                    groups.push(key);
-                }
-            };
-        };
-        if(groups.length === 0) {
-            groups.push('rest');
-        }
-        return groups;
-    },
-
-    /**
-    * Iterates over metadata json to convert to renderable html
-    * @param {object}   node            xml-node
-    * @param {object}   result          resulting object
-    * @param {object}   group_by        object to group by
-    * @param {string}   parent_node_tag parent tag name
-    */
-    metadataIterator: function(node, result, group_by, parent_node_tag) {
-        // Node tag
-        var nodeTag = this.parseMetadataTextTag(node);
-        // Current node identifier
-        var currentTag = (typeof parent_node_tag !== 'undefined' ? (parent_node_tag + '>') : '') + node.tag;
-        // Goups to include tag in
-        var groups = this.getGroups(currentTag, group_by);
-        // For each group
-        for (var i = 0; i < groups.length; i++) {
-            var group = groups[i];
-            if(typeof result[group] !== 'string') {
-                result[group] = '';
-            }
-
-            if(nodeTag !== null) {
-                result[group] += '<li>';
-                result[group] += nodeTag;
-
-                // Loop over child nodes
-                if(node.children && i === 0) {
-                    result[group] += nodeTag !== '' ? '<ul>' : '';
-                    for (var j = 0; j < node.children.length; j++) {
-                        this.metadataIterator(node.children[j], result, group_by, currentTag);
-                    }
-                    result[group] += nodeTag !== '' ? '</ul>' : '';
-                }
-
-                result[group] += '</li>';
-            }
-        };
-    },
-
-    /**
-    * Parse metadata-json-response into html
-    * @param  {object}   json    json response object
-    * @return {object}   result  grouped result object  
-    */
-    parseMetadata: function(json) {
-        var result = {};
-        // Group metadata to prepare to show in tabs
-        var group_by = {
-            overview: [
-                'gmd:MD_Metadata>gmd:identificationInfo>srv:SV_ServiceIdentification>gmd:citation>gmd:CI_Citation>gmd:title',
-                'gmd:MD_Metadata>gmd:identificationInfo>srv:SV_ServiceIdentification>gmd:abstract',
-                'gmd:MD_Metadata>gmd:identificationInfo>srv:SV_ServiceIdentification>gmd:descriptiveKeywords',
-                'gmd:MD_Metadata>gmd:identificationInfo>srv:SV_ServiceIdentification>gmd:graphicOverview'
-            ],
-            metadata_info: [
-                'gmd:MD_Metadata>gmd:fileIdentifier',
-                'gmd:MD_Metadata>gmd:language',
-                'gmd:MD_Metadata>gmd:dateStamp',
-                'gmd:MD_Metadata>gmd:hierarchyLevel',
-                'gmd:MD_Metadata>gmd:metadataStandardName',
-                'gmd:MD_Metadata>gmd:metadataStandardVersion',
-                'gmd:MD_Metadata>gmd:contact'
-            ],
-            data_info: [
-                'gmd:MD_Metadata>gmd:identificationInfo'
-            ],
-            quality: [
-                'gmd:MD_Metadata>gmd:dataQualityInfo'
-            ],
-            distribution: [
-                'gmd:MD_Metadata>gmd:distributionInfo'
-            ]
-        };
-
-        // Iterate over metadata to render html
-    	this.metadataIterator(json[0], result, group_by);
-        return result;
-    }
-});
-Ext.define('OpenEMap.view.SavedMapConfigs' ,{
-    extend:  Ext.grid.Panel ,
-    
-    autoScroll: true,
-    hideHeaders: true,
-
-    id: 'savedMapConfigsGrid',
-
-	selModel: Ext.create('Ext.selection.CheckboxModel', {
-		mode: 'SINGLE',
-        checkOnly: true,
-		listeners: { 
-			select: function( t, record, index, eOpts ) {
-				var configId = record.get('configId');
-				init(OpenEMap.wsUrls.basePath + OpenEMap.wsUrls.configs + '/' + configId);
-			}
-		}
-	}),
-	
-	store: Ext.create('OpenEMap.data.SavedMapConfigs'),
-    columns: [
-        { 
-        	header: 'Name',  
-        	dataIndex: 'name',
-        	flex: 1
-        },
-        {
-            xtype: 'actioncolumn',
-            width: 40,
-            iconCls: 'action-remove',
-            tooltip: 'Ta bort',
-            handler: function(grid, rowIndex, cellIndex, column, e, record, tr) {
-                //TODO! change to proper rest store delete
-                Ext.MessageBox.confirm('Ta bort', 'Vill du verkligen ta bort konfigurationen?', function(btn) {
-                    if(btn === 'yes') {
-                        var store = grid.getStore();
-                        grid.panel.dataHandler.deleteConfiguration(record.get('configId'),{ configId: record.get('configId') });
-                        store.removeAt(rowIndex);
-                    }
-                });
-                e.stopEvent();
-                return false;
-            }
-        }
-    ],
-
-    constructor: function() {
-    	this.callParent(arguments);
-    }
-});
-/**
- * 
- */
-Ext.define('OpenEMap.view.layer.Tree' ,{
-    extend:  Ext.tree.Panel ,
-               
-                                         
-                            
-      
-
-    rootVisible: false,
-    hideHeaders: true,
-
-    initComponent: function() {
-        if(!this.store && this.mapPanel) {
-            this.store = Ext.create('OpenEMap.data.GroupedLayerTree', {
-                root: {
-                    text: (this.mapPanel.config && this.mapPanel.config.name ? this.mapPanel.config.name : 'Lager'),
-                    expanded: true,
-                    layers: this.mapPanel.map.layerSwitcherLayerTree
-                },
-                map: this.mapPanel.map
-            });
-        }
-
-        this.on('checkchange', function(node, checked, eOpts) {
-            if(checked) {
-                // Loop this node and children
-                node.cascadeBy(function(n){
-                    n.set('checked', checked);
-                    var olLayerRef = n.get('layer');
-                    // Change layer visibility (Layer groups have no layer reference)
-                    if(olLayerRef) {
-                        olLayerRef.setVisibility(true);
-                    }
-                });
-                // check parent if not root
-                if (!node.parentNode.isRoot()) {
-                    node.parentNode.set('checked', checked);
-                }
-            } else {
-                node.cascadeBy(function(n){
-                    // Loop this node and children
-                    n.set('checked', false);
-                    var olLayerRef = n.get('layer');
-                    if(olLayerRef) {
-                        olLayerRef.setVisibility(false);
-                    }
-                });
-            }
-        });
-
-        this.on('cellclick', function(tree, td, cellIndex, node) {
-            // Add legend if node have a wms legend and the node isnt removed
-            if((node.gx_wmslegend || node.gx_urllegend) && node.store) {
-                var legend = node.gx_wmslegend || node.gx_urllegend;
-                if (legend.isHidden()) {
-                    if (!legend.rendered) {
-                        legend.render(td);
-                    }
-                    legend.show();
-                } else {
-                    legend.hide();
-                }
-            }
-        });
-        
-        this.callParent(arguments);
-    }
-
-});
-
-Ext.define('OpenEMap.view.layer.TreeFilter', {
-    extend:  Ext.AbstractPlugin , 
-    alias: 'plugin.treefilter', 
-    
-    collapseOnClear: true, 
-    allowParentFolders: false, 
-
-    init: function (tree) {
-        var me = this;
-        me.tree = tree;
-
-        tree.filter = Ext.Function.bind(me.filter, me);
-        tree.clearFilter = Ext.Function.bind(me.clearFilter, me);
-    },
-
-    filter: function (value, property, re) {
-            var me = this, 
-                tree = me.tree,
-                matches = [],
-                root = tree.getRootNode(),
-                // property is optional - will be set to the 'text' propert of the  treeStore record by default
-                property = property || 'text',
-                // the regExp could be modified to allow for case-sensitive, starts  with, etc.
-                re = re || new RegExp(value, "ig"),
-                visibleNodes = [],
-                viewNode;
-
-            // if the search field is empty
-            if (Ext.isEmpty(value)) {                                           
-                me.clearFilter();
-                return;
-            }
-
-            // expand all nodes for the the following iterative routines
-            tree.expandAll();
-
-            // iterate over all nodes in the tree in order to evalute them against the search criteria
-            root.cascadeBy(function (node) {
-                // if the node matches the search criteria and is a leaf (could be  modified to searh non-leaf nodes)
-                if (node.get(property).match(re)) {
-                    // add the node to the matches array
-                    matches.push(node);
-                }
-            });
-
-            // if me.allowParentFolders is false (default) then remove any  non-leaf nodes from the regex match
-            if (me.allowParentFolders === false) {
-                Ext.each(matches, function (match) {
-                    if (!match.isLeaf()) {
-                        Ext.Array.remove(matches, match);
-                    }
-                });
-            }
-
-            // loop through all matching leaf nodes
-            Ext.each(matches, function (item, i, arr) {
-                // find each parent node containing the node from the matches array
-                root.cascadeBy(function (node) {
-                    if (node.contains(item) == true) {
-                        // if it's an ancestor of the evaluated node add it to the visibleNodes  array
-                        visibleNodes.push(node);
-                    }
-                });
-                // if me.allowParentFolders is true and the item is  a non-leaf item
-                if (me.allowParentFolders === true && !item.isLeaf()) {
-                    // iterate over its children and set them as visible
-                    item.cascadeBy(function (node) {
-                        visibleNodes.push(node);
-                    });
-                }
-                // also add the evaluated node itself to the visibleNodes array
-                visibleNodes.push(item);
-            });
-
-            // finally loop to hide/show each node
-            root.cascadeBy(function (node) {
-                // get the dom element assocaited with each node
-                viewNode = Ext.fly(tree.getView().getNode(node));
-                // the first one is undefined ? escape it with a conditional
-                if (viewNode) {
-                    viewNode.setVisibilityMode(Ext.Element.DISPLAY);
-                    // set the visibility mode of the dom node to display (vs offsets)
-                    viewNode.setVisible(Ext.Array.contains(visibleNodes, node));
-                }
-            });
-        }, 
-
-        clearFilter: function () {
-            var me = this
-                , tree = this.tree
-                , root = tree.getRootNode();
-
-            if (me.collapseOnClear) {
-                // collapse the tree nodes
-                tree.collapseAll();
-            }
-            // final loop to hide/show each node
-            root.cascadeBy(function (node) {
-                // get the dom element assocaited with each node
-                viewNode = Ext.fly(tree.getView().getNode(node));
-                // the first one is undefined ? escape it with a conditional and show  all nodes
-                if (viewNode) {
-                    viewNode.show();
-                }
-            });
-        }
-    });
-
-/**
- * Add layer view
- * View includes a drag/drop and collapsable layer tree
- */
-
-Ext.define('OpenEMap.view.layer.Add' ,{
-    extend:  OpenEMap.view.layer.Tree ,
-    
-               
-                                    
-                                         
-                                            
-      
-
-    title: 'Lägg till lager',
-
-    width: 250,
-    height: 550,
-
-    headerPosition: 'top',
-    collapsible: true,
-    collapseMode: 'header',
-    collapseDirection : 'right',
-    titleCollapse: true,
-
-    viewConfig: {
-         plugins: {
-            ptype: 'treeviewdragdrop',
-            enableDrop: false
-        },
-        copy: true
-    },
-
-    // Layer tree filtering
-    plugins: {
-        ptype: 'treefilter',
-        allowParentFolders: true
-    },
-    dockedItems: [
-        {
-            xtype: 'toolbar',
-            dock: 'top',
-            layout: 'fit',
-            items: [{
-                xtype: 'trigger',
-                triggerCls: 'x-form-clear-trigger',
-                onTriggerClick: function () {
-                    this.reset();
-                    this.focus();
-                },
-                listeners: {
-                    change: function (field, newVal) {
-                        var tree = field.up('treepanel');
-                        tree.filter(newVal);
-                    },
-                    buffer: 250
-                }
-            }]
-        }
-    ],
-
-    initComponent: function() {
-        var me = this;
-        this.on('checkchange', function(node, checked, eOpts) {
-            node.cascadeBy(function(n){
-                if(checked) {
-                    me.loadLayer(n);
-                } else {
-                    me.unLoadLayer(n);
-                }
-            });
-        });
-
-        // Add columns
-        this.columns = [
-            {
-                xtype: 'treecolumn',
-                flex: 1,
-                dataIndex: 'text'
-            },
-            me.metadataColumn
-        ];
-
-        // Create store for the layer tree
-        this.store = Ext.create('OpenEMap.data.GroupedLayerTree');
-
-        // Create server store
-        this.serverStore = Ext.create('OpenEMap.data.Servers',{ 
-            proxy: {
-                url: OpenEMap.wsUrls.basePath + OpenEMap.wsUrls.servers,
-                type: 'ajax',
-                reader: {
-                    type: 'json',
-                    root: 'configs'
-                }
-            }
-        });
-
-        // Wait for server load to initiate layer tree
-        this.serverStore.load({
-            callback: function() {
-                me.dataHandler.getLayers(function(layers) {
-                    if(layers) {
-                        var parser = new OpenEMap.config.Parser({
-                            serverStore: me.serverStore 
-                        });
-                        var layerTree = parser.parseLayerTree(layers);
-
-                        me.store.setRootNode({
-                            text: 'Lager',
-                            expanded: true,
-                            layers: layerTree
-                        });
-                    }
-                    
-                });
-            }
-        });
-
-        this.callParent(arguments);
-
-        
-    },
-
-    /** 
-    * Load a layer to GeoExt.MapPanel
-    * @param {Ext.data.NodeInterface}   node    tree node
-    */
-    loadLayer: function(node) {
-        var layer = node.get('layer');
-        if(layer && layer !== '' && this.mapPanel) {
-            layer.setVisibility(true);
-            layer.displayInLayerSwitcher = false;
-            this.mapPanel.layers.add(layer);
-        }
-    },
-
-    /** 
-    * Unload a layer from GeoExt.MapPanel
-    * @param {Ext.data.NodeInterface}   node    tree node
-    */
-    unLoadLayer: function(node) {
-        var layer = node.get('layer');
-        if(layer && layer !== '' && this.mapPanel) {
-            this.mapPanel.layers.remove(layer);
-        }
-    }
-
-});
-/**
- * 
- */
-
-Ext.define('OpenEMap.view.layer.Advanced' ,{
-	extend:  Ext.container.Container ,
-
-	           
-		                                     
-		                          
-		                           
-		                                
-		                            
-		                                   
-		                                                           
-	  
-
-	layout: {
-		type: 'hbox',
-	    pack: 'end',
-	    align: 'stretch'
-	},
-	width: 500,
-	height: 650,
-
- 	initComponent: function() {
- 		var me = this;
-
- 		this.dataHandler = Ext.create('OpenEMap.data.DataHandler');
-
- 		this.metadataWindow = Ext.create('OpenEMap.view.MetadataWindow', {
- 			dataHandler: this.dataHandler
- 		});
-
- 		this.savedMapConfigs = Ext.create('OpenEMap.view.SavedMapConfigs', {
- 			dataHandler: this.dataHandler
- 		});
-
-		this.showOnMapLayerView = Ext.create('OpenEMap.view.layer.Tree', {
-			title: 'Visas på kartan',
-			width: 250,
-			height: 500,
-			region: 'north',
-    		mapPanel: this.mapPanel,
-    		rootVisible: true,
-
-    		viewConfig: {
-		        plugins: {
-	                ptype: 'treeviewdragdrop',
-	                allowContainerDrops: true,
-	                allowParentInserts: true
-	            }
-		    },
-
-    		columns: [
-	            {
-	                xtype: 'gx_treecolumn',
-	                flex: 1,
-	                dataIndex: 'text'
-	            }, 
-	            Ext.create('OpenEMap.action.MetadataInfoColumn', {
-		 			metadataWindow: this.metadataWindow,
-		 			dataHandler: this.dataHandler
-		 		}),
-	            {
-	                xtype: 'actioncolumn',
-	                width: 40,
-	                iconCls: 'action-remove',
-	                tooltip: 'Ta bort',
-	                handler: function(grid, rowIndex, colIndex) {
-	                	var node = grid.getStore().getAt(rowIndex);
-	                	// Remove childs
-	                	for (var i = 0; i < node.childNodes.length; i++) {
-	                		node.removeChild(node.childNodes[i]);
-	                	};
-					    node.remove()
-					},
-					dataHandler: this.dataHandler
-	            }
-	        ],
-	        buttons: [
-	        	{
-		            text: 'Spara kartinnehåll',
-		            handler: function() {
-		            	if(me.orginalConfig) {
-		            		var conf = Ext.clone(me.orginalConfig);
-		            		Ext.MessageBox.prompt(
-		            			'Namn', 
-		            			'Ange ett namn:', 
-		            			function(btn, text) {
-		            				if (btn == 'ok' && text.length > 0) {
-		            					// Update layer config
-						            	var layerTree = me.showOnMapLayerView.getStore().getLayerConfiguration();
-						            	if(conf.layers) {
-							            	var baseAndWfsLayers = conf.layers.filter(function(layer) {
-							            		return (layer.wms && layer.wms.options.isBaseLayer || layer.wfs) ? layer : false;
-							            	});
-							            	conf.layers = baseAndWfsLayers.concat(layerTree);
-						            	}
-						            	if(text !== conf.name) {
-						            		// Save new config
-						            		conf.name = text;
-						            		me.dataHandler.saveNewConfiguration(conf, function() {
-						            			me.savedMapConfigs.getStore().load();
-						            		});
-						            	} else if(conf.configId){
-						            		// Update config
-						            		me.dataHandler.updateConfiguration(conf.configId, conf);
-						            	}
-						            }
-		            			},
-		            			this,
-		            			false,
-		            			conf.name
-		            		);
-			            	
-		            	}
-		            }
-		        }
-		    ]
-    	});
-
-	  	this.items = [
-			Ext.create('OpenEMap.view.layer.Add', {
-			    mapPanel: this.mapPanel,
-			    dataHandler: this.dataHandler,
-			    metadataColumn: Ext.create('OpenEMap.action.MetadataInfoColumn',{
-		 			metadataWindow: this.metadataWindow,
-		 			dataHandler: this.dataHandler
-		 		})
-			}),
-	    	{
-	    		xtype: 'panel',
-	    		layout: 'border',
-	    		width: '50%',
-	    		border: false,
-	    		items: [
-	    			me.showOnMapLayerView,
-			    	{
-						title: 'Sparade kartor',
-						region: 'center',
-						xtype: 'panel',
-						border: false,
-						layout: 'fit',
-						collapsible: true,
-						titleCollapse: true,
-						items: me.savedMapConfigs
-					}
-	    		]
-	    	}
-		];
-    	this.callParent(arguments);
-    }
-});
-Ext.define('OpenEMap.view.layer.Basic' ,{
-    extend:  OpenEMap.view.layer.Tree ,
-
-    //autoScroll: true,
-    //lines: false,
-    overflowY: 'auto',
-    rootVisible: false,
-    //width: 300,
-    height: 300,
-    border: false,
-
-    initComponent: function() {
-        if (!this.renderTo) {
-            this.title = 'Lager';
-            this.bodyPadding = 5;
-            this.collapsible = true;
-        }
-        
-        this.callParent(arguments);
-    }
-
-
-});
