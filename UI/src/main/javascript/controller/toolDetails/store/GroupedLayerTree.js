@@ -152,7 +152,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
             var isWmsInfo = this.tryToGetRecordAttribute(node, 'isWmsInfo');
             if ((queryable && clickable) || (clickable && this._updating)){
             	//OK rebuild logic here to determine if there is WFS get Feature, or WMSGetFeatureInfo
-            	var layerPieces = stripName(layer.wms.params.LAYERS);
+            	var layerPieces = stripName(layer.wms.params.layers ? layer.wms.params.layers : layer.wms.params.LAYERS);
             	
                 if (!isWmsInfo){
                     layer.wfs = {};
