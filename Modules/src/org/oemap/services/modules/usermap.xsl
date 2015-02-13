@@ -4,15 +4,14 @@
 	<xsl:output method="html" version="4.0" encoding="ISO-8859-1" />
 	<xsl:template match="Document">
 	<link rel="stylesheet" type="text/css" href="/libs/ext-theme-oep/oepTheme-all.css"></link>
-    <link rel="stylesheet" type="text/css" href="{openEMapCSSFile}"></link>
     <style>
      input[type="button"], button {
      	padding: 0px !important;
      }
     </style>
-  <xsl:variable name="oemapjs" select="openEMapScript"></xsl:variable>
 	<xsl:choose>
 		<xsl:when test="debug='true'">
+		    <link rel="stylesheet" type="text/css" href="/OpenEMap-WebUserInterface/resources/css/OpenEMap.css"></link>
 		    <script type="text/javascript" src="/libs/ext-4.2.1/ext-all-debug.js"></script>
 		    <script type="text/javascript" src="/libs/ext-4.2.1/ext-theme-neptune.js"></script>
 		    <script type="text/javascript" src="/libs/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
@@ -34,7 +33,7 @@
           <script type="text/javascript" src="/OpenEMap-WebUserInterface/src/main/javascript/Client.js"></script>
 		</xsl:when>
 		<xsl:otherwise>
-			<link rel="stylesheet" type="text/css" href="{openEMapCSSFile}" />
+		    <link rel="stylesheet" type="text/css" href="/OpenEMap-1.6.0-rc.1/resources/css/OpenEMap.css"></link>
 		    <script type="text/javascript" src="/libs/ext-4.2.1/ext-all.js"></script>
 		    <script type="text/javascript" src="/libs/ext-4.2.1/ext-theme-neptune.js"></script>
 		    <script type="text/javascript" src="/libs/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
@@ -43,7 +42,7 @@
 		    <script type="text/javascript" src="/libs/proj4js/proj4_defs.js"></script>
 		    <script type="text/javascript" src="/libs/geoext-2.0.2-rc.1-all.js"></script> 
 		    <script type="text/javascript" src="/libs/es5-shim.min.js"></script>
-		    <script type="text/javascript" src="{openEMapScript}"></script>
+			<script type="text/javascript" src="/OpenEMap-1.6.0-rc.1/OpenEMap-1.6.0-rc.1-debug.js"></script>
 		   
 	
 		</xsl:otherwise>
@@ -158,7 +157,7 @@
 					var id = queryString[Object.keys(queryString)[0]];
 
 					Ext.Ajax.request({
-						url : OpenEMap.wsUrls.basePath + OpenEMap.wsUrls.configs + '/config/' + id,
+						url : OpenEMap.wsUrls.basePath + OpenEMap.wsUrls.configs + 'config/' + id,
 						method : 'GET',
 						success : function(evt){
 							var config = JSON.parse(evt.responseText);

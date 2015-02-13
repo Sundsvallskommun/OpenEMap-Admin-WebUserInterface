@@ -25,12 +25,12 @@
 
 	<xsl:choose>
 		<xsl:when test="debugAdmin='true'">
-			<link rel="stylesheet" type="text/css" href="/ext-4.2.1/resources/css/ext-all-neptune.css" />
+			<link rel="stylesheet" type="text/css" href="/libs/ext-4.2.1/resources/css/ext-all-neptune.css" />
 			<link rel="stylesheet" type="text/css" href="/OpenEmap-Admin-WebUserInterface/UI/oeadmin.css" />
-			<script type="text/javascript" src="/ext-4.2.1/ext-debug.js"></script>
-			<script type="text/javascript" src="/ext-4.2.1/ext-theme-neptune.js"></script>
-    		<script type="text/javascript" src="/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
-    		<script type="text/javascript" src="/OpenLayers-2.13.1/OpenLayers.js"></script>
+			<script type="text/javascript" src="/libs/ext-4.2.1/ext-debug.js"></script>
+			<script type="text/javascript" src="/libs/ext-4.2.1/ext-theme-neptune.js"></script>
+    		<script type="text/javascript" src="/libs/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
+    		<script type="text/javascript" src="/libs/OpenLayers-2.13.1/OpenLayers.js"></script>
     		
     		<script type="text/javascript">
         		 var appPath = 'http://localhost/openemap-admin'; 
@@ -60,6 +60,7 @@
 			
 			Ext.onReady(function(){
 				Ext.applyIf(OpenEMap, { wsUrls :{
+					adminconfigs: '/adminconfigs/',
 					configs: '/configs/',
 					servers: 'settings/servers',
 					layers: 'layers/layers',
@@ -67,7 +68,7 @@
 					metadata_abstract: 'geometadata/getabstractbyid'}});
 			});
 			</script>
-			<script type="text/javascript" src="{/Document/requestinfo/contextpath}/static/f/{/Document/module/sectionID}/{/Document/module/moduleID}/OpenEMap-Admin-1.5.0-min.js"></script>
+			<script type="text/javascript" src="/OpenEMap-Admin-1.6.0-rc.1/OpenEMap-Admin-1.6.0-rc.1-debug.js"></script>
 					
 		</xsl:otherwise>
 	</xsl:choose>

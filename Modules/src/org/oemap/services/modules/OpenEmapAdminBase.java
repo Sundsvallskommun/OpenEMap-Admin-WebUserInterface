@@ -50,24 +50,24 @@ public class OpenEmapAdminBase extends AnnotatedForegroundModule {
     protected boolean debug = false;
 	
 	@ModuleSetting
-    @TextFieldSettingDescriptor(name = "GIS Server", description = "Base URL to GIS Server. (eg. https://extmap.sundsvall.se/geoserver")
-    protected String gisServer = "";
+    @TextFieldSettingDescriptor(name = "GIS Server", description = "Base URL to GIS Server. (eg. https://extmap.sundsvall.se")
+    protected String gisServer = "https://extmaptest.sundsvall.se";
 	
 	@ModuleSetting
-    @TextFieldSettingDescriptor(name = "WMS Server", description = "Context path to WMS endpoint on GIS server (eg. /wms")
-    protected String wmsServer = "";
+    @TextFieldSettingDescriptor(name = "WMS Server", description = "Context path to WMS endpoint on GIS server (eg. /geoserver/wms")
+    protected String wmsServer = "/geoserver/wms";
 	
 	@ModuleSetting
-    @TextFieldSettingDescriptor(name = "WMS Server Getcapabilities URL", description = "Context path to Getcapabilities used when listing layers in advanced layer control and admin. (eg /wms?request=GetCapabilities&version=1.1.1")
-    protected String wmsGetCapabilities = "";
+    @TextFieldSettingDescriptor(name = "WMS Server Getcapabilities URL", description = "Context path to Getcapabilities used when listing layers in advanced layer control and admin. (eg /geoserver/wms?request=GetCapabilities&version=1.1.1")
+    protected String wmsGetCapabilities = "/capababilities/wms.xml";
 	
 	@ModuleSetting
-    @TextFieldSettingDescriptor(name = "WFS Server", description = "Context path to WFS endpoint on GIS server (eg. /wfs")
-    protected String wfsServer = "";
+    @TextFieldSettingDescriptor(name = "WFS Server", description = "Context path to WFS endpoint on GIS server (eg. /geoserver/wfs")
+    protected String wfsServer = "/geoserver/wfs";
 	
 	@ModuleSetting
-    @TextFieldSettingDescriptor(name = "WMTS Server", description = "Context path to WMTS endpoint on GIS server (eg. /gwc/service/wms")
-    protected String wmtsServer = "";
+    @TextFieldSettingDescriptor(name = "WMTS Server", description = "Context path to WMTS endpoint on GIS server (eg. /geoserver/gwc/service/wms")
+    protected String wmtsServer = "/geoservergwc/service/wms";
 	
 	@ModuleSetting
     @TextFieldSettingDescriptor(name = "Alias for proxy", description = "Alias set in admin proxy.")
