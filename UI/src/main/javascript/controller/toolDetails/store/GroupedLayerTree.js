@@ -112,6 +112,11 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         var attributeList = ['name','wms','wfs','metadataUrl', 'isGroupLayer', 'queryable', 'clickable'];
         var layer = {};
 
+        var stripName = function(name) {
+            var parts = name.split(':');
+            return parts.length > 1 ? parts : ['',name];
+        };
+
         if(node.hasChildNodes()) {
             layer.layers = [];
             return layer;
@@ -146,8 +151,8 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
             var clickable = this.tryToGetRecordAttribute(node, 'clickable');
             var isWmsInfo = this.tryToGetRecordAttribute(node, 'isWmsInfo');
             if ((queryable && clickable) || (clickable && this._updating)){
-            	//OK rebuild logic here to determine of there is WFS get Feature, or WMSGetFeatureInfo
-            	var layerPieces = layer.wms.params.LAYERS.split(':');
+            	//OK rebuild logic here to determine if there is WFS get Feature, or WMSGetFeatureInfo
+            	var layerPieces = stripName(layer.wms.params.LAYERS);
             	
                 if (!isWmsInfo){
                     layer.wfs = {};
