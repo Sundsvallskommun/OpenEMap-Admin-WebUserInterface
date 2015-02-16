@@ -1,21 +1,16 @@
-set OPENEMAPADMIN_VERSION=1.5.0
-set ZIPFILE=OpenEMap-Admin%OPENEMAPADMIN_VERSION%.zip
-set OPENEMAPADMIN=OpenEMap-Admin-%OPENEMAPADMIN_VERSION%-min.js
-set OPENEMAPADMIN_DEBUG=OpenEMap-Admin-%OPENEMAPADMIN_VERSION%-debug.js
-#set OPENEMAP_VERSION=1.5.0-rc.4
-#set OPENEMAP=OpenEMap-%OPENEMAP_VERSION%-min.js
-#set OPENEMAP_DEBUG=OpenEMap-%OPENEMAP_VERSION%-debug.js
+set OPENEMAPADMIN=OpenEMap-Admin-1.6.0-rc.1
+set OPENEMAPADMINJS=%OPENEMAPADMIN%-min.js
+set OPENEMAPADMINJS_DEBUG=%OPENEMAPADMIN%-debug.js
 
-sencha compile --classpath=src/main/javascript,../../libs/ext-4.2.1/src,../../libs/geoext-2.0.1/src,../../OpenEMap-WebUserInterface/src/main/javascript exclude -all and include -namespace AdmClient,OpenEMap and concat -closure %OPENEMAPADMIN%
-sencha compile --classpath=src/main/javascript,../../libs/ext-4.2.1/src,../../libs/geoext-2.0.1/src,../../OpenEMap-WebUserInterface/src/main/javascript exclude -all and include -namespace AdmClient,OpenEMap and concat %OPENEMAPADMIN_DEBUG%
+cd release
+rd /s /q %OPENEMAPADMIN%
+del %OPENEMAPADMIN%.zip
+sencha compile --classpath=../src/main/javascript,../../../libs/ext-4.2.1/src,../../../libs/geoext-2.0.1/src,../../../OpenEMap-WebUserInterface/src/main/javascript exclude -all and include -namespace AdmClient,OpenEMap and concat -closure %OPENEMAPADMIN%/%OPENEMAPADMINJS%
+sencha compile --classpath=../src/main/javascript,../../../libs/ext-4.2.1/src,../../../libs/geoext-2.0.1/src,../../../OpenEMap-WebUserInterface/src/main/javascript exclude -all and include -namespace AdmClient,OpenEMap and concat %OPENEMAPADMIN%/%OPENEMAPADMINJS_DEBUG%
+xcopy /s /y ..\src\main\webapp\resources %OPENEMAPADMIN%
+7z a -tzip %OPENEMAPADMIN%.zip -r %OPENEMAPADMIN% -x!doc
 
-copy %OPENEMAPADMIN% ..\..\
-copy %OPENEMAPADMIN_DEBUG% ..\..\
-xcopy /s /y src\main\webapp\resources .
-del /q ..\Modules\src\org\oemap\services\modules\staticcontent\*
-copy /v %OPENEMAPADMIN% ..\Modules\src\org\oemap\services\modules\staticcontent\
-copy /v %OPENEMAPADMIN_DEBUG% ..\Modules\src\org\oemap\services\modules\staticcontent\
-#copy /v ..\..\OpenEMap-WebUserInterface\release\OpenEMap-%OPENEMAP_VERSION%\%OPENEMAP% ..\Modules\src\org\oemap\services\modules\staticcontent\
-#copy /v ..\..\OpenEMap-WebUserInterface\release\OpenEMap-%OPENEMAP_VERSION%\%OPENEMAP_DEBUG% ..\Modules\src\org\oemap\services\modules\staticcontent\
-#cpoy OPENEMAP_RESOURCES?
+#del /q ..\Modules\src\org\oemap\services\modules\staticcontent\*
+#copy /v %OPENEMAPADMIN% ..\Modules\src\org\oemap\services\modules\staticcontent\
+#copy /v %OPENEMAPADMIN_DEBUG% ..\Modules\src\org\oemap\services\modules\staticcontent\
 pause
