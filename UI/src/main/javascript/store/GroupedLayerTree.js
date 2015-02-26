@@ -310,15 +310,22 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
     newNodeUpdate: function(data){
         this.data = data;
         if (!data.wfs){ // new layer
-                    // first check for wfs then wms
-            var wfsUrl = 'adminproxy?url=' + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + data.name || data.wms.params.LAYERS;
+            // first check for wfs then wms
+        	var getLayerName = function(data) {
+	        	if (data.wms && data.wms.params && data.wms.params.LAYERS) {
+	        			return data.wms.params.LAYERS;
+	        	} else {
+	        		return data.name;
+	        	}
+        	}
+        	var layerName = getLayerName(data);
+            var wfsUrl = 'adminproxy?url=' + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + layerName;
             var localWfsStore = Ext.create('GeoExt.data.AttributeStore');
             localWfsStore.setUrl(wfsUrl);
             localWfsStore.load({
                 scope: this,
                 callback: function(records, operation, success) {
             	if (records.length === 0){ // Not wfs then wms
-                    var layerName = data.name;
                     var wmsStore = Ext.create('GeoExt.data.WmsCapabilitiesLayerStore',{
                         url: wmsGetCapabilities
                     });
@@ -329,49 +336,51 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
                             scope: this,
                             callback: function(records, operation, success) {
                             
-                            if(records && records.length > 0) {
-                            
-                                //var args = this;
-                                records.forEach(function(record) {
-                                    
-                                    var layerName = this.data.name;
-                                    var currentLayerName = record.get('name');
-                                    if (layerName === currentLayerName){
-                                        var boundaryBox = record.get('bbox');
-                                        for (var srsName in boundaryBox){
-                                            var boundary = boundaryBox[srsName].bbox;
-                                            var extent = new OpenLayers.Bounds.fromArray(boundary);
-
-                                            var requestUrl = 'adminproxy?url=' + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
-                                                '&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
-                                            Ext.Ajax.request({
-                                                scope: this,
-                                                url: requestUrl,
-                                                success: function(){
-                                                    var format = new OpenLayers.Format.GML();
-                                                    var feature = format.read(arguments[0].responseXML);
-                                                
-                                                    
-                                                    
-                                                    if (this.data.metadata === '' || !this.data.metadata){
-                                                        this.data.metadata = {};
-                                                        this.data.metadata.attributes = {};
-                                                    }
-                                                    for (var attribute in feature[0].attributes){
-                                                        //var item = [attribute, attribute, true];
-                                                        this.data.metadata.attributes[attribute] = {
-                                                            "alias" : attribute
-                                                        };
-                                                    }
-                                                    this.data.clickable = true; 
-                                                    this.data.isWmsInfo = true;
-                                                    AdmClient.app.config.layers = this.getLayerConfiguration(this.data);
-                                                }
-                                            });
-                                        }
-                                    }
-                                }, this);
-                            }
+	                        	records = records.filter(function(record){
+	                        		return record.get('name') === layerName;
+	                        	});
+	                            if(records && records.length > 0) {
+	                            
+	                                //var args = this;
+	                                records.forEach(function(record) {
+	                                    
+		                                var boundaryBox = record.get('bbox');
+		                                for (var srsName in boundaryBox){
+		                                    var boundary = boundaryBox[srsName].bbox;
+		                                    var extent = new OpenLayers.Bounds.fromArray(boundary);
+		
+		                                    var requestUrl = 'adminproxy?url=' + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
+		                                        '&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
+		                                    Ext.Ajax.request({
+		                                        scope: this,
+		                                        url: requestUrl,
+		                                        success: function(){
+		                                            var format = new OpenLayers.Format.GML();
+		                                            var feature = format.read(arguments[0].responseXML);
+		                                        
+		                                            if (feature.length > 0) { 
+		                                                if (this.data.metadata === '' || !this.data.metadata){
+		                                                    this.data.metadata = {};
+		                                                    this.data.metadata.attributes = {};
+		                                                }
+		                                                for (var attribute in feature[0].attributes){
+		                                                    //var item = [attribute, attribute, true];
+		                                                    this.data.metadata.attributes[attribute] = {
+		                                                        "alias" : attribute
+		                                                    };
+		                                                }
+		                                                this.data.clickable = true; 
+		                                                this.data.isWmsInfo = true;
+		                                            } else {
+		                                                this.data.clickable = false; 
+		                                                this.data.queryable = false; 
+		                                            }
+		                                            AdmClient.app.config.layers = this.getLayerConfiguration(this.data);
+		                                        }
+		                                    });
+	                                    }
+	                                }, this);
+	                            }
                             } // callback
                         }); // load wms
                     }

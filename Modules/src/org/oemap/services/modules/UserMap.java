@@ -45,6 +45,7 @@ public class UserMap extends AnnotatedForegroundModule {
 	@CheckboxSettingDescriptor(name = "Debug mode?", description = "This assumes Open eMap javascript sources at /OpenEMap-WebUserInterface.")
 	protected boolean debug = false;
 	
+	protected String usr = null;
 	
 	@Override
 	public ForegroundModuleResponse defaultMethod(HttpServletRequest req,
@@ -52,6 +53,7 @@ public class UserMap extends AnnotatedForegroundModule {
 			throws Exception, Throwable {
 
 		Document doc = createDocument(req, uriParser);
+		usr = user.getUsername();
 		return new SimpleForegroundModuleResponse(doc,
 				this.getDefaultBreadcrumb());
 	}
@@ -66,6 +68,7 @@ public class UserMap extends AnnotatedForegroundModule {
 		document.appendChild(moduleDescriptor.toXML(doc));
 		
 		XMLUtils.appendNewElement(doc, document, "debug", debug);
+		XMLUtils.appendNewElement(doc, document, "usr", usr);
 		
 		return doc;
 	}
