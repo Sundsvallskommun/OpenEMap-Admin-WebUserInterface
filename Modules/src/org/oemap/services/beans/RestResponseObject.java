@@ -25,6 +25,7 @@ public class RestResponseObject {
 	private boolean success = true;
 	private Integer id = 0;
 	private String message = "";
+	private String json = "";
 
 	public String getMessage() {
 		return message;
@@ -32,6 +33,14 @@ public class RestResponseObject {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public String getJson() {
+		return json;
+	}
+
+	public void setJson(String json) {
+		this.json= json;
 	}
 
 	public boolean isSuccess() {

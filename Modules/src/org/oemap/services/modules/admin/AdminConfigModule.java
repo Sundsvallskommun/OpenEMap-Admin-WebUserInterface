@@ -160,6 +160,8 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 				throw new WriteprotectedException();
 			}
 			configDAO.update(config);
+			String json = configFactory.createJSON(config);
+			configFactory.setRestResponseObject(true, config.getConfigId(), "", json);
 		} catch (SQLException x) {
 			configFactory.setRestResponseObject(false, 0, x.getMessage());
 		}
@@ -192,6 +194,8 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 				throw new WriteprotectedException();
 			}
 			configDAO.add(config);
+			String json = configFactory.createJSON(config);
+			configFactory.setRestResponseObject(true, config.getConfigId(), "", json);
 		} catch (SQLException x) {
 			configFactory.setRestResponseObject(false, 0, x.getMessage());
 		}
@@ -222,7 +226,8 @@ public class AdminConfigModule extends AnnotatedRESTModule {
 				throw new WriteprotectedException();
 			}
 			configDAO.delete(config);
-			
+			String json = configFactory.createJSON(config);
+			configFactory.setRestResponseObject(true, config.getConfigId(), "", json);
 		} catch (Exception x) {
 			configFactory.setRestResponseObject(false, 0, x.getMessage());
 		}

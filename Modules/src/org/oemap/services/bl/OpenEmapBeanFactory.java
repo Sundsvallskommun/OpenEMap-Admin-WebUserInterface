@@ -51,11 +51,18 @@ public class OpenEmapBeanFactory<T> {
 	};
 
 	public void setRestResponseObject(boolean success, Integer id,
-			String message) throws JsonGenerationException,
+			String message, String json) throws JsonGenerationException,
 			JsonMappingException, IOException {
 		response.setId(id);
 		response.setMessage(message);
 		response.setSuccess(success);
+		response.setJson(json);
+	}
+
+	public void setRestResponseObject(boolean success, Integer id,
+			String message) throws JsonGenerationException,
+			JsonMappingException, IOException {
+		this.setRestResponseObject(success, id, message, "");
 	}
 
 	public String getRestResponseObject() throws JsonGenerationException,
