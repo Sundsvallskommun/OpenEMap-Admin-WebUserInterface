@@ -34,7 +34,7 @@
 		</xsl:when>
 		<xsl:otherwise>
 			<link rel="stylesheet" type="text/css" href="/libs/ext-theme-oep/ext-theme-oep-all.css"></link>
-		    <link rel="stylesheet" type="text/css" href="/OpenEMap-1.6.0-rc.1/resources/css/OpenEMap.css"></link>
+		    <link rel="stylesheet" type="text/css" href="/OpenEMap-1.6.0-rc.3/resources/css/OpenEMap.css"></link>
 		    <script type="text/javascript" src="/libs/ext-4.2.1/ext-all.js"></script>
 		    <script type="text/javascript" src="/libs/ext-4.2.1/ext-theme-neptune.js"></script>
 		    <script type="text/javascript" src="/libs/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
@@ -43,7 +43,7 @@
 		    <script type="text/javascript" src="/libs/proj4js/proj4_defs.js"></script>
 		    <script type="text/javascript" src="/libs/geoext-2.0.2-rc.1-all.js"></script> 
 		    <script type="text/javascript" src="/libs/es5-shim.min.js"></script>
-			<script type="text/javascript" src="/OpenEMap-1.6.0-rc.1/OpenEMap-1.6.0-rc.1-debug.js"></script>
+			<script type="text/javascript" src="/OpenEMap-1.6.0-rc.3/OpenEMap-1.6.0-rc.3-debug.js"></script>
 	
 		</xsl:otherwise>
 	</xsl:choose>
