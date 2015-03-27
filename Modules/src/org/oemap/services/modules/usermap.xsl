@@ -13,8 +13,8 @@
 			<link rel="stylesheet" type="text/css" href="/libs/ext-4.2.1/packages/ext-theme-oep/build/resources/ext-theme-oep-all.css"></link>
 		    <link rel="stylesheet" type="text/css" href="/OpenEMap-WebUserInterface/resources/css/OpenEMap.css"></link>
 		    <script type="text/javascript" src="/libs/ext-4.2.1/ext-all-debug.js"></script>
-		    <script type="text/javascript" src="/libs/ext-4.2.1/ext-theme-neptune.js"></script>
 		    <script type="text/javascript" src="/libs/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
+		    <script type="text/javascript" src="/libs/ext-4.2.1/ext-theme-neptune.js"></script>
 		    <script type="text/javascript" src="/libs/OpenLayers-2.13.1/OpenLayers.js"></script>
 		    <script type="text/javascript" src="/libs/proj4js/proj4-compressed.js"></script>
 		    <script type="text/javascript" src="/libs/proj4js/proj4_defs.js"></script>
@@ -84,9 +84,14 @@
 				map : {renderTo: 'mapContent'},
 				toolbar : {},
 				zoomTools : {},
-				layers : {type: 'advanced', renderTo: 'layers'},
+				layers : {
+					type: 'advanced'
+//					, renderTo: 'layers'
+				},
 				baseLayers : {},
-				searchFastighet : {renderTo: 'search'}
+				searchFastighet : {
+//					renderTo: 'search'
+				}
 				//objectConfig : {x: 100, y: 400, width: 300, height: 200, collapsed: true}
 			};
 			
@@ -164,7 +169,7 @@
 					var id = queryString[Object.keys(queryString)[0]];
 
 					OpenEMap.username='<xsl:value-of select="usr" />';
-		        	OpenEMap.wsUrls.basePath = '/openemapadmin'; 
+		        	OpenEMap.wsUrls.basePath = '/openemapadmin-1.6.0-rc.3'; 
 					OpenEMap.wsUrls.adminconfigs = '/adminconfigs';
 					OpenEMap.wsUrls.configs = '/configs';
 
