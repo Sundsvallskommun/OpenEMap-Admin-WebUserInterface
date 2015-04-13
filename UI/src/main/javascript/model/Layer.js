@@ -28,9 +28,8 @@ Ext.define('AdmClient.model.Layer', {
     extend : 'Ext.data.Model',
     fields : [ 
     	'layerId', 
-    	'name', 
-    	'wms', 
-    	'wfs', 
+    	{name: 'name', defaultValue: ''}, 
+    	{name: 'wms', defaultValue: null}, 
     	'group', 
     	'metadata',
     	'isSearchable',
@@ -41,8 +40,9 @@ Ext.define('AdmClient.model.Layer', {
     	{name: 'isGroupLayer', type: 'boolean', defaultValue: false},
     	{name: 'isBaseLayer', mapping: 'wms.options.isBaseLayer',  type : 'boolean'},
         {name: 'visibility', mapping: 'wms.options.visibility', type: 'boolean'},
-        {name: 'wfs', mapping: 'wfs', type: 'object'},
-    	'layer' // OpenLayers reference
+        {name: 'wfs', mapping: 'wfs', type: 'object', defaultValue: null},
+    	{name: 'layer', type: 'object'}, // OpenLayers reference
+        {name: 'layers', type: 'array', defaultValue: null}
     ],
     proxy: {
         type: 'rest',

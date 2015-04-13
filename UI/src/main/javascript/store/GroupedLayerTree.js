@@ -46,14 +46,14 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
     maxLayerIndex: 1000,
 
     listeners: {
-        beforeinsert: function(store, node, refNode, eOpts) { return this.onBeforeInsert(store, node, refNode); },
-        beforeappend: function(store, node, eOpts) { return this.onBeforeAppend(store, node); },
-        insert: function(store, node, refNode, eOpts) { this.onInsert(node); },
-        append: function(store, node, index, eOpts) { this.onAppend(node); },// this.onInsertAndAppend(node); },
+        beforeinsert: function(store, node, refNode, eOpts) { return this.onBeforeInsertAppend(store, node, refNode); },
+        beforeappend: function(store, node, eOpts) { return this.onBeforeInsertAppend(store, node); },
+        insert: function(store, node, refNode, eOpts) { this.onInsertAndAppend(store, node); },
+        append: function(store, node, index, eOpts) { this.onInsertAndAppend(store, node); },
         remove: function(store, node, isMove, eOpts) { this.onRemove(store, node, isMove); },
         datachanged: function() { this.onUpdate(); },
         layerMetadataChange: function(){
-            AdmClient.app.config.layers = this.getLayerConfiguration(null);
+            AdmClient.app.config.layers = this.getLayerConfiguration();
         }
     },
 
@@ -63,379 +63,63 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         
     },
 
-    /*
-    * Since not all models include all AdmClient attributes, like wms and wfs
-    * try to get attributes from the raw json data. As a last solution set defaults
-    * @param    {Ext.data.NodeInterface}    node        node to search for attributes in
-    * @param    {string}                    attribute   searched attribute
-    */
-    tryToGetRecordAttribute: function(node, attribute) {
-        var attr = null;
-        var modelNodeAttr = node.get(attribute);
-        
-        if( (modelNodeAttr && typeof modelNodeAttr !== 'undefined')) {
-            attr = modelNodeAttr;
-        } else if(typeof node.data[attribute] !== 'undefined') {
-            attr = node.data[attribute];
-        }
-        
-        // Set defaults
-        if(attribute === 'wms' && typeof modelNodeAttr === 'string') {
-            attr = { url: '', options: {}, params: {} };
-        } else if(attribute === 'wfs' && typeof modelNodeAttr === 'string') {
-            attr = { url: '', featureType: '', featurePrefix: '' };
-        }
-        
-        if (attribute === 'wms' && !modelNodeAttr){
-        	attr = attr || {};
-        	attr.params = node.raw.params;
-        	attr.url = node.raw.url;
-        	attr.options = {
-        	     "isBaseLayer": false,
-        	     "visibility": false
-        	    };
-        	if (node.raw.options && node.raw.options.metadata && node.raw.options.metadata.metadataURLs && node.raw.options.metadata.metadataURLs.length > 0){
-        		attr.metadataUrl = node.raw.options.metadata.metadataURLs[0].href;
-        	}
-        }
-        
-        return attr;
-    },
-    
-    /*
-    * Converts a store node to layer configuration
-    * !TODO Change into writer and add something like nameProperty: 'mapping' to get mapped JSON
-    * @param  {Ext.data.NodeInterface}    node    Node to convert
-    * @return {object}                    layer   OpenEMap layer
-    */
-    nodeToLayerConfig: function(node, data) {
-        var attributeList = ['name','wms','wfs','metadataUrl', 'isGroupLayer', 'queryable', 'clickable'];
-        var layer = {};
-
-        var stripName = function(name) {
-            var parts = name.split(':');
-            return parts.length > 1 ? parts : ['',name];
-        };
-
-        if(node.hasChildNodes()) {
-            layer.layers = [];
-            return layer;
-        }
-        
-        attributeList.forEach(function(attributeName) {
-            var attr = this.tryToGetRecordAttribute(node, attributeName);
-            if(attr !== undefined) {
-                layer[attributeName] = attr;
-            }
-        }, this);
-
-        if(layer.wms && layer.wms.options) {
-            var isBaseLayer = this.tryToGetRecordAttribute(node, 'isBaseLayer');
-            if(!isBaseLayer) {
-                isBaseLayer = false;
-            }
-            
-            layer.wms.options.isBaseLayer = isBaseLayer;
-            layer.wms.options.visibility = this.tryToGetRecordAttribute(node, 'visibility');
-            
-            if (layer.wms.options.visibility === undefined || layer.wms.options.visibility === null){
-                layer.wms.options.visibility = false;
-            }
-
-            if (node.data.metadata && node.data.metadata !== ''){
-                layer.metadata = node.data.metadata;
-            }
-            node.set('wms', layer.wms);
-            
-            var queryable = this.tryToGetRecordAttribute(node, 'queryable');
-            var clickable = this.tryToGetRecordAttribute(node, 'clickable');
-            var isWmsInfo = this.tryToGetRecordAttribute(node, 'isWmsInfo');
-            if ((queryable && clickable) || (clickable && this._updating)){
-            	//OK rebuild logic here to determine if there is WFS get Feature, or WMSGetFeatureInfo
-            	var layerPieces = stripName(layer.wms.params.layers ? layer.wms.params.layers : layer.wms.params.LAYERS);
-            	
-                if (!isWmsInfo){
-                    layer.wfs = {};
-                    layer.wfs.featurePrefix = layerPieces[0];
-                    layer.wfs.featureType = layerPieces[1];
-                    layer.wfs.url = wfsServer;
-                    node.set('wfs', layer.wfs);
-                }else{
-                    node.set('description', 'Added by OpeEMap Admin');
-                }
-                
-            }else {
-                if (layer.wfs) delete layer.wfs;
-            }
-            
-            /*if (data && data.name && node.get('name') === data.name){ // handle visibility
-            	layer.wms.options.visibility = data.checked;
-            }*/
-        }
-        
-        return layer;
-    },
-
-    /**
-    * Returns all layers as OpenEMap layer configuration tree.
-    * @return {object} layerConfig  OpenEMap layer configuration
-    */
-    getLayerConfiguration: function(data) {
-
-    	var layerConfig  = [];
-    
-        // Get layers and sublayers.
-        // TODO: clean up
-    	var offset = layerConfig.length;
-        var index = 0;
-        this.getRootNode().childNodes.forEach(function(node, i) {
-            index = offset + i;
-            layerConfig[index] = this.nodeToLayerConfig(node, data);
-            
-            node.childNodes.forEach(function(subnode) {
-                if(layerConfig[index].layers) {
-                    layerConfig[index].name = subnode.parentNode.get('name');
-                    layerConfig[index].isGroupLayer = subnode.parentNode.get('isGroupLayer');
-                    layerConfig[index].layers.push(this.nodeToLayerConfig(subnode));
-                }
-            }, this);
-        }, this);
-        return layerConfig;
-    },
-
-    /**
-    * Before append to store
-    * @param {Ext.data.Model} node
-    * @param {Ext.data.Model} appendNode
-    */
-    onBeforeAppend: function(node, appendNode) {
-        // Prevent groups from being added to groups
-        if(node && !node.isRoot() && !appendNode.isLeaf()) {
-            return false;
-        }
-        
-        return true;
-    },
-
     /**
     * Before insert to store
     * @param {Ext.data.Store} store
     * @param {Ext.data.Model} node
     * @param {Ext.data.Model} refNode
     */
-    onBeforeInsert: function(store, node, refNode) {
-        // Prevent groups from being added to groups
-        if(!refNode.parentNode.isRoot() && !node.isLeaf()) {
-            return false;
+    onBeforeInsertAppend: function(store, node, refNode) {
+    	var layerName = this.getLayerName(node.data);
+        if ((node.$className === 'GeoExt.data.WmsCapabilitiesLayerModel' && (!node.data.wms && node.raw && node.raw.url && layerName)) || node.$className === 'AdmClient.model.Layer') {
+        	return true;
+        } else {
+        	return false;
         }
-        
-        return true;
-    },
-    
-    onInsert: function(node) {
-    	//console.log(node);
-        this.newNodeUpdate(node.data);
-    },
-    
-    onAppend: function(node) {
-    	this.newNodeUpdate(node.data);
     },
 
     /**
-     * Handler for a store's insert and append event.
-     *
-     * @param {Ext.data.Model} node
+     * Get a nodes layer name
+     * @param {Ext.data.Model} data
      */
-    
-    //this function is obselete??
-    onInsertAndAppend: function(node) {
-        if(!this._inserting) {
-            this._inserting = true;
-            
-            // Add this node layers and subnodes to map. 
-            node.cascadeBy(function(subnode) {
+	getLayerName: function(data) {
+    	if (data.wms && data.wms.params && (data.wms.params.LAYERS || data.wms.params.layers)) {
+    			return data.wms.params.LAYERS || data.wms.params.layers;
+    	} else {
+    		return data.name;
+    	}
+	},
 
-                // If this node is a GeoExt layer, then the raw model is an OpenLayers layer
-                if(subnode.raw && subnode.raw.CLASS_NAME && subnode.raw.CLASS_NAME.indexOf('OpenLayers.Layer') > -1) {
-                    // Store a reference to the OpenLayers layer.
-                    subnode.set('layer',subnode.raw);
-
-                    // Insert WMS params
-                    if(subnode.raw.CLASS_NAME.indexOf('OpenLayers.Layer.WMS') > -1) {
-                        subnode.set('wms',{
-                            url: subnode.raw.url,
-                            params: subnode.raw.params,
-                            options: {
-                                isBaseLayer: false,
-                                visibility: false
-                            }
-                        });
-                        subnode.set('checked', false);
-                        if(subnode.raw.options && subnode.raw.options.metadata && subnode.raw.options.metadata.metadataURLs && subnode.raw.options.metadata.metadataURLs.length > 0) {
-                            subnode.set('metadataUrl', subnode.raw.options.metadata.metadataURLs[0].href);
-                        }
-                    }
-                }
-
-                var layer = subnode.get('layer');
-
-                // Add getLayer function to support GeoExt
-                subnode.getLayer = function() {
-                    return this.get('layer');
-                };
-                // Add WMS legened 
-                this.addWMSLegend(subnode);
-
-                // If store is connected to a map, add layer to map
-                if(layer && layer !== '' && this.map) {
-                    var mapLayer = this.map.getLayer(layer);
-                    if(mapLayer === null && layer && layer.displayInLayerSwitcher === true) {
-                        this.map.addLayer(layer);
-                    }
-                }
-            }, this);
-
-            // Reorder layers on map
-            this.reorderLayersOnMap();
-    
-            delete this._inserting;
-        }
-        
-    },
-
-    layerUpdate : function(){
-         AdmClient.app.config.layers = this.getLayerConfiguration(null);
-    },
-
-    newNodeUpdate: function(data){
-        this.data = data;
-        if (!data.wfs){ // new layer
-            // first check for wfs then wms
-        	var getLayerName = function(data) {
-	        	if (data.wms && data.wms.params && data.wms.params.LAYERS) {
-	        			return data.wms.params.LAYERS;
-	        	} else {
-	        		return data.name;
-	        	}
+	onInsertAndAppend: function(store, node) {
+    	// kolla om det går att göra Wfs anrop och skapa Wfs tag och metadata samt sätt queryable 
+        if (node.$className === 'GeoExt.data.WmsCapabilitiesLayerModel') {
+        	var layerName = this.getLayerName(node.data);
+        	
+        	if (!node.data.wms && node.raw && node.raw.url && layerName) {
+            	node.data.wms = {url: node.raw.url, options: {displayInLayerSwitcher: true, isBaseLayer: false}};
+    			if (node.raw.params) {
+    				node.data.wms.params = node.raw.params; 
+    			} else {
+    				node.data.wms.params = {layers: layerName};
+    			}
+    			if (node.raw.metadata && node.raw.metadata.queryable) {
+    				node.data.queryable = node.raw.metadata.queryable; 
+    			}
+    			if (node.raw.metadata && node.raw.metadata.legendURL) {
+    				node.data.wms.options.legendURL = node.raw.metadata.legendURL; 
+    			}
+    			if (node.raw.metadata && node.raw.metadata.metadataURLs && node.raw.metadata.metadataURLs.length > 0) {
+    				node.data.wms.metadataURL = node.raw.metadata.metadataURLs[0]; 
+    			}
+    	    	node.data.isGroupLayer = false;
+    	    	node.data.clickable = false;
+    	    	this.getWFSSettings(node);
         	}
-        	var layerName = getLayerName(data);
-            var wfsUrl = 'adminproxy?url=' + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + layerName;
-            var localWfsStore = Ext.create('GeoExt.data.AttributeStore');
-            localWfsStore.setUrl(wfsUrl);
-            localWfsStore.load({
-                scope: this,
-                callback: function(records, operation, success) {
-            	if (records.length === 0){ // Not wfs then wms
-                    var wmsStore = Ext.create('GeoExt.data.WmsCapabilitiesLayerStore',{
-                        url: wmsGetCapabilities
-                    });
-
-                    if (records.length === 0){
-
-                        wmsStore.load({
-                            scope: this,
-                            callback: function(records, operation, success) {
-                            
-	                        	records = records.filter(function(record){
-	                        		return record.get('name') === layerName;
-	                        	});
-	                            if(records && records.length > 0) {
-	                            
-	                                //var args = this;
-	                                records.forEach(function(record) {
-	                                    
-		                                var boundaryBox = record.get('bbox');
-		                                for (var srsName in boundaryBox){
-		                                    var boundary = boundaryBox[srsName].bbox;
-		                                    var extent = new OpenLayers.Bounds.fromArray(boundary);
-		
-		                                    var requestUrl = 'adminproxy?url=' + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
-		                                        '&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
-		                                    Ext.Ajax.request({
-		                                        scope: this,
-		                                        url: requestUrl,
-		                                        success: function(){
-		                                            var format = new OpenLayers.Format.GML();
-		                                            var feature = format.read(arguments[0].responseXML);
-		                                        
-		                                            if (feature.length > 0) { 
-		                                                if (this.data.metadata === '' || !this.data.metadata){
-		                                                    this.data.metadata = {};
-		                                                    this.data.metadata.attributes = {};
-		                                                }
-		                                                for (var attribute in feature[0].attributes){
-		                                                    //var item = [attribute, attribute, true];
-		                                                    this.data.metadata.attributes[attribute] = {
-		                                                        "alias" : attribute
-		                                                    };
-		                                                }
-		                                                this.data.clickable = true; 
-		                                                this.data.isWmsInfo = true;
-		                                            } else {
-		                                                this.data.clickable = false; 
-		                                                this.data.queryable = false; 
-		                                            }
-		                                            AdmClient.app.config.layers = this.getLayerConfiguration(this.data);
-		                                        }
-		                                    });
-	                                    }
-	                                }, this);
-	                            }
-                            } // callback
-                        }); // load wms
-                    }
-                } else{ // it is wfs
-                    records.forEach(function(a){
-                        if (this.data.metadata === '' || !this.data.metadata){
-                            this.data.metadata = {};
-                            this.data.metadata.attributes = {};
-                        }
-                        this.data.metadata.attributes[a.data.name] = {
-                            "alias" : a.data.name
-                        };
-                    }, this);
-                    this.data.clickable = true;
-                    this.data.isWmsInfo = false;
-                    AdmClient.app.config.layers = this.getLayerConfiguration(this.data);
-                }
-                }
-            });
+//        } else if (node.$className === 'AdmClient.model.Layer') {
+//        	console.log(node);
         }
     },
-
-    onUpdate: function(chkBox, opt, eOpts ) {
-        if(!this._updating) {
-            this._updating = true;
-
-            var data = null;
-            if (chkBox && chkBox.data)
-            	data = chkBox.data;
-
-            if (data && data.id === "root"){
-                this._updating = false;
-                return;
-            }
-
-            if (data && data.clickable){
-                //determine wfs or wms
-            	this.newNodeUpdate(data);
-                //check if wms or wfs already in configuration
-
-
-            }else if (data && !data.clickable){
-                delete data.wfs;
-                delete data.metadata;
-                data.clickable = false;
-                var s = Ext.getStore('configurationTreeStore');
-                AdmClient.app.config.layers = s.getLayerConfiguration(data);
-            }
-            else{
-                AdmClient.app.config.layers = this.getLayerConfiguration(data);
-            }
-        }
-        this._updating = false;
-    },
-
+    
     /**
      * Handler for a store's remove event.
      *
@@ -456,10 +140,215 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
             }, this);
 
             // Remove layers from app configuration
-            //AdmClient.app.config.layers = this.getLayerConfiguration();
+            AdmClient.app.config.layers = this.getLayerConfiguration();
 
             delete this._removing;
         }
+    },
+
+    onUpdate: function(chkBox, opt, eOpts ) {
+        if(!this._updating) {
+            this._updating = true;
+
+            var data = null;
+            if (chkBox && chkBox.data)
+            	data = chkBox.data;
+
+            if (data && data.id === "root"){
+                this._updating = false;
+                return;
+            }
+
+            var s = Ext.getStore('configurationTreeStore');
+            AdmClient.app.config.layers = s.getLayerConfiguration();
+        }
+        this._updating = false;
+    },
+
+    
+    /**
+     * Tries to get WFS-settings for a layer 
+     * @private
+     * @param  {Ext.data.NodeInterface} node     
+     */
+    getWFSSettings: function(node) {
+        var stripName = function(name) {
+            var parts = name.split(':');
+            return parts.length > 1 ? parts : ['',name];
+        };
+        if (!(node.data && node.data.wms)) {
+        	return false;
+        }
+    	var layerPieces = stripName(node.data.wms.params.layers || node.data.wms.params.LAYERS);
+        var wfsUrl = 'adminproxy?url=' + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + (node.data.wms.params.layers || node.data.wms.params.LAYERS);
+	    var localWfsStore = Ext.create('GeoExt.data.AttributeStore');
+	    localWfsStore.setUrl(wfsUrl);
+	    localWfsStore.load({
+	        scope: node,
+	        callback: function(records, operation, success) {
+	        	if (success && records.length > 0) {
+	        		var metadata = {};
+		            records.forEach(function(a){
+		                if (this.get('metadata') === '' || !this.get('metadata')){
+		                    metadata.attributes = {};
+		                }
+		                metadata.attributes[a.data.name] = {
+		                    "alias" : a.data.name
+		                };
+		            }, this);
+	        		this.set('metadata', metadata);
+		            this.set('wfs', {
+		            	featurePrefix: layerPieces[0],
+		                featureType: layerPieces[1],
+		                url: wfsServer
+		               });
+		            this.set('queryable', true);
+		            this.set('clickable', true);
+	                var s = Ext.getStore('configurationTreeStore');
+	                AdmClient.app.config.layers = s.getLayerConfiguration();
+	            // WFS Fails, try WMS 
+		        } else if (this.get('wms')  && this.get('wms').params && (this.get('wms').params.LAYERS || this.get('wms').params.layers)) {
+					var srsName = null;
+					var wms = this.get('wms');
+					for (srsName in this.get('srs')) {
+						break;
+					}
+					var boundary = this.get('bbox')[srsName].bbox;
+					var extent = new OpenLayers.Bounds.fromArray(boundary);
+					var layerName = wms.params.LAYERS || wms.params.layers; 
+
+					var requestUrl = 'adminproxy?url=' + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
+						'&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
+					Ext.Ajax.request({
+						scope: this,
+						url: requestUrl,
+						success: function(){
+							var format = new OpenLayers.Format.GML();
+							var feature = format.read(arguments[0].responseXML);
+
+							if (feature.length > 0) { 
+								metadata = {};
+								if (this.get('metadata') === '' || !this.get('metadata')){
+									metadata.attributes = {};
+								}
+								for (var attribute in feature[0].attributes){
+									//var item = [attribute, attribute, true];
+									metadata.attributes[attribute] = {
+										alias: attribute
+									};
+								}
+								this.set('metadata', metadata);
+								this.set('clickable', true); 
+				                var s = Ext.getStore('configurationTreeStore');
+				                AdmClient.app.config.layers = s.getLayerConfiguration();
+							} else {
+								this.set('clickable', false); 
+								this.set('queryable', false); 
+				                var s = Ext.getStore('configurationTreeStore');
+				                AdmClient.app.config.layers = s.getLayerConfiguration();
+							}
+						}
+					});
+		        }
+	        }
+	    });
+    },
+
+    /*
+     * Since not all models include all AdmClient attributes, like wms and wfs
+     * try to get attributes from the raw json data. As a last solution set defaults
+     * @param    {Ext.data.NodeInterface}    node        node to search for attributes in
+     * @param    {string}                    attribute   searched attribute
+     */
+    tryToGetRecordAttribute: function(node, attribute) {
+        var attr = null;
+        var modelNodeAttr = node.get(attribute);
+        
+        if( (modelNodeAttr && typeof modelNodeAttr !== 'undefined')) {
+            attr = modelNodeAttr;
+        } else if(typeof node.data[attribute] !== 'undefined') {
+            attr = node.data[attribute];
+        }
+        return attr;
+    },
+     
+    /**
+    * Converts a store node to layer configuration
+    * !TODO Change into writer and add something like nameProperty: 'mapping' to get mapped JSON
+    * @param  {Ext.data.NodeInterface}    node    Node to convert
+    * @return {object}                    layer   OpenEMap layer
+    */
+    nodeToLayerConfig: function(node) {
+        var attributeList = ['name','wms','wfs','metadataUrl', 'isGroupLayer', 'queryable', 'clickable'];
+        var layer = {};
+        var me = this;
+
+        var stripName = function(name) {
+            var parts = name.split(':');
+            return parts.length > 1 ? parts : ['',name];
+        };
+
+        attributeList.forEach(function(attributeName) {
+            var attr = this.tryToGetRecordAttribute(node, attributeName);
+            if(attr !== undefined) {
+                layer[attributeName] = attr;
+            }
+        }, this);
+
+        if(layer.wms && layer.wms.options) {
+            var isBaseLayer = this.tryToGetRecordAttribute(node, 'isBaseLayer');
+            if(!isBaseLayer) {
+                isBaseLayer = false;
+            }
+             
+            layer.wms.options.isBaseLayer = isBaseLayer;
+            layer.wms.options.visibility = this.tryToGetRecordAttribute(node, 'visibility');
+             
+            if (layer.wms.options.visibility === undefined || layer.wms.options.visibility === null){
+                layer.wms.options.visibility = false;
+            }
+
+            if (node.data.metadata && node.data.metadata !== ''){
+                layer.metadata = node.data.metadata;
+            }
+             
+            var queryable = this.tryToGetRecordAttribute(node, 'queryable');
+            var clickable = this.tryToGetRecordAttribute(node, 'clickable');
+            if ((queryable && clickable) || (clickable && this._updating)){
+            	var layerPieces = stripName(layer.wms.params.layers ? layer.wms.params.layers : layer.wms.params.LAYERS);
+                layer.wfs = {};
+                layer.wfs.featurePrefix = layerPieces[0];
+                layer.wfs.featureType = layerPieces[1];
+                layer.wfs.url = wfsServer;
+            } else {
+                if (layer.wfs) delete layer.wfs;
+            }
+        }
+         
+        if (node.hasChildNodes()) {
+	        layer.layers = [];
+	        node.childNodes.forEach(function(subnode) {
+	        	layer.layers.push(me.nodeToLayerConfig(subnode));
+	        });
+        }
+        return layer;
+    },
+
+    /**
+    * Returns all layers as OpenEMap layer configuration tree.
+    * @return {object} layerConfig  OpenEMap layer configuration
+    */
+    getLayerConfiguration: function() {
+    	var layerConfig  = [];
+        // Get layers and sublayers.
+        this.getRootNode().childNodes.forEach(function(node, i) {
+        	layerConfig.push(this.nodeToLayerConfig(node));
+        }, this);
+        return layerConfig;
+    },
+
+    layerUpdate : function(){
+        AdmClient.app.config.layers = this.getLayerConfiguration();
     },
 
     /**
@@ -509,11 +398,12 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
      */
     unbind: function() {
         var me = this;
-        me.un('beforeinsert', me.onBeforeInsert, me);
-        me.un('beforeappend', me.onBeforeAppend, me);
+        me.un('beforeinsert', me.onBeforeInsertAndAppend, me);
+        me.un('beforeappend', me.onBeforeInsertAndAppend, me);
         me.un('insert', me.onInsertAndAppend, me);
         me.un('append', me.onInsertAndAppend, me);
         me.un('remove', me.onRemove, me);
+        me.un('datachangded', me.onUpdate, me);
         me.map = null;
     },
 
