@@ -177,6 +177,9 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 			Ext.MessageBox.alert('"Default" is an invalid configuration name.', 'You are trying to write to a write protected template. Choose another template name');
 			return;
 		}
+		// Update config.layers
+        var s = Ext.getStore('configurationTreeStore');
+        AdmClient.app.config.layers = s.getLayerConfiguration();
 		
 		AdmClient.app.config.isPublic = true;
 		var url = appPath + '/adminconfigs/config';

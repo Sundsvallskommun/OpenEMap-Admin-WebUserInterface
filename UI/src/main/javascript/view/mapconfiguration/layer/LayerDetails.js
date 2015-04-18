@@ -77,6 +77,8 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 			
 			var wfsUrl = 'adminproxy?url=' + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + getTypeName(this.layer);
 			this.store = Ext.create('GeoExt.data.AttributeStore');
+			var proxy = this.store.getProxy();
+			Ext.apply(proxy.proxyConfig, {headers: {"Content-Type": "application/xml; charset=UTF-8"}});
 			this.store.setUrl(wfsUrl);
 			this.store.load();
 		}

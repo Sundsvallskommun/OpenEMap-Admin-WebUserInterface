@@ -51,6 +51,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         insert: function(store, node, refNode, eOpts) { this.onInsertAndAppend(store, node); },
         append: function(store, node, index, eOpts) { this.onInsertAndAppend(store, node); },
         remove: function(store, node, isMove, eOpts) { this.onRemove(store, node, isMove); },
+        move: function(store, oldParent, newParent, index, eOpts) {this.onMove(store, oldParent, newParent, index, eOpts);},
         datachanged: function() { this.onUpdate(); },
         layerMetadataChange: function(){
             AdmClient.app.config.layers = this.getLayerConfiguration();
@@ -63,6 +64,9 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         
     },
 
+	onMove: function(store, oldParent, newParent, index, eOpts) {
+		console.log(oldParent);
+	},
     /**
     * Before insert to store
     * @param {Ext.data.Store} store
@@ -91,29 +95,31 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
 	},
 
 	onInsertAndAppend: function(store, node) {
-    	// kolla om det går att göra Wfs anrop och skapa Wfs tag och metadata samt sätt queryable 
+    	// kolla om det går att göra Wfs anrop och skapa Wfs tag och metadata samt sätt queryable
         if (node.$className === 'GeoExt.data.WmsCapabilitiesLayerModel') {
         	var layerName = this.getLayerName(node.data);
         	
         	if (!node.data.wms && node.raw && node.raw.url && layerName) {
-            	node.data.wms = {url: node.raw.url, options: {displayInLayerSwitcher: true, isBaseLayer: false}};
+            	var wms = {url: node.raw.url, options: {displayInLayerSwitcher: true, isBaseLayer: false}};
     			if (node.raw.params) {
-    				node.data.wms.params = node.raw.params; 
+    				wms.params = node.raw.params; 
     			} else {
-    				node.data.wms.params = {layers: layerName};
-    			}
-    			if (node.raw.metadata && node.raw.metadata.queryable) {
-    				node.data.queryable = node.raw.metadata.queryable; 
+    				wms.params = {layers: layerName};
     			}
     			if (node.raw.metadata && node.raw.metadata.legendURL) {
-    				node.data.wms.options.legendURL = node.raw.metadata.legendURL; 
+    				wms.options.legendURL = node.raw.metadata.legendURL; 
     			}
     			if (node.raw.metadata && node.raw.metadata.metadataURLs && node.raw.metadata.metadataURLs.length > 0) {
-    				node.data.wms.metadataURL = node.raw.metadata.metadataURLs[0]; 
+    				wms.metadataURL = node.raw.metadata.metadataURLs[0]; 
     			}
-    	    	node.data.isGroupLayer = false;
-    	    	node.data.clickable = false;
-    	    	this.getWFSSettings(node);
+    			node.set('wms', wms);
+    			
+    			if (node.raw.metadata && node.raw.metadata.queryable) {
+    				node.set('queryable', node.raw.metadata.queryable); 
+    			}
+    	    	node.set('isGroupLayer', false);
+    	    	node.set('clickable', false);
+    	    	this.getWFSSettings(newNode);
         	}
 //        } else if (node.$className === 'AdmClient.model.Layer') {
 //        	console.log(node);
