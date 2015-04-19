@@ -102,7 +102,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		        tbar : [{
 		        	text : 'Nytt grupplager',
 		        	itemId : 'newGroupLayer',
-		        	icon : '/openemap-admin/font-awesome/black/png/16/plus.png'
+		        	icon : 'resources/font-awesome/black/png/16/plus.png'
 		    	}],
 		        columns: [
 		            {
@@ -116,7 +116,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		                width: 70,
 		                text: '&Auml;ndra <br /> lagernamn',
 		                align: 'center',
-		                icon: '/openemap-admin/font-awesome/black/png/16/pencil.png',
+		                icon: 'resources/font-awesome/black/png/16/pencil.png',
 		                tooltip: '&Auml;ndra namn',
 		                handler: function(grid, rowIndex, colIndex) {
 		                	var node = grid.getStore().getAt(rowIndex);
@@ -180,7 +180,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		                width: 70,
 		                text: 'Ta bort',
 		                align: 'center',
-		                icon: '/openemap-admin/font-awesome/black/png/16/times.png',
+		                icon: 'resources/font-awesome/black/png/16/times.png',
 		                tooltip: 'Ta bort',
 		                handler: function(grid, rowIndex, colIndex) {
 		                	var node = grid.getStore().getAt(rowIndex);
@@ -199,12 +199,12 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		            	isDisabled: function(view, ri, ci, item, record){
 		            		return record.data.isGroupLayer;
 		            	},
-		            	//icon: '/openemap-admin/font-awesome/black/png/16/table.png',
+		            	//icon: 'resources/font-awesome/black/png/16/table.png',
 		            	renderer:function(value, meta){
 		            		if (!meta.record.get('queryable')){
 		            			return '<span></span>';
 		            		}
-		            		return '<img role="button" class="x-action-col-icon x-action-col-0" src="/openemap-admin/font-awesome/black/png/16/table.png" />';
+		            		return '<img role="button" class="x-action-col-icon x-action-col-0" src="resources/font-awesome/black/png/16/table.png" />';
 		            	},
 		            	handler : function(grid, rowIdex, colIndex){
 		            		var selectedLayer = null;
