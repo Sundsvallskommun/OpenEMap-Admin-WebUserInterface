@@ -187,7 +187,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		                	// Remove childs
 		                	for (var i = 0; i < node.childNodes.length; i++) {
 		                		node.removeChild(node.childNodes[i]);
-		                	};
+		                	}
 						    node.remove();
 						}
 		            },{

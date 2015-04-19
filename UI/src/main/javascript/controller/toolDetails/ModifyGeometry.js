@@ -42,6 +42,7 @@ Ext.define('AdmClient.controller.toolDetails.ModifyGeometry', {
 	toolSelected : function(chkBox, rowIndex, checked, eOpts) {
 		
 		var toolObject = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data;
+		var tool = null;
 		if (checked){
 			if (/ModifyGeometry/.test(toolObject.toolName)){
 				//find the right place in config object
@@ -50,7 +51,7 @@ Ext.define('AdmClient.controller.toolDetails.ModifyGeometry', {
 				});
 				
 				if (configItems.length === 0){ // add tool to config object
-					var tool = {type: 'ModifyGeometry'};
+					tool = {type: 'ModifyGeometry'};
 					AdmClient.app.config.tools.push(tool);
 				}
 			}
@@ -59,7 +60,7 @@ Ext.define('AdmClient.controller.toolDetails.ModifyGeometry', {
 			if (/ModifyGeometry/.test(toolObject.toolName)){
 				
 				for (var i = 0; i < AdmClient.app.config.tools.length; i++){
-					var tool = AdmClient.app.config.tools[i];
+					tool = AdmClient.app.config.tools[i];
 					if (/ModifyGeometry/.test(tool.type)){
 						AdmClient.app.config.tools.splice(i, 1);
 					}

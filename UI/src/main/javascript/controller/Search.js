@@ -61,7 +61,7 @@ Ext.define('AdmClient.controller.Search', {
 			panel.store.data.items[i].save();
 		}
 
-		for (var i = 0; i < panel.store.data.items.length; i++){
+		for (i = 0; i < panel.store.data.items.length; i++){
 			panel.store.data.items[i].data.selected = false;
 			var municipality = panel.store.data.items[i];
 			if (AdmClient.app.config.search){

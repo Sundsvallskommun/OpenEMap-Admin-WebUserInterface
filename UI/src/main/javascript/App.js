@@ -102,7 +102,7 @@ Ext.application({
                'AdmClient.model.Config'
                ],
     name: 'AdmClient',
-    appFolder: 'http://localhost/OpenEMap-Admin-WebUserInterface/UI/src/main/javascript',
+    appFolder: 'src/main/javascript',
     controllers: ['Main', 
                   'Layers', 
                   'MainToolbar', 

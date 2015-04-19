@@ -72,7 +72,7 @@ Ext.define('AdmClient.controller.ToolsGrid', {
 		
 		// IMPORTANT
 		// this needs to rewrite
-		for (var i = 0; i < panel.store.data.items.length; i++){
+		for (i = 0; i < panel.store.data.items.length; i++){
 			panel.store.data.items[i].data.selected = false;
 			var toolName = panel.store.data.items[i];
 			for (var j = 0; j < AdmClient.app.config.tools.length; j++){

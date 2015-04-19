@@ -73,7 +73,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 		            });
 				}
 					
-			}
+			};
 			
 			var wfsUrl = 'adminproxy?url=' + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + getTypeName(this.layer);
 			this.store = Ext.create('GeoExt.data.AttributeStore');
@@ -111,7 +111,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
         		            });
         					return undefined;
         				}
-        			}
+        			};
                 	var layerName = getLayerName(this.layer);
                     if(layerName && records && records.length > 0) {
                     	records = records.filter(function(record){
@@ -121,38 +121,39 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
                         if (records.length > 0) {
 	                        records.forEach(function(record) {
                             	var boundaryBox = record.get('bbox');
+								var success = function(){
+									var format = new OpenLayers.Format.GML();
+									var feature = format.read(arguments[0].responseXML);
+									var fields = this.getAttributeCollection(feature[0].attributes);
+									
+
+									if (this.layer.metadata && this.layer.metadata.attributes && this.layer.metadata.attributes instanceof Object) {
+										var attributesInLayer = this.layer.metadata.attributes;
+										var fieldsFilter = function(f){
+											return f[0] === attribute;
+										};
+										for (var attribute in attributesInLayer){
+											var item = fields.filter(fieldsFilter, f);
+											if (item.length > 0) {
+												item[0][1] = item[0][1] === '' ? attributesInLayer[attribute].alias : item[0][1];
+												item[0][2] = true;
+											}
+										}
+									}
+									this.store.loadData(fields);
+								};
+
                             	for (var srsName in boundaryBox){
                             		var boundary = boundaryBox[srsName].bbox;
                             		var extent = new OpenLayers.Bounds.fromArray(boundary);
 
                             		var requestUrl = 'adminproxy?url=' + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
                             		 	'&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
-                            		 Ext.Ajax.request({
+                            		Ext.Ajax.request({
                             		 	scope: this,
                             		 	url: requestUrl,
-                            		 	success: function(){
-                            		 		var format = new OpenLayers.Format.GML();
-                            		 		var feature = format.read(arguments[0].responseXML);
-                            		 		var fields = this.getAttributeCollection(feature[0].attributes);
-                            		 		
-
-                            		 		if (this.layer.metadata 
-                            		 				&& this.layer.metadata.attributes 
-                            		 				&& this.layer.metadata.attributes instanceof Object) {
-                            		 			var attributesInLayer = this.layer.metadata.attributes;
-                            		 			for (var attribute in attributesInLayer){
-                            		 				var item = fields.filter(function(f){
-                            		 					return f[0] === attribute;
-                            		 				});
-                            		 				if (item.length > 0) {
-                            		 					item[0][1] = item[0][1] === '' ? attributesInLayer[attribute].alias : item[0][1];
-                            		 					item[0][2] = true;
-                            		 				}
-                            		 			}
-                            		 		}
-                            		 		this.store.loadData(fields);
-										}
-                            		 });
+                            		 	success: success
+                            		});
                             	}
 	                        }, this);
 	                    } else {
