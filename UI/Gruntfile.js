@@ -148,6 +148,18 @@ module.exports = function(grunt) {
 				host: 'extmaptest.sundsvall.se',
 				https: true,
 				port: 443
+			},
+			{
+				context: '/openemapadmin',
+				host: 'kartatest.e-tjansteportalen.se',
+				https: true,
+				port: 443
+			},
+			{
+				context: '/print',
+				host: 'kartatest.e-tjansteportalen.se',
+				https: true,
+				port: 443
 			}		
 		]
     },

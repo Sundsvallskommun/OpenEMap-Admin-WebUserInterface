@@ -7,6 +7,9 @@
 
     <link rel="stylesheet" type="text/css" href="bower_components/ext-4.2.1/resources/ext-theme-neptune/ext-theme-neptune-all.css">
     <link rel="stylesheet" type="text/css" href="oeadmin.css" />
+
+    <!-- This will make the page reload automatically when source has changed and page is served using grunt devserver -->
+    <script src="//localhost:35729/livereload.js"></script>
 <!--    <link rel="stylesheet" type="text/css" href="resources/images/icons/css/font-awesome.css">-->
     <script type="text/javascript" src="bower_components/ext-4.2.1/ext-debug.js"></script>
     <script type="text/javascript" src="bower_components/ext-4.2.1/ext-theme-neptune.js"></script>
@@ -24,7 +27,7 @@
             disableCaching: false,
             paths: {
                 AdmClient: 'src/main/javascript',
-//                OpenEMap: '../../OpenEMap-WebUserInterface/src/main/javascript',
+                OpenEMap: 'bower_components/OpenEMap/src/main/javascript',
                 GeoExt: 'bower_components/geoext2/src/GeoExt/'
             }
           });
