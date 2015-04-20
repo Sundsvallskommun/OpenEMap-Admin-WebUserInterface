@@ -2,7 +2,8 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    releasePath: 'release/<%= pkg.name %>-<%= pkg.version %>', 
+    releasePath: 'release/<%= pkg.name %>-<%= pkg.version %>',
+    modulesStaticPath: '<%= pkg.modulesStaticPath %>', 
     
     clean: ['<%= releasePath %>', '<%= releasePath %>.zip'],
     
@@ -146,7 +147,7 @@ module.exports = function(grunt) {
             { expand: false, src: ['debug_factory.html'], dest: '<%= releasePath %>/' },
             { expand: false, src: ['admin.json'], dest: '<%= releasePath %>/' },
             { expand: false, src: ['src/main/javascript/OpenEMapAdmin.js'], dest: '<%= releasePath %>/OpenEMapAdmin.js' },
-            { expand: true, cwd: '<%= releasePath %>/', src: ['**'], dest: '/workspaces/openhierarchy/OpenEMap-Admin-Services/src/org/oemap/services/modules/staticcontent/<%= pkg.name %>' }
+            { expand: true, cwd: '<%= releasePath %>/', src: ['**'], dest: '<%= modulesStaticPath %>/<%= pkg.name %>' }
             ]        
         }
     },
