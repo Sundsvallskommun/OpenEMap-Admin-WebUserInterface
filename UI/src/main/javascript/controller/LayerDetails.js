@@ -64,7 +64,7 @@ Ext.define('AdmClient.controller.LayerDetails', {
 			delete layer.metadata;
 		}
 
-		var store = this.getLayerDetails().panelGrid.store;
+		store = this.getLayerDetails().panelGrid.store;
 		AdmClient.app.config.layers = store.treeStore.getLayerConfiguration();
 
 		this.getLayerDetails().close();

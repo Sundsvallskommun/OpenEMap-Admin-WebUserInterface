@@ -42,6 +42,7 @@ Ext.define('AdmClient.controller.toolDetails.DrawPath', {
 	toolSelected : function(chkBox, rowIndex, checked, eOpts) {
 		
 		var toolObject = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data;
+		var tool = null;
 		if (checked){
 			if (/Path/.test(toolObject.tool)){
 				//find the right place in config object
@@ -50,7 +51,7 @@ Ext.define('AdmClient.controller.toolDetails.DrawPath', {
 				});
 				
 				if (configItems.length === 0){ // add tool to config object
-					var tool = {type: 'DrawGeometry', iconCls : 'action-drawline', geometry : 'Path'};
+					tool = {type: 'DrawGeometry', iconCls : 'action-drawline', geometry : 'Path'};
 					AdmClient.app.config.tools.push(tool);
 				}
 			}
@@ -59,7 +60,7 @@ Ext.define('AdmClient.controller.toolDetails.DrawPath', {
 			if (/Path/.test(toolObject.tool)){
 				
 				for (var i = 0; i < AdmClient.app.config.tools.length; i++){
-					var tool = AdmClient.app.config.tools[i];
+					tool = AdmClient.app.config.tools[i];
 					if (/Path/.test(tool.geometry)){
 						AdmClient.app.config.tools.splice(i, 1);
 					}

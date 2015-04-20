@@ -118,7 +118,7 @@ Ext.define('AdmClient.view.mapconfiguration.tools.details.DrawObject', {
 	
 	getToolConfig: function() {
 	    return AdmClient.app.config.tools.filter(function(tool) {
-	        return tool.type = this.type;
+	        return (tool.type = this.type);
 	    }, this);
 	}
 });

@@ -95,7 +95,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
 	},
 
 	onInsertAndAppend: function(store, node) {
-    	// kolla om det går att göra Wfs anrop och skapa Wfs tag och metadata samt sätt queryable
+    	// Check if it is possible to do a Wfs call, and create WFS-tag and metadata and set queryable 
         if (node.$className === 'GeoExt.data.WmsCapabilitiesLayerModel') {
         	var layerName = this.getLayerName(node.data);
         	
@@ -231,6 +231,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
 						success: function(){
 							var format = new OpenLayers.Format.GML();
 							var feature = format.read(arguments[0].responseXML);
+			                var store = Ext.getStore('configurationTreeStore');
 
 							if (feature.length > 0) { 
 								metadata = {};
@@ -245,13 +246,11 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
 								}
 								this.set('metadata', metadata);
 								this.set('clickable', true); 
-				                var s = Ext.getStore('configurationTreeStore');
-				                AdmClient.app.config.layers = s.getLayerConfiguration();
+				                AdmClient.app.config.layers = store.getLayerConfiguration();
 							} else {
 								this.set('clickable', false); 
 								this.set('queryable', false); 
-				                var s = Ext.getStore('configurationTreeStore');
-				                AdmClient.app.config.layers = s.getLayerConfiguration();
+				                AdmClient.app.config.layers = store.getLayerConfiguration();
 							}
 						}
 					});

@@ -27,7 +27,7 @@ Copyright Härnösands kommun(C) 2014
 
 Ext.define('AdmClient.controller.PreviewMap', {
 	extend : 'Ext.app.Controller',
-	requires : [ 'AdmClient.view.mapconfiguration.map.PreviewMap', 'OpenEMap.Client' ],
+	requires : [ 'AdmClient.view.mapconfiguration.map.PreviewMap'],
 
 	init : function() {
 		this.control({

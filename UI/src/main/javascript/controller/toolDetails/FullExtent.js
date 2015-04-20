@@ -43,6 +43,7 @@ Ext.define('AdmClient.controller.toolDetails.FullExtent', {
 	toolSelected : function(chkBox, rowIndex, checked, eOpts) {
 		
 		var toolObject = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data;
+		var tool = null;
 		if (checked){
 			if (/FullExtent/.test(toolObject.toolName)){
 				//find the right place in config object
@@ -51,7 +52,7 @@ Ext.define('AdmClient.controller.toolDetails.FullExtent', {
 				});
 				
 				if (configItems.length === 0){ // add tool to config object
-					var tool = {type: 'FullExtent'};
+					tool = {type: 'FullExtent'};
 					AdmClient.app.config.tools.push(tool);
 				}
 			}
@@ -60,7 +61,7 @@ Ext.define('AdmClient.controller.toolDetails.FullExtent', {
 			if (/FullExtent/.test(toolObject.toolName)){
 				
 				for (var i = 0; i < AdmClient.app.config.tools.length; i++){
-					var tool = AdmClient.app.config.tools[i];
+					tool = AdmClient.app.config.tools[i];
 					if (/FullExtent/.test(tool.type)){
 						AdmClient.app.config.tools.splice(i, 1);
 					}

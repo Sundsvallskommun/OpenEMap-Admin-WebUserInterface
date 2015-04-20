@@ -28,7 +28,6 @@ Ext.define('AdmClient.view.settings.LayersConfigured', {
     alias : 'widget.layersconfigured',
     title : 'Configured layers',
     store : 'Layers',
-    title : 'Configured layers',
     itemId : 'layers',
     autoScroll : true,
     minHeight : 200,
