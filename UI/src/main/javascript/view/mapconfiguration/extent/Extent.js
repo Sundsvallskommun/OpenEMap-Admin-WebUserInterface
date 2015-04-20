@@ -36,14 +36,14 @@ Ext.define('AdmClient.view.mapconfiguration.map.Extent', {
 			tbar : [ {
 				xtype : 'button',
 				itemId : 'pan',
-				icon : 'icons/arrow-move.png',
+				icon : 'resources/images/arrow-move.png',
 				enableToggle : true,
 				pressed : true
 
 			}, {
 				xtype : 'button',
 				itemId : 'markExtent',
-				icon : 'icons/figur-R.png',
+				icon : 'resources/images/figur-R.png',
 				enableToggle : true
 			} ]
 		} ];

@@ -58,7 +58,7 @@ Ext.define('AdmClient.view.MapConfiguration', {
 					xtype : 'button',
 					text : 'Pan',
 					itemId : 'pan',
-					icon : 'icons/arrow-move.png',
+					icon : 'resources/images/arrow-move.png',
 					enableToggle : true,
 					pressed : true
 
@@ -66,7 +66,7 @@ Ext.define('AdmClient.view.MapConfiguration', {
 					xtype : 'button',
 					itemId : 'markExtent',
 					text : 'Mark extent',
-					icon : 'icons/figur-R.png',
+					icon : 'resources/images/figur-R.png',
 					iconCls : 'extent',
 					enableToggle : true
 				},('->'),{

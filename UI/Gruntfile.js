@@ -69,7 +69,7 @@ module.exports = function(grunt) {
         command: [
             '-sdk bower_components/ext-4.2.1',
             'compile',
-            '--classpath=src/main/javascript,bower_components/geoext2/src',
+            '--classpath=src/main/javascript,bower_components/geoext2/src,bower_components/OpenEMap/src/main/javascript',
             'exclude -all', 'and',
             'include -namespace AdmClient', 'and',
             'concat --closure <%= releasePath %>/<%= pkg.name %>-<%= pkg.version %>-min.js']
@@ -78,7 +78,7 @@ module.exports = function(grunt) {
         command: [
             '-sdk bower_components/ext-4.2.1',
             'compile',
-            '--classpath=src/main/javascript,bower_components/geoext2/src',
+            '--classpath=src/main/javascript,bower_components/geoext2/src,bower_components/OpenEMap/src/main/javascript',
             'exclude -all', 'and',
             'include -namespace AdmClient', 'and',
             'concat <%= releasePath %>/<%= pkg.name %>-<%= pkg.version %>-debug.js']
@@ -100,13 +100,34 @@ module.exports = function(grunt) {
             'exclude -all', 'and',
             'include -namespace GeoExt', 'and',
             'concat bower_components/geoext2/release/geoext-debug.js']
+      },
+      openemap_release: {
+        command: [
+            '-sdk bower_components/ext-4.2.1',
+            'compile',
+            '--classpath=bower_components/OpenEMap/src/main/javascript,bower_components/geoext2/src',
+            'exclude -all', 'and',
+            'include -namespace OpenEMap', 'and',
+            'concat --closure bower_components/OpenEMap/release/OpenEMap-min.js']
+      },
+      openemap_debug: {
+        command: [
+            '-sdk bower_components/ext-4.2.1',
+            'compile',
+            '--classpath=bower_components/OpenEMap/src/main/javascript,bower_components/geoext2/src',
+            'exclude -all', 'and',
+            'include -namespace OpenEMap', 'and',
+            'concat bower_components/OpenEMap/release/OpenEMap-debug.js']
       }
     },
     
     copy: {
         dist: {
             files: [
-            { expand: true, src: ['resources/**'], dest: '<%= releasePath %>' },
+            { expand: true, cwd: 'resources/images/', src: ['**'], dest: '<%= releasePath %>/resources/images/' },
+            { expand: true, cwd: 'resources/font-awesome/black/png/16/', src: ['**'], dest: '<%= releasePath %>/resources/font-awesome/black/png/16/' },
+            { expand: true, cwd: 'resources/font-awesome/black/png/22/', src: ['**'], dest: '<%= releasePath %>/resources/font-awesome/black/png/22/' },
+            { expand: true, cwd: 'bower_components/ext-4.2.1/resources/ext-theme-neptune/', src: ['**'], dest: '<%= releasePath %>/lib/ext/resources/ext-theme-neptune/' },
             { expand: false, src: ['bower_components/ext-4.2.1/ext-all.js'], dest: '<%= releasePath %>/lib/ext/ext-all.js' },
             { expand: false, src: ['bower_components/ext-4.2.1/ext-all-debug.js'], dest: '<%= releasePath %>/lib/ext/ext-all-debug.js' },
             { expand: false, src: ['bower_components/ext-4.2.1/ext-theme-neptune.js'], dest: '<%= releasePath %>/lib/ext/ext-theme-neptune.js' },
@@ -116,9 +137,15 @@ module.exports = function(grunt) {
             { expand: true, cwd: 'bower_components/OpenLayers-2.13.1/', src: ['theme/**'], dest: '<%= releasePath %>/lib/OpenLayers/'},
             { expand: false, src: ['bower_components/geoext2/release/geoext-all.js'], dest: '<%= releasePath %>/lib/geoext/geoext-all.js'},
             { expand: false, src: ['bower_components/geoext2/release/geoext-debug.js'], dest: '<%= releasePath %>/lib/geoext/geoext-debug.js'},
+            { expand: false, src: ['bower_components/OpenEMap/release/OpenEMap-min.js'], dest: '<%= releasePath %>/lib/OpenEMap/OpenEMap-min.js'},
+            { expand: false, src: ['bower_components/OpenEMap/release/OpenEMap-debug.js'], dest: '<%= releasePath %>/lib/OpenEMap/OpenEMap-debug.js'},
             { expand: false, src: ['<%= releasePath %>/<%= pkg.name %>-<%= pkg.version %>-min.js'], dest: '<%= releasePath %>/<%= pkg.name %>-min.js' },
             { expand: false, src: ['<%= releasePath %>/<%= pkg.name %>-<%= pkg.version %>-debug.js'], dest: '<%= releasePath %>/<%= pkg.name %>-debug.js' },
             { expand: false, src: ['src/main/javascript/<%= pkg.name %>.js'], dest: '<%= releasePath %>/<%= pkg.name %>.js' },
+            { expand: false, src: ['oeadmin.css'], dest: '<%= releasePath %>/' },
+            { expand: false, src: ['debug_factory.html'], dest: '<%= releasePath %>/' },
+            { expand: false, src: ['admin.json'], dest: '<%= releasePath %>/' },
+            { expand: false, src: ['src/main/javascript/OpenEMapAdmin.js'], dest: '<%= releasePath %>/OpenEMapAdmin.js' },
             { expand: true, cwd: '<%= releasePath %>/', src: ['**'], dest: '/workspaces/openhierarchy/OpenEMap-Admin-Services/src/org/oemap/services/modules/staticcontent/<%= pkg.name %>' }
             ]        
         }
@@ -187,7 +214,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-compress');
 
   grunt.registerTask('default', ['auto_install', 'jshint']);
-  grunt.registerTask('build', ['default', 'sencha:release', 'sencha:debug', 'sencha:geoext_release', 'sencha:geoext_debug'] );
+  grunt.registerTask('build', ['default', 'sencha:release', 'sencha:debug', 'sencha:geoext_release', 'sencha:geoext_debug', 'sencha:openemap_release', 'sencha:openemap_debug'] );
   grunt.registerTask('distcopy', ['copy']);
   grunt.registerTask('dist', ['clean', 'build', 'copy', 'compress']);
   grunt.registerTask('devserver', ['default', 'configureProxies', 'connect', 'watch']);

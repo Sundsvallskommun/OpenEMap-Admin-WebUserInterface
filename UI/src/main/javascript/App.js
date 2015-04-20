@@ -68,6 +68,7 @@ Ext.application({
 	           'AdmClient.store.Layers',
 	           'AdmClient.store.SearchServer',
 	           'AdmClient.store.Municipalities',
+	           'AdmClient.store.WmsCapabilitiesLayerTree',
 	           
 	           'AdmClient.view.main.MainToolbar',
 	           'AdmClient.view.Main',
@@ -99,7 +100,9 @@ Ext.application({
                'AdmClient.model.SettingBase',
                'AdmClient.model.SearchServer',
                'AdmClient.model.Layer',
-               'AdmClient.model.Config'
+               'AdmClient.model.Config',
+               
+               'OpenEMap.Client'
                ],
     name: 'AdmClient',
     appFolder: 'src/main/javascript',
@@ -132,9 +135,9 @@ Ext.application({
     models : ['SettingBase','Server', 'SearchServer', 'Layer', 'Config'],
     launch: function() {
     	this.config = Ext.create('AdmClient.model.Config');
-      this.admClient =  Ext.create('Ext.container.Container', {
+      	this.admClient =  Ext.create('Ext.container.Container', {
         	layout: 'border',
-          renderTo: 'contentitem',
+          	renderTo: 'contentitem',
         	height : (window.innerHeight - 70),
         	items : [{xtype: 'main'}]
         });
