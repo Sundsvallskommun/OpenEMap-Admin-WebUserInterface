@@ -40,11 +40,10 @@ Ext.define('AdmClient.controller.toolDetails.DrawPath', {
 	},
 	
 	toolSelected : function(chkBox, rowIndex, checked, eOpts) {
-		
 		var toolObject = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data;
 		var tool = null;
-		if (checked){
-			if (/Path/.test(toolObject.tool)){
+		if (/Path/.test(toolObject.tool)){
+			if (checked){
 				//find the right place in config object
 				var configItems = AdmClient.app.config.tools.filter(function(t){
 					return t.tool === 'Path';
@@ -54,20 +53,15 @@ Ext.define('AdmClient.controller.toolDetails.DrawPath', {
 					tool = {type: 'DrawGeometry', iconCls : 'action-drawline', geometry : 'Path'};
 					AdmClient.app.config.tools.push(tool);
 				}
-			}
-		}
-		else{
-			if (/Path/.test(toolObject.tool)){
-				
+			} else {
 				for (var i = 0; i < AdmClient.app.config.tools.length; i++){
 					tool = AdmClient.app.config.tools[i];
-					if (/Path/.test(tool.geometry)){
+					if (/DrawGeometry/.test(tool.type) && /Path/.test(tool.geometry)){
 						AdmClient.app.config.tools.splice(i, 1);
 					}
 				}
 			}
 		}
-		
 		this.getToolsGrid().store.commitChanges();
 	}
 });

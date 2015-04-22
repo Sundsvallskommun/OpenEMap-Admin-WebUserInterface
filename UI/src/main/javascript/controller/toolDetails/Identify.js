@@ -40,34 +40,28 @@ Ext.define('AdmClient.controller.toolDetails.Identify', {
 	},
 	
 	toolSelected : function(chkBox, rowIndex, checked, eOpts) {
-		
 		var toolObject = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data;
 		var tool = null;
-		if (checked){
-			if (/Identify/.test(toolObject.toolName)){
+		if (/Identify/.test(toolObject.toolName)){
+			if (checked){
 				//find the right place in config object
 				var configItems = AdmClient.app.config.tools.filter(function(t){
-					return t.tool === 'Identify';
+					return (t === 'Identify' || t.tool === 'Identify');
 				});
 				
 				if (configItems.length === 0){ // add tool to config object
-					tool = {type: 'Identify'};
+					tool = {type: 'Identify', tooltip: 'Få information om objekt i kartan', iconCls: 'action-identify'};
 					AdmClient.app.config.tools.push(tool);
 				}
-			}
-		}
-		else{
-			if (/Identify/.test(toolObject.toolName)){
-				
+			} else {
 				for (var i = 0; i < AdmClient.app.config.tools.length; i++){
 					tool = AdmClient.app.config.tools[i];
-					if (/Identify/.test(tool.type)){
+					if ((/Identify/.test(tool.type)) || (/Identify/.test(tool))) {
 						AdmClient.app.config.tools.splice(i, 1);
 					}
 				}
 			}
+			this.getToolsGrid().store.commitChanges();
 		}
-		
-		this.getToolsGrid().store.commitChanges();
 	}
 });

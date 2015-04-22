@@ -41,19 +41,27 @@ Ext.define('AdmClient.store.ToolStore', {
 		name : 'selected'
 	} ],
 
-	data : [ [ 'DrawGeometry', 'Point', 'Action for add point.', false ],
-	         [ 'DrawGeometry', 'Path', 'Action for draw line tool.', false ],
-	         [ 'DrawGeometry', 'Polygon', 'Action for draw polygon tool.', false ],
-			[ 'DeleteGeometry', 'Delete geometry', 'Tool for delete geometry.', false ],
-			[ 'DeleteAllFeatures', 'Delete all geometry', 'Tool for delete all geometries on map.', false ],
+	data : [ [ 'DrawGeometry', 'Point', 'Draw point', false ],
+	         [ 'DrawGeometry', 'Path', 'Draw line', false ],
+	         [ 'DrawGeometry', 'Polygon', 'Draw polygon.', false ],
+	         [ 'DrawGeometry', 'Text', 'Draw text.', false ],
+	         [ 'DrawObject', 'Rectangle', 'Draw rectangular object.', false ],
+	         [ 'DrawObject', 'Octagon', 'Draw octagonal object.', false ],
+	         [ 'DrawObject', 'L-shape', 'Draw L-shaped object.', false ],
+	         [ 'DrawObject', 'D-shape', 'Draw D-shaped object.', false ],
+			[ 'SelectGeometry', 'Select geometry', 'Tool for selecting geometry.', false ],
+			[ 'ModifyGeometry', 'Modify geometry', 'Tool for modify geometry.', false ],
+			[ 'DeleteGeometry', 'Delete geometry', 'Tool for delete single geometry.', false ],
+			[ 'DeleteAllFeatures', 'Delete all geometries', 'Tool for delete all geometries on map.', false ],
 			[ 'FullExtent', 'Full extent', 'Zoom to full extent.', false ],
+			[ 'ZoomSelector', 'Zoom to scale', 'Zoom to scale.', false ],
+			[ 'Print', 'Print', 'Tool for printing.', false ],
 			[ 'Identify', 'Identify', 'Identify features.', false ],
+			[ 'Popup', 'Popup', 'Tool to show popup window for features in popup layers.', false ],
+			[ 'DetailReport', 'Detail report', 'Tool for detail report.', false],
 			[ 'MeasureArea', 'Measure area', 'Measure area in 2D.', false ],
 			[ 'MeasureLine', 'Measure line', 'Measure line in 2D.', false ],
-			[ 'DeleteMeasure', 'Delete measure', 'Tool for delete measure.', false],
-			[ 'Print', 'Print', 'Tool for printing.', false ],
-			[ 'ModifyGeometry', 'Modify geometry', 'Tool for modify geometry.', false ],
-			[ 'DetailReport', 'Detail report', 'Tool for detail report.', false]
+			[ 'DeleteMeasure', 'Delete measure', 'Tool for delete measure.', false]
 			//[ 'A', 'Detail report', 'Tool for detail report.', false]
 	]
 	

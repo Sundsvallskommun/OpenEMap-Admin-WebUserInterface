@@ -43,31 +43,26 @@ Ext.define('AdmClient.controller.toolDetails.ModifyGeometry', {
 		
 		var toolObject = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data;
 		var tool = null;
-		if (checked){
-			if (/ModifyGeometry/.test(toolObject.toolName)){
+		if (/ModifyGeometry/.test(toolObject.toolName)){
+			if (checked){
 				//find the right place in config object
 				var configItems = AdmClient.app.config.tools.filter(function(t){
-					return t.tool === 'ModifyGeometry';
+					return (t === 'ModifyGeometry' || t.tool === 'ModifyGeometry');
 				});
 				
 				if (configItems.length === 0){ // add tool to config object
 					tool = {type: 'ModifyGeometry'};
 					AdmClient.app.config.tools.push(tool);
 				}
-			}
-		}
-		else{
-			if (/ModifyGeometry/.test(toolObject.toolName)){
-				
+			} else {
 				for (var i = 0; i < AdmClient.app.config.tools.length; i++){
 					tool = AdmClient.app.config.tools[i];
-					if (/ModifyGeometry/.test(tool.type)){
+					if ((/ModifyGeometry/.test(tool.type)) || (/ModifyGeometry/.test(tool))) {
 						AdmClient.app.config.tools.splice(i, 1);
 					}
 				}
 			}
+			this.getToolsGrid().store.commitChanges();
 		}
-		
-		this.getToolsGrid().store.commitChanges();
 	}
 });

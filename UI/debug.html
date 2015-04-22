@@ -21,17 +21,15 @@
         var appPath = '/openemapadmin'; 
         var defaultWMSServer = 'https://extmaptest.sundsvall.se/geoserver/wms?request=GetCapabilities&version=1.1.0';
         var wfsServer = 'https://extmaptest.sundsvall.se/geoserver/wfs';
-        //var defaultWMSServer = 'http://www.corsproxy.com/nomad.swecosundsvall.se/geoserver/wms?request=GetCapabilities&version=1.1.0';
-        //var defaultWMSServer = 'gwc.xml'; 
-        Ext.Loader.setConfig({
+		var configOpenEMapAdminApp = {
             disableCaching: false,
             paths: {
                 AdmClient: 'src/main/javascript',
                 OpenEMap: 'bower_components/OpenEMap/src/main/javascript',
                 GeoExt: 'bower_components/geoext2/src/GeoExt/'
             }
-          });
-          
+       };
+         
     </script> 
     <script type="text/javascript" src="src/main/javascript/App.js"></script>
 </head>

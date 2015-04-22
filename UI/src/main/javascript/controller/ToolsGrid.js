@@ -44,7 +44,6 @@ Ext.define('AdmClient.controller.ToolsGrid', {
 			'#toolsGrid' : {
 				render : this.gridRender
 			},
-			
 			'#details' : {
 				render : this.detailsRender
 			}

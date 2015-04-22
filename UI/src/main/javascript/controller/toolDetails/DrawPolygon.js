@@ -43,8 +43,8 @@ Ext.define('AdmClient.controller.toolDetails.DrawPolygon', {
 		
 		var toolObject = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data;
 		var tool = null;
-		if (checked){
-			if (/Polygon/.test(toolObject.tool)){
+		if (/Polygon/.test(toolObject.tool)){
+			if (checked){
 				//find the right place in config object
 				var configItems = AdmClient.app.config.tools.filter(function(t){
 					return t.tool === 'Polygon';
@@ -54,21 +54,15 @@ Ext.define('AdmClient.controller.toolDetails.DrawPolygon', {
 					tool = {type: 'DrawGeometry', iconCls : 'action-drawpolygon', geometry : 'Polygon'};
 					AdmClient.app.config.tools.push(tool);
 				}
-			}
-		}
-		else{
-			if (/Polygon/.test(toolObject.tool)){
-				
+			} else {
 				for (var i = 0; i < AdmClient.app.config.tools.length; i++){
 					tool = AdmClient.app.config.tools[i];
-					if (/Polygon/.test(tool.geometry)){
+					if (/DrawGeometry/.test(tool.type) && /Polygon/.test(tool.geometry)){
 						AdmClient.app.config.tools.splice(i, 1);
 					}
 				}
 			}
+			this.getToolsGrid().store.commitChanges();
 		}
-		
-		this.getToolsGrid().store.commitChanges();
 	}
-	
 });

@@ -44,31 +44,26 @@ Ext.define('AdmClient.controller.toolDetails.Print', {
 		
 		var toolObject = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data;
 		var tool = null;
-		if (checked){
-			if (/Print/.test(toolObject.toolName)){
+		if (/Print/.test(toolObject.toolName)){
+			if (checked){
 				//find the right place in config object
 				var configItems = AdmClient.app.config.tools.filter(function(t){
-					return t.tool === 'Print';
+					return (t === 'Print' || t.tool === 'Print');
 				});
 				
 				if (configItems.length === 0){ // add tool to config object
 					tool = {type: 'Print'};
 					AdmClient.app.config.tools.push(tool);
 				}
-			}
-		}
-		else{
-			if (/Print/.test(toolObject.toolName)){
-				
+			} else {
 				for (var i = 0; i < AdmClient.app.config.tools.length; i++){
 					tool = AdmClient.app.config.tools[i];
-					if (/Print/.test(tool.type)){
+					if ((/Print/.test(tool.type)) || (/Print/.test(tool))) {
 						AdmClient.app.config.tools.splice(i, 1);
 					}
 				}
 			}
+			this.getToolsGrid().store.commitChanges();
 		}
-		
-		this.getToolsGrid().store.commitChanges();
 	}
 });

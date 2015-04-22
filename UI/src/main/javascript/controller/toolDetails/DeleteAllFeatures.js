@@ -41,34 +41,28 @@ Ext.define('AdmClient.controller.toolDetails.DeleteAllFeatures', {
 	},
 	
 	toolSelected : function(chkBox, rowIndex, checked, eOpts) {
-		
 		var toolObject = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data;
 		var tool = null;
-		if (checked){
-			if (/DeleteAllFeatures/.test(toolObject.toolName)){
+		if (/DeleteAllFeatures/.test(toolObject.toolName)){
+			if (checked){
 				//find the right place in config object
 				var configItems = AdmClient.app.config.tools.filter(function(t){
-					return t.tool === 'DeleteAllFeatures';
+					return (t === 'DeleteAllFeatures' || t.tool === 'DeleteAllFeatures');
 				});
 				
 				if (configItems.length === 0){ // add tool to config object
 					tool = {type: 'DeleteAllFeatures'};
 					AdmClient.app.config.tools.push(tool);
 				}
-			}
-		}
-		else{
-			if (/DeleteAllFeatures/.test(toolObject.toolName)){
-				
+			} else {
 				for (var i = 0; i < AdmClient.app.config.tools.length; i++){
 					tool = AdmClient.app.config.tools[i];
-					if (/DeleteAllFeatures/.test(tool.type)){
+					if ((/DeleteAllFeatures/.test(tool.type)) || (/DeleteAllFeatures/.test(tool))) {
 						AdmClient.app.config.tools.splice(i, 1);
 					}
 				}
 			}
+			this.getToolsGrid().store.commitChanges();
 		}
-		
-		this.getToolsGrid().store.commitChanges();
 	}
 });

@@ -40,34 +40,28 @@ Ext.define('AdmClient.controller.toolDetails.DetailReport', {
 	},
 	
 	toolSelected : function(chkBox, rowIndex, checked, eOpts) {
-		
 		var toolObject = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data;
 		var tool = null;
-		if (checked){
-			if (/DetailReport/.test(toolObject.toolName)){
+		if (/DetailReport/.test(toolObject.toolName)){
+			if (checked){
 				//find the right place in config object
 				var configItems = AdmClient.app.config.tools.filter(function(t){
-					return t.tool === 'DetailReport';
+					return (t === 'DetailReport' || t.tool === 'DetailReport');
 				});
 				
 				if (configItems.length === 0){ // add tool to config object
 					tool = {type: 'DetailReport'};
 					AdmClient.app.config.tools.push(tool);
 				}
-			}
-		}
-		else{
-			if (/DetailReport/.test(toolObject.toolName)){
-				
+			} else {
 				for (var i = 0; i < AdmClient.app.config.tools.length; i++){
 					tool = AdmClient.app.config.tools[i];
-					if (/DetailReport/.test(tool.type)){
+					if ((/DetailReport/.test(tool.type)) || (/DetailReport/.test(tool))) {
 						AdmClient.app.config.tools.splice(i, 1);
 					}
 				}
 			}
+			this.getToolsGrid().store.commitChanges();
 		}
-		
-		this.getToolsGrid().store.commitChanges();
 	}
 });
