@@ -14,13 +14,15 @@
     <script type="text/javascript" src="bower_components/ext-4.2.1/ext-debug.js"></script>
     <script type="text/javascript" src="bower_components/ext-4.2.1/ext-theme-neptune.js"></script>
     <script type="text/javascript" src="bower_components/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
-    <script type="text/javascript" src="bower_components/OpenLayers-2.13.1/OpenLayers.js"></script>
+    <script type="text/javascript" src="bower_components/OpenLayers-2.13.1/OpenLayers.debug.js"></script>
     <!--  <script type="text/javascript" src="bower_components/geoext2/release/geoext-all.js"></script>-->
     
     <script type="text/javascript">
         var appPath = '/openemapadmin'; 
         var defaultWMSServer = 'https://extmaptest.sundsvall.se/geoserver/wms?request=GetCapabilities&version=1.1.0';
         var wfsServer = 'https://extmaptest.sundsvall.se/geoserver/wfs';
+        var wmsServer = 'https://extmaptest.sundsvall.se/geoserver/wms';
+		var proxyUrl = '/cgi-bin/proxy.py?url=';
 		var configOpenEMapAdminApp = {
             disableCaching: false,
             paths: {

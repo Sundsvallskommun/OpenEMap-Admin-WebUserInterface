@@ -65,6 +65,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
     },
 
 	onMove: function(store, oldParent, newParent, index, eOpts) {
+		console.log('onMove');
 		console.log(oldParent);
 	},
     /**
@@ -119,10 +120,11 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
     			}
     	    	node.set('isGroupLayer', false);
     	    	node.set('clickable', false);
-    	    	this.getWFSSettings(newNode);
+    	    	this.getWFSSettings(node);
         	}
 //        } else if (node.$className === 'AdmClient.model.Layer') {
-//        	console.log(node);
+			console.log('onInsertAndAppend');
+        	console.log(node);
         }
     },
     
@@ -186,7 +188,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
         	return false;
         }
     	var layerPieces = stripName(node.data.wms.params.layers || node.data.wms.params.LAYERS);
-        var wfsUrl = 'adminproxy?url=' + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + (node.data.wms.params.layers || node.data.wms.params.LAYERS);
+        var wfsUrl = proxyUrl + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + (node.data.wms.params.layers || node.data.wms.params.LAYERS);
 	    var localWfsStore = Ext.create('GeoExt.data.AttributeStore');
 	    localWfsStore.setUrl(wfsUrl);
 	    localWfsStore.load({
@@ -223,7 +225,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
 					var extent = new OpenLayers.Bounds.fromArray(boundary);
 					var layerName = wms.params.LAYERS || wms.params.layers; 
 
-					var requestUrl = 'adminproxy?url=' + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
+					var requestUrl = proxyUrl + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
 						'&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
 					Ext.Ajax.request({
 						scope: this,

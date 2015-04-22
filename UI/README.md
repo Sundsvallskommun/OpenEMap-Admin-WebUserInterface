@@ -6,6 +6,14 @@ Based on Ext JS 4
 
 Ext JS application name is AdmClient
 
+## Integration
+Following global variables must be declared:
+´´´javascript
+        var appPath = '/openemapadmin'; 
+        var defaultWMSServer = 'https://extmaptest.sundsvall.se/geoserver/wms?request=GetCapabilities&version=1.1.0';
+        var wfsServer = 'https://extmaptest.sundsvall.se/geoserver/wfs';
+        var wmsServer = 'https://extmaptest.sundsvall.se/geoserver/wms';
+´´´
 ## Development
 Requirements:
 * Node JS >0.10

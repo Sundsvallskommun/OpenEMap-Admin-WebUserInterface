@@ -184,6 +184,12 @@ module.exports = function(grunt) {
 				port: 443
 			},
 			{
+				context: '/cgi-bin',
+				host: 'kartatest.e-tjansteportalen.se',
+				https: true,
+				port: 443
+			},
+			{
 				context: '/print',
 				host: 'kartatest.e-tjansteportalen.se',
 				https: true,
