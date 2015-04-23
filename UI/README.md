@@ -8,12 +8,16 @@ Ext JS application name is AdmClient
 
 ## Integration
 Following global variables must be declared:
-´´´javascript
-        var appPath = '/openemapadmin'; 
+Â´Â´Â´javascript
+    	// context path to OpenEMap-Admin-Services 
+    	var appPath = '/openemapadmin';
+    	// Settings for servers 
         var defaultWMSServer = 'https://extmaptest.sundsvall.se/geoserver/wms?request=GetCapabilities&version=1.1.0';
         var wfsServer = 'https://extmaptest.sundsvall.se/geoserver/wfs';
         var wmsServer = 'https://extmaptest.sundsvall.se/geoserver/wms';
-´´´
+		var proxyUrl = '/cgi-bin/proxy.py?url=';
+		var wmsGetCapabilities = proxyUrl + defaultWMSServer; 
+Â´Â´Â´
 ## Development
 Requirements:
 * Node JS >0.10

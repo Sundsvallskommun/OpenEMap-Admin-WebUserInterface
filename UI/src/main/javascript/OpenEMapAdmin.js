@@ -150,7 +150,7 @@ var waitUntilOpenEMapIsLoaded = function(callback) {
 		loadJsScripts(scripts);
 	});
 
-/*	waitUntilOpenEMapIsLoaded(run);
+	waitUntilOpenEMapIsLoaded(run);
 	function run() {
 		AdmClient.app.admClient.setHeight(window.innerHeight - 70);
 		AdmClient.app.admClient.setWidth(window.innerWidth);
@@ -159,5 +159,5 @@ var waitUntilOpenEMapIsLoaded = function(callback) {
 				AdmClient.app.admClient.setWidth(window.innerWidth);
 		});
 	}
-*/
+
 }) ();

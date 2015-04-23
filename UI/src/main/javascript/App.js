@@ -36,7 +36,7 @@ Copyright Härnösands kommun(C) 2014
  * ID collisions. 
  *
  */
-var config = {
+Ext.application({
 	requires: ['Ext.container.Container',
 	           'AdmClient.controller.Main',
 	           'AdmClient.controller.MainToolbar',
@@ -112,7 +112,7 @@ var config = {
                'OpenEMap.Client'
                ],
     name: 'AdmClient',
-    appFolder: '',
+    appFolder: 'src/main/javascript/',
     controllers: ['Main', 
                   'Layers', 
                   'MainToolbar', 
@@ -156,10 +156,4 @@ var config = {
         	items : [{xtype: 'main'}]
         });
     }
-};
-
-if (typeof configOpenEMapAdminApp !== "undefined") {
-	config = Ext.apply(config, configOpenEMapAdminApp); 
-}
-
-Ext.application(config);
+});
