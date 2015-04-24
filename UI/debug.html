@@ -23,6 +23,8 @@
         var wfsServer = 'https://extmaptest.sundsvall.se/geoserver/wfs';
         var wmsServer = 'https://extmaptest.sundsvall.se/geoserver/wms';
 		var proxyUrl = '/cgi-bin/proxy.py?url=';
+		var wmsGetCapabilities = proxyUrl + defaultWMSServer; 
+		
         Ext.Loader.setConfig({
             disableCaching: false,
 		    appFolder: 'src/main/javascript/',
