@@ -96,36 +96,56 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
 	},
 
 	onInsertAndAppend: function(store, node) {
-    	// Check if it is possible to do a Wfs call, and create WFS-tag and metadata and set queryable 
-        if (node.$className === 'GeoExt.data.WmsCapabilitiesLayerModel') {
-        	var layerName = this.getLayerName(node.data);
-        	
-        	if (!node.data.wms && node.raw && node.raw.url && layerName) {
-            	var wms = {url: node.raw.url, options: {displayInLayerSwitcher: true, isBaseLayer: false}};
-    			if (node.raw.params) {
-    				wms.params = node.raw.params; 
-    			} else {
-    				wms.params = {layers: layerName};
-    			}
-    			if (node.raw.metadata && node.raw.metadata.legendURL) {
-    				wms.options.legendURL = node.raw.metadata.legendURL; 
-    			}
-    			if (node.raw.metadata && node.raw.metadata.metadataURLs && node.raw.metadata.metadataURLs.length > 0) {
-    				wms.metadataURL = node.raw.metadata.metadataURLs[0]; 
-    			}
-    			node.set('wms', wms);
-    			
-    			if (node.raw.metadata && node.raw.metadata.queryable) {
-    				node.set('queryable', node.raw.metadata.queryable); 
-    			}
-    	    	node.set('isGroupLayer', false);
-    	    	node.set('clickable', false);
-    	    	this.getWFSSettings(node);
-        	}
-//        } else if (node.$className === 'AdmClient.model.Layer') {
-			console.log('onInsertAndAppend');
-        	console.log(node);
-        }
+		if(!this._inserting) {
+			this._inserting = true; 
+	        if (node.$className === 'GeoExt.data.WmsCapabilitiesLayerModel') {
+		    	node.set('allowDrag', true);
+	        	var layerName = this.getLayerName(node.data);
+	        	
+    			// Add this node layers and subnodes to map. 
+//				store.cascadeBy(function(node) {
+					
+			        if(node.raw && node.raw.CLASS_NAME && node.raw.CLASS_NAME.indexOf('OpenLayers.Layer') > -1) {
+		    			node.set('layer', node.raw);
+		
+						if (node.raw.CLASS_NAME.indexOf('OpenLayers.Layer.WMS') > -1) {
+			            	var wms = {url: node.raw.url, options: {displayInLayerSwitcher: true, isBaseLayer: false, visibility: true}};
+			    			if (node.raw.params) {
+			    				wms.params = node.raw.params; 
+			    			} else {
+			    				wms.params = {layers: layerName};
+			    			}
+			    			if (node.raw.metadata && node.raw.metadata.legendURL) {
+			    				wms.options.legendURL = node.raw.metadata.legendURL; 
+			    			}
+			    			if (node.raw.metadata && node.raw.metadata.metadataURLs && node.raw.metadata.metadataURLs.length > 0) {
+			    				wms.metadataURL = node.raw.metadata.metadataURLs[0]; 
+			    			}
+			    			node.set('wms', wms);
+			    		}
+		    			
+		    			if (node.raw.metadata && node.raw.metadata.queryable) {
+		    				node.set('queryable', node.raw.metadata.queryable); 
+		    			}
+		    	    	node.set('isGroupLayer', false);
+		    	    	node.set('clickable', false);
+		    	    	
+		    	    	// Add getLayer function to support GeoExt
+		    	    	var layer = node.get('layer');
+		    	    	node.getLayer = function() {
+		    	    		this.get('layer');
+		    	    	}
+		    	    	
+						// Add ´metadata and WFS info to node if it is queryable
+		    	    	this.getWFSSettings(node);
+		        	}
+//	        	});
+//	        } else if (node.$className === 'AdmClient.model.Layer') {
+//				console.log('onInsertAndAppend');
+//	        	console.log(node);
+	      }
+	      this._inserting = false;
+	    }
     },
     
     /**
