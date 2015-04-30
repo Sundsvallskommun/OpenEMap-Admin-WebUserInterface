@@ -27,7 +27,7 @@ xcopy /s /y ..\..\..\libs\ext-4.2.1\locale %RELEASE_KAT%\lib\ext\locale
 xcopy /s /y ..\..\..\libs\ext-4.2.1\resources\ext-theme-neptune %RELEASE_KAT%\lib\ext\resources\ext-theme-neptune
 copy ..\..\..\libs\OpenLayers-2.13.1\OpenLayers.js %RELEASE_KAT%\lib\OpenLayers\OpenLayers.js
 copy ..\..\..\libs\geoext-2.0.2-rc.1-all.js %RELEASE_KAT%\lib\geoext\geoext-all.js
-xcopy /s /y %RELEASE_KAT% ..\..\Modules\src\org\oemap\services\modules\staticcontent\OpenEMapAdmin\
+xcopy /s /y %RELEASE_KAT% D:\Workspaces\OpenHierarchy\gitrepos\OpenEMap-Admin-Services\src\org\oemap\services\modules\staticcontent\OpenEMap-Admin
 
 7z a -tzip %OPENEMAPADMIN%-%VERSIONBIG%%VERSIONSMALL%.zip -r %OPENEMAPADMIN%-%VERSIONBIG%%VERSIONSMALL% -x!doc
 cd..
