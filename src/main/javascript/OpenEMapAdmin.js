@@ -30,6 +30,8 @@ var openEMapScriptLocation;
 var appPath = '/openemapadmin'; 
 var defaultWMSServer = 'https://extmaptest.sundsvall.se/geoserver/wms?request=GetCapabilities&version=1.1.0';
 var wfsServer = 'https://extmaptest.sundsvall.se/geoserver/wfs';
+var proxyUrl = proxyUrl || 'https://extmaptest.sundsvall.se/openemapadmin/adminproxy?url=';
+var imageBasePath = imageBasePath || '';
 
 var loadCssFiles = function(files, callback) {
 	var fileCounter = 0;

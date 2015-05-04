@@ -134,7 +134,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
 		    	    	var layer = node.get('layer');
 		    	    	node.getLayer = function() {
 		    	    		this.get('layer');
-		    	    	}
+		    	    	};
 		    	    	
 						// Add ´metadata and WFS info to node if it is queryable
 		    	    	this.getWFSSettings(node);
