@@ -31,6 +31,8 @@ Ext.define('AdmClient.controller.toolDetails.DrawText', {
 		ref : 'toolsGrid',
 		selector : '#toolsGrid'
 	}],
+	toolId: 'DrawText',
+	config : {id: 'DrawText', type: 'DrawGeometry', tooltip : 'Rita etikett', iconCls : 'action-drawpoint', geometry : 'Point', attributes: {type: 'label', label: 'Ny label', metadata: {type: {hidden: true}}}},
 	init : function() {
 		this.control({
 			'#toolsGrid checkcolumn' : {
@@ -40,30 +42,9 @@ Ext.define('AdmClient.controller.toolDetails.DrawText', {
 	},
 	
 	toolSelected : function(chkBox, rowIndex, checked, eOpts) {
-		
-		var toolObject = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data;
-		var tool = null;
-		if (/Text/.test(toolObject.tool)) {
-			if (checked){
-				//find the right place in config object
-				var configItems = AdmClient.app.config.tools.filter(function(t){
-					return (t === 'Text' || t.tool === 'Text');
-				});
-				if (configItems.length === 0){ // add tool to config object
-					tool = {type: 'DrawGeometry', tooltip : 'Rita etikett', iconCls : 'action-drawpoint', geometry : 'Point', attributes: {type: 'label', label: 'Ny label', metadata: {type: {hidden: true}}}};
-					AdmClient.app.config.tools.push(tool);
-				}
-			} else {
-				if (/Text/.test(toolObject.tool)){
-					for (var i = 0; i < AdmClient.app.config.tools.length; i++){
-						tool = AdmClient.app.config.tools[i];
-						if ((/Point/.test(tool.geometry)) && tool.attributes && (/label/.test(tool.attributes.type))) {
-							AdmClient.app.config.tools.splice(i, 1);
-						}
-					}
-				}
-			}
-			this.getToolsGrid().store.commitChanges();
+		var store = this.getToolsGrid().getSelectionModel().store;
+		if (store.data.items[rowIndex].data.id === this.toolId) {
+			this.getToolsGrid().getSelectionModel().store.checkTool(rowIndex, checked, this.config);
 		}
 	}
 });

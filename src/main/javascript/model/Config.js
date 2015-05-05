@@ -77,7 +77,7 @@ Ext.define('AdmClient.model.Config', {
 		config.extent = this.extent;
 		config.attribution = this.attribution;
 		config.drawStyle = this.drawStyle;
-		config.tools = this.drawStyle;
+		config.tools = this.tools;
 		config.layers = this.layers;
 		config.version = this.version;
 		config.autoClearDrawLayer = this.autoClearDrawLayer;

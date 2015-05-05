@@ -31,6 +31,8 @@ Ext.define('AdmClient.controller.toolDetails.SelectGeometry', {
 		ref : 'toolsGrid',
 		selector : '#toolsGrid'
 	}],
+	toolId: 'SelectGeometry',
+	config: {id: 'SelectGeometry', type: 'SelectGeometry'},
 	init : function() {
 		this.control({
 			'#toolsGrid checkcolumn' : {
@@ -40,29 +42,9 @@ Ext.define('AdmClient.controller.toolDetails.SelectGeometry', {
 	},
 	
 	toolSelected : function(chkBox, rowIndex, checked, eOpts) {
-		
-		var toolObject = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data;
-		var tool = null;
-		if (/SelectGeometry/.test(toolObject.toolName)){
-			if (checked){
-				//find the right place in config object
-				var configItems = AdmClient.app.config.tools.filter(function(t){
-					return (t === 'SelectGeometry' || t.tool === 'SelectGeometry');
-				});
-				
-				if (configItems.length === 0){ // add tool to config object
-					tool = {type: 'SelectGeometry'};
-					AdmClient.app.config.tools.push(tool);
-				}
-			} else {
-				for (var i = 0; i < AdmClient.app.config.tools.length; i++){
-					tool = AdmClient.app.config.tools[i];
-					if ((/SelectGeometry/.test(tool.type)) || (/SelectGeometry/.test(tool))) {
-						AdmClient.app.config.tools.splice(i, 1);
-					}
-				}
-			}
-			this.getToolsGrid().store.commitChanges();
+		var store = this.getToolsGrid().getSelectionModel().store;
+		if (store.data.items[rowIndex].data.id === this.toolId) {
+			this.getToolsGrid().getSelectionModel().store.checkTool(rowIndex, checked, this.config);
 		}
 	}
 });

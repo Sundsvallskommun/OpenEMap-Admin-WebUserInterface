@@ -31,6 +31,8 @@ Ext.define('AdmClient.controller.toolDetails.Identify', {
 		ref : 'toolsGrid',
 		selector : '#toolsGrid'
 	}],
+	toolId: 'Identify',
+	config : {id: 'Identify', type: 'Identify', tooltip: 'Få information om objekt i kartan', iconCls: 'action-identify'},
 	init : function() {
 		this.control({
 			'#toolsGrid checkcolumn' : {
@@ -40,28 +42,9 @@ Ext.define('AdmClient.controller.toolDetails.Identify', {
 	},
 	
 	toolSelected : function(chkBox, rowIndex, checked, eOpts) {
-		var toolObject = this.getToolsGrid().getSelectionModel().store.data.items[rowIndex].data;
-		var tool = null;
-		if (/Identify/.test(toolObject.toolName)){
-			if (checked){
-				//find the right place in config object
-				var configItems = AdmClient.app.config.tools.filter(function(t){
-					return (t === 'Identify' || t.tool === 'Identify');
-				});
-				
-				if (configItems.length === 0){ // add tool to config object
-					tool = {type: 'Identify', tooltip: 'Få information om objekt i kartan', iconCls: 'action-identify'};
-					AdmClient.app.config.tools.push(tool);
-				}
-			} else {
-				for (var i = 0; i < AdmClient.app.config.tools.length; i++){
-					tool = AdmClient.app.config.tools[i];
-					if ((/Identify/.test(tool.type)) || (/Identify/.test(tool))) {
-						AdmClient.app.config.tools.splice(i, 1);
-					}
-				}
-			}
-			this.getToolsGrid().store.commitChanges();
+		var store = this.getToolsGrid().getSelectionModel().store;
+		if (store.data.items[rowIndex].data.id === this.toolId) {
+			this.getToolsGrid().getSelectionModel().store.checkTool(rowIndex, checked, this.config);
 		}
 	}
 });

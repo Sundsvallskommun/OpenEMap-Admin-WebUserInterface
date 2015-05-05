@@ -38,31 +38,55 @@ Ext.define('AdmClient.store.ToolStore', {
 		name : 'info',
 		type : 'string'
 	},{
+		name : 'id',
+		type : 'string'
+	}, {  
 		name : 'selected'
 	} ],
 
-	data : [ [ 'DrawGeometry', 'Point', 'Draw point', false ],
-	         [ 'DrawGeometry', 'Path', 'Draw line', false ],
-	         [ 'DrawGeometry', 'Polygon', 'Draw polygon.', false ],
-	         [ 'DrawGeometry', 'Text', 'Draw text.', false ],
-	         [ 'DrawObject', 'Rectangle', 'Draw rectangular object.', false ],
-	         [ 'DrawObject', 'Octagon', 'Draw octagonal object.', false ],
-	         [ 'DrawObject', 'L-shape', 'Draw L-shaped object.', false ],
-	         [ 'DrawObject', 'D-shape', 'Draw D-shaped object.', false ],
-			[ 'SelectGeometry', 'Select geometry', 'Tool for selecting geometry.', false ],
-			[ 'ModifyGeometry', 'Modify geometry', 'Tool for modify geometry.', false ],
-			[ 'DeleteGeometry', 'Delete geometry', 'Tool for delete single geometry.', false ],
-			[ 'DeleteAllFeatures', 'Delete all geometries', 'Tool for delete all geometries on map.', false ],
-			[ 'FullExtent', 'Full extent', 'Zoom to full extent.', false ],
-			[ 'ZoomSelector', 'Zoom to scale', 'Zoom to scale.', false ],
-			[ 'Print', 'Print', 'Tool for printing.', false ],
-			[ 'Identify', 'Identify', 'Identify features.', false ],
-			[ 'Popup', 'Popup', 'Tool to show popup window for features in popup layers.', false ],
-			[ 'DetailReport', 'Detail report', 'Tool for detail report.', false],
-			[ 'MeasureArea', 'Measure area', 'Measure area in 2D.', false ],
-			[ 'MeasureLine', 'Measure line', 'Measure line in 2D.', false ],
-			[ 'DeleteMeasure', 'Delete measure', 'Tool for delete measure.', false]
+	data : [ [ 'DrawGeometry', 'Point', 'Draw point', 'DrawPoint', false ],
+	         [ 'DrawGeometry', 'Path', 'Draw line', 'DrawLine', false ],
+	         [ 'DrawGeometry', 'Polygon', 'Draw polygon.', 'DrawPolygon', false ],
+	         [ 'DrawGeometry', 'Text', 'Draw text.', 'DrawText', false ],
+	         [ 'DrawObject', 'Rectangle', 'Draw rectangular object.', 'DrawRectangle', false ],
+	         [ 'DrawObject', 'Octagon', 'Draw octagonal object.', 'DrawOctagon', false ],
+	         [ 'DrawObject', 'L-shape', 'Draw L-shaped object.', 'DrawL-shape', false ],
+	         [ 'DrawObject', 'D-shape', 'Draw D-shaped object.', 'DrawD-shape', false ],
+			[ 'SelectGeometry', 'Select geometry', 'Tool for selecting geometry.', 'SelectGeometry', false ],
+			[ 'ModifyGeometry', 'Modify geometry', 'Tool for modify geometry.', 'ModifyGeometry', false ],
+			[ 'DeleteGeometry', 'Delete geometry', 'Tool for delete single geometry.', 'DeleteGeometry', false ],
+			[ 'DeleteAllFeatures', 'Delete all geometries', 'Tool for delete all geometries on map.', 'DeleteAllFeatures', false ],
+			[ 'FullExtent', 'Full extent', 'Zoom to full extent.', 'FullExtent', false ],
+			[ 'ZoomSelector', 'Zoom to scale', 'Zoom to scale.', 'ZoomSelector', false ],
+			[ 'Print', 'Print', 'Tool for printing.', 'Print', false ],
+			[ 'Identify', 'Identify', 'Identify features.', 'Identify', false ],
+			[ 'Popup', 'Popup', 'Tool to show popup window for features in popup layers.', 'Popup', false ],
+			[ 'DetailReport', 'Detail report', 'Tool for detail report.', 'DetailReport', false],
+			[ 'MeasureArea', 'Measure area', 'Measure area in 2D.', 'MeasureArea', false ],
+			[ 'MeasureLine', 'Measure line', 'Measure line in 2D.', 'MeasureLine', false ],
+			[ 'DeleteMeasure', 'Delete measure', 'Tool for delete measure.', 'DeleteMeasure', false]
 			//[ 'A', 'Detail report', 'Tool for detail report.', false]
-	]
+	],
 	
+	checkTool: function(rowIndex, checked, tool) {
+		var toolObject = this.data.items[rowIndex].data;
+
+		if (checked){
+			//find the right place in config object
+			var configItems = AdmClient.app.config.tools.filter(function(t){
+				return (t.id === toolObject.id);
+			});
+			if (configItems.length === 0){ // add tool to config object
+				AdmClient.app.config.tools.push(tool);
+			}
+		} else {
+			for (var i = 0; i < AdmClient.app.config.tools.length; i++){
+				tool = AdmClient.app.config.tools[i];
+				if (toolObject.id === tool.id) {
+					AdmClient.app.config.tools.splice(i, 1);
+				}
+			}
+		}
+		this.commitChanges();
+	}
 });

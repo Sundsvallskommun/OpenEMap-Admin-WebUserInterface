@@ -76,22 +76,10 @@ Ext.define('AdmClient.controller.ToolsGrid', {
 			var toolName = panel.store.data.items[i];
 			for (var j = 0; j < AdmClient.app.config.tools.length; j++){
 				var configTool = AdmClient.app.config.tools[j];
-				if (configTool.constructor === String){
-					if (configTool === toolName.data.toolName){
-						toolName.data.selected = true;
-						toolName.save();
-					}
-				} else if (configTool.type === toolName.data.toolName){
-					if (configTool.geometry && configTool.geometry === toolName.data.tool){
-						toolName.data.selected = true;
-					} else if(configTool.geometry && configTool.geometry !== toolName.data.tool){
-						continue;
-					} 
-					else if(configTool.type && toolName.data.toolName){
-						toolName.data.selected = true;
-					}
-					toolName.save();
-				}
+				if (configTool.id === toolName.data.id) {
+					toolname.data.selected = true;
+				} 
+				toolName.save();
 			}
 		}
 		panel.updateLayout();
