@@ -219,7 +219,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 									icon: Ext.Msg.WARNING
 								});
 								// TODO - close window
-		            		}
+		            		};
 		            		Ext.create('AdmClient.view.mapconfiguration.layer.LayerDetails',{
 		            			selectedLayer : selectedLayer, grid: grid
 		            		}).show();

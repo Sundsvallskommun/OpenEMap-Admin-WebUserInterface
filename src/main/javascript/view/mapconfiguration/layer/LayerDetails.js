@@ -76,7 +76,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 			var wfsUrl = proxyUrl + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + getTypeName(this.layer);
 			this.store = Ext.create('GeoExt.data.AttributeStore');
 			var proxy = this.store.getProxy();
-			Ext.apply(proxy.proxyConfig, {headers: {"Content-Type": "application/xml; charset=UTF-8"}});
+//			Ext.apply(proxy.proxyConfig, {headers: {"Content-Type": "application/xml; charset=UTF-8"}});
 			this.store.setUrl(wfsUrl);
 			this.store.load();
 		}
@@ -122,25 +122,33 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 	                        records.forEach(function(record) {
                             	var boundaryBox = record.get('bbox');
 								var success = function(){
-									var format = new OpenLayers.Format.GML();
-									var feature = format.read(arguments[0].responseXML);
-									var fields = this.getAttributeCollection(feature[0].attributes);
-									
-
-									if (this.layer.metadata && this.layer.metadata.attributes && this.layer.metadata.attributes instanceof Object) {
-										var attributesInLayer = this.layer.metadata.attributes;
-										var fieldsFilter = function(f){
-											return f[0] === attribute;
-										};
-										for (var attribute in attributesInLayer){
-											var item = fields.filter(fieldsFilter, f);
-											if (item.length > 0) {
-												item[0][1] = item[0][1] === '' ? attributesInLayer[attribute].alias : item[0][1];
-												item[0][2] = true;
+									if (arguments[0].responseXML) {
+										var format = new OpenLayers.Format.GML();
+										var feature = format.read(arguments[0].responseXML);
+										var fields = this.getAttributeCollection(feature[0].attributes);
+										
+	
+										if (this.layer.metadata && this.layer.metadata.attributes && this.layer.metadata.attributes instanceof Object) {
+											var attributesInLayer = this.layer.metadata.attributes;
+											var fieldsFilter = function(f){
+												return f[0] === attribute;
+											};
+											for (var attribute in attributesInLayer){
+												var item = fields.filter(fieldsFilter, f);
+												if (item.length > 0) {
+													item[0][1] = item[0][1] === '' ? attributesInLayer[attribute].alias : item[0][1];
+													item[0][2] = true;
+												}
 											}
 										}
+										this.store.loadData(fields);
+									} else {
+										this.close();
+										Ext.Error.raise({
+											title: 'Kommunikationsproblem',
+											msg: 'Kan inte hämta information om lagret'
+										});
 									}
-									this.store.loadData(fields);
 								};
 
                             	for (var srsName in boundaryBox){
