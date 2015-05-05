@@ -75,12 +75,14 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
     * @param {Ext.data.Model} refNode
     */
     onBeforeInsertAppend: function(store, node, refNode) {
-    	var layerName = this.getLayerName(node.data);
+/*    	var layerName = this.getLayerName(node.data);
         if ((node.$className === 'GeoExt.data.WmsCapabilitiesLayerModel' && (!node.data.wms && node.raw && node.raw.url && layerName)) || node.$className === 'AdmClient.model.Layer') {
         	return true;
         } else {
         	return false;
         }
+*/
+		return true;
     },
 
     /**
