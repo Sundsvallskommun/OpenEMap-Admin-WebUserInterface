@@ -16,6 +16,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 	title : 'Lager inst&auml;llningar',
 	width : 600,
 	height : 400,
+	defaultAlign: 'c',
 
 	constructor : function(){
 		this.layer = arguments[0].selectedLayer;
@@ -55,9 +56,6 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 	initComponent : function() {
 
 		var self = this;
-		this.x = Math.ceil(window.innerWidth / 2 - this.innerWidth / 2);
-		this.y = Math.ceil(window.innerHeight / 2 - this.innerHeight / 2);
-
 		this.modal = true;
 		
 		if (this.layer.wfs){
@@ -75,7 +73,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 					
 			};
 			
-			var wfsUrl = 'adminproxy?url=' + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + getTypeName(this.layer);
+			var wfsUrl = proxyUrl + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + getTypeName(this.layer);
 			this.store = Ext.create('GeoExt.data.AttributeStore');
 			var proxy = this.store.getProxy();
 			Ext.apply(proxy.proxyConfig, {headers: {"Content-Type": "application/xml; charset=UTF-8"}});
@@ -149,7 +147,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
                             		var boundary = boundaryBox[srsName].bbox;
                             		var extent = new OpenLayers.Bounds.fromArray(boundary);
 
-                            		var requestUrl = 'adminproxy?url=' + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
+                            		var requestUrl = proxyUrl + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
                             		 	'&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
                             		Ext.Ajax.request({
                             		 	scope: this,
@@ -175,13 +173,20 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 		}
 		if (this.store){
 			this.store.addListener('load', function(store, records, successful, eOpts){
-				records.forEach(function(l){
-					if (self.layer.metadata && self.layer.metadata.attributes && self.layer.metadata.attributes[l.data.name] instanceof Object){
-						l.data.alias = self.layer.metadata.attributes[l.data.name].alias;
-						l.data.visible = true;
-					}
-				});
-				store.update();
+				if (successful) {
+					records.forEach(function(l){
+						if (self.layer.metadata && self.layer.metadata.attributes && self.layer.metadata.attributes[l.data.name] instanceof Object){
+							l.data.alias = self.layer.metadata.attributes[l.data.name].alias;
+							l.data.visible = true;
+						}
+					});
+					store.update();
+				} else {
+                	Ext.Error.raise({
+                        msg: 'Cant get metadata for layer',
+                        option: this
+                    });	            
+				}
 			});
 		}
 
