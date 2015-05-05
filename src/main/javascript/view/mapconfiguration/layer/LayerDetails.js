@@ -243,7 +243,6 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 			}
 			]
 		}],
-
 		this.callParent(arguments);
 	}
 });

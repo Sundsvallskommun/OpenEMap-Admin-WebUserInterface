@@ -211,6 +211,15 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		            		if (grid.getStore().data.items[rowIdex].childNodes.length === 0){
 		            				selectedLayer = grid.getStore().data.items[rowIdex].data;
 		            		}
+		            		Ext.Error.handle = function(error) {
+								Ext.Msg.show({
+									title: error.title || 'Fel',
+									msg: error.msg || 'Odefinierat fel',
+									buttons: Ext.Msg.OK,
+									icon: Ext.Msg.WARNING
+								});
+								// TODO - close window
+		            		}
 		            		Ext.create('AdmClient.view.mapconfiguration.layer.LayerDetails',{
 		            			selectedLayer : selectedLayer, grid: grid
 		            		}).show();
