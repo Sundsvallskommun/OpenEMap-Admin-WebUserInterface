@@ -9,7 +9,7 @@ module.exports = function(grunt) {
     	dist: {
 	    	src: ['<%= releasePath %>', '<%= releasePath %>.zip']
     	},
-    	design: {
+    	module: {
 	    	options: {force: true},
 	    	src: ['<%= modulesStaticPath %>/<%= pkg.name %>']
 	  	}
@@ -157,7 +157,7 @@ module.exports = function(grunt) {
             { expand: false, src: ['src/main/javascript/OpenEMapAdmin.js'], dest: '<%= releasePath %>/OpenEMapAdmin.js' }
             ]        
         },
-        design: {
+        module: {
             files: [
           		{ expand: true, cwd: '<%= releasePath %>/', src: ['**'], dest: '<%= modulesStaticPath %>/<%= pkg.name %>' }
           	]
@@ -236,6 +236,6 @@ module.exports = function(grunt) {
   grunt.registerTask('build', ['default', 'sencha:release', 'sencha:debug', 'sencha:geoext_release', 'sencha:geoext_debug', 'sencha:openemap_release', 'sencha:openemap_debug'] );
   grunt.registerTask('distcopy', ['copy', 'compress']);
   grunt.registerTask('dist', ['clean:dist', 'build', 'copy:dist', 'compress']);
-  grunt.registerTask('copytodesign', ['clean:design', 'copy:design']);
+  grunt.registerTask('copytomodule', ['clean:module', 'copy:module']);
   grunt.registerTask('devserver', ['default', 'configureProxies', 'connect', 'watch']);
 };
