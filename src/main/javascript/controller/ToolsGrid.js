@@ -77,7 +77,7 @@ Ext.define('AdmClient.controller.ToolsGrid', {
 			for (var j = 0; j < AdmClient.app.config.tools.length; j++){
 				var configTool = AdmClient.app.config.tools[j];
 				if (configTool.id === toolName.data.id) {
-					toolname.data.selected = true;
+					toolName.data.selected = true;
 				} 
 				toolName.save();
 			}

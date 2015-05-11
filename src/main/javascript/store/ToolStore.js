@@ -61,6 +61,7 @@ Ext.define('AdmClient.store.ToolStore', {
 			[ 'Print', 'Print', 'Tool for printing.', 'Print', false ],
 			[ 'Identify', 'Identify', 'Identify features.', 'Identify', false ],
 			[ 'Popup', 'Popup', 'Tool to show popup window for features in popup layers.', 'Popup', false ],
+			[ 'Permalink', 'Permalink', 'Dela karta.', 'Permalink', false ],
 			[ 'DetailReport', 'Detail report', 'Tool for detail report.', 'DetailReport', false],
 			[ 'MeasureArea', 'Measure area', 'Measure area in 2D.', 'MeasureArea', false ],
 			[ 'MeasureLine', 'Measure line', 'Measure line in 2D.', 'MeasureLine', false ],
