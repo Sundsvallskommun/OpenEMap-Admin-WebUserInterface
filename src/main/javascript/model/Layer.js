@@ -40,6 +40,7 @@ Ext.define('AdmClient.model.Layer', {
     	{name: 'isGroupLayer', type: 'boolean', defaultValue: false},
     	{name: 'isBaseLayer', mapping: 'wms.options.isBaseLayer',  type : 'boolean'},
         {name: 'visibility', mapping: 'wms.options.visibility', type: 'boolean'},
+        {name: 'expanded', type: 'boolean', defaultValue: false},
         {name: 'wfs', mapping: 'wfs', type: 'object', defaultValue: null},
     	{name: 'layer', type: 'object'}, // OpenLayers reference
         {name: 'layers', type: 'array', defaultValue: null}

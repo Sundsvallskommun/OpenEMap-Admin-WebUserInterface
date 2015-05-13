@@ -84,7 +84,8 @@ Ext.define('AdmClient.controller.ConfigLayers', {
                 var root = tree.getRootNode();
                 root.appendChild({
                     name : text,
-                    isGroupLayer: true
+                    isGroupLayer: true,
+                    expanded: true
                 });
             }
         });
@@ -261,8 +262,6 @@ Ext.define('AdmClient.controller.ConfigLayers', {
         }
         // Do the node have sublayers, iterate over them
         if(layer.layers) {
-            // Expand all groups
-            layer.expanded = true;
             layer.layers.forEach(arguments.callee, this);
         } else {
             // If no sublayers, this is a leaf
