@@ -343,15 +343,6 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
              
             var queryable = this.tryToGetRecordAttribute(node, 'queryable');
             var clickable = this.tryToGetRecordAttribute(node, 'clickable');
-            if ((queryable && clickable) || (clickable && this._updating)){
-            	var layerPieces = stripName(layer.wms.params.layers ? layer.wms.params.layers : layer.wms.params.LAYERS);
-                layer.wfs = {};
-                layer.wfs.featurePrefix = layerPieces[0];
-                layer.wfs.featureType = layerPieces[1];
-                layer.wfs.url = wfsServer;
-            } else {
-                if (layer.wfs) delete layer.wfs;
-            }
         }
          
         if (node.hasChildNodes()) {

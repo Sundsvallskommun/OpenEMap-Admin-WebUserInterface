@@ -144,7 +144,7 @@ var waitUntilOpenEMapIsLoaded = function(callback) {
 		{src: openEMapScriptLocation + "lib/OpenLayers/OpenLayers.js", dependencies: function() {return true;}},
 		{src: openEMapScriptLocation + "lib/geoext/geoext-all.js", dependencies: function() {return ((typeof Ext !== "undefined") && Ext.isReady &&  (typeof OpenLayers !== "undefined"));}},
 		{src: openEMapScriptLocation + "lib/OpenEMap/OpenEMap-min.js", dependencies: function() {return ((typeof Ext !== "undefined") && Ext.isReady &&  (typeof GeoExt !== "undefined") &&  (typeof OpenLayers !== "undefined"));}},
-		{src: openEMapScriptLocation + "OpenEMap-Admin-debug.js", dependencies: function() {return ((typeof Ext !== "undefined") && Ext.isReady &&  (typeof GeoExt !== "undefined") &&  (typeof OpenLayers !== "undefined") && (typeof OpenEMap !== "undefined") && (typeof OpenEMap.Client !== "undefined") );}}
+		{src: openEMapScriptLocation + "OpenEMap-Admin-min.js", dependencies: function() {return ((typeof Ext !== "undefined") && Ext.isReady &&  (typeof GeoExt !== "undefined") &&  (typeof OpenLayers !== "undefined") && (typeof OpenEMap !== "undefined") && (typeof OpenEMap.Client !== "undefined") );}}
     ];
 	
 	// Ensure css files are loaded before js files
