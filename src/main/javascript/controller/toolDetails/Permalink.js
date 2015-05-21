@@ -32,7 +32,7 @@ Ext.define('AdmClient.controller.toolDetails.Permalink', {
 		selector : '#toolsGrid'
 	}],
 	toolId: 'Permalink',
-	config: {id: 'Permalink', type: 'Permalink', iconCls : 'action-permalink', tooltip: 'Dela kartan'},
+	config: {id: 'Permalink', type: 'Permalink', iconCls : 'action-permalink', tooltip: 'Skapa länk till kartan'},
 	init : function() {
 		this.control({
 			'#toolsGrid checkcolumn' : {
