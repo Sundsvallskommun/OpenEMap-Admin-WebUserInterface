@@ -32,7 +32,7 @@ Ext.define('AdmClient.controller.toolDetails.DrawRectangle', {
 		selector : '#toolsGrid'
 	}],
 	toolId: 'DrawRectangle',
-	config : {id: 'DrawRectangle', type : 'DrawObject', itemId : 'DrawObjectR', tooltip : 'Rita rektangel', iconCls : 'action-draw-R', disable : false, obectConfig : {type : 'R'}, attributes: {state: 'GEOMETRY', metadata: {state: {hidden: false}}}},
+	config : {id: 'DrawRectangle', type : 'DrawObject', itemId : 'DrawObjectR', tooltip : 'Rita rektangel', iconCls : 'action-draw-square', disable : false, obectConfig : {type : 'R'}, attributes: {state: 'GEOMETRY', metadata: {state: {hidden: false}}}},
 	init : function() {
 		this.control({
 			'#toolsGrid checkcolumn' : {

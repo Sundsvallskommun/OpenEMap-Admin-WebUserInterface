@@ -32,7 +32,7 @@ Ext.define('AdmClient.controller.toolDetails.DrawOctagon', {
 		selector : '#toolsGrid'
 	}],
 	toolId: 'DrawOctagon',
-	config: {id: 'DrawOctagon', type : 'DrawObject', itemId : 'DrawObjectO', tooltip : 'Rita åttkantigt objekt', iconCls : 'action-draw-O', disable : false, obectConfig : {type : 'O'}, attributes: {state: 'GEOMETRY', metadata: {state: {hidden: false}}}},
+	config: {id: 'DrawOctagon', type : 'DrawObject', itemId : 'DrawObjectO', tooltip : 'Rita åttkantigt objekt', iconCls : 'action-draw-octagon', disable : false, obectConfig : {type : 'O'}, attributes: {state: 'GEOMETRY', metadata: {state: {hidden: false}}}},
 	init : function() {
 		this.control({
 			'#toolsGrid checkcolumn' : {

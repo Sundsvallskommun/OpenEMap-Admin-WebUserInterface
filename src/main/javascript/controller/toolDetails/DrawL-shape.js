@@ -32,7 +32,7 @@ Ext.define('AdmClient.controller.toolDetails.DrawL-shape', {
 		selector : '#toolsGrid'
 	}],
 	toolId: 'DrawL-shape',
-	config : {id: 'DrawL-shape', type : 'DrawObject', itemId : 'DrawObjectL', tooltip : 'Rita L-format objekt', iconCls : 'action-draw-L', disable : false, obectConfig : {type : 'L'}, attributes: {state: 'GEOMETRY', metadata: {state: {hidden: false}}}},
+	config : {id: 'DrawL-shape', type : 'DrawObject', itemId : 'DrawObjectL', tooltip : 'Rita L-format objekt', iconCls : 'action-draw-l', disable : false, obectConfig : {type : 'L'}, attributes: {state: 'GEOMETRY', metadata: {state: {hidden: false}}}},
 	init : function() {
 		this.control({
 			'#toolsGrid checkcolumn' : {

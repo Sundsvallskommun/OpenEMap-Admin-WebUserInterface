@@ -32,7 +32,7 @@ Ext.define('AdmClient.controller.toolDetails.DrawD-shape', {
 		selector : '#toolsGrid'
 	}],
 	toolId: 'DrawD-shape',
-	config : {id: 'DrawD-shape', type : 'DrawObject', itemId : 'DrawObjectD', tooltip : 'Rita objekt med avfasade hörn', iconCls : 'action-draw-D', disable : false, obectConfig : {type : 'D'}, attributes: {state: 'GEOMETRY', metadata: {state: {hidden: false}}}},
+	config : {id: 'DrawD-shape', type : 'DrawObject', itemId : 'DrawObjectD', tooltip : 'Rita objekt med avfasade hörn', iconCls : 'action-draw-d', disable : false, obectConfig : {type : 'D'}, attributes: {state: 'GEOMETRY', metadata: {state: {hidden: false}}}},
 	init : function() {
 		this.control({
 			'#toolsGrid checkcolumn' : {
