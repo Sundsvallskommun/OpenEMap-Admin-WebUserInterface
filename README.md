@@ -7,9 +7,9 @@ Based on Ext JS 4
 Ext JS application name is AdmClient
 
 ## Integration
-Following global variables must be declared:
-´´´html
+```html
 	<script type="text/javascript">
+		// Following global variable must be declared
     	// context path to OpenEMap-Admin-Services 
     	var appPath = '/openemapadmin';
     	// Settings for servers 
@@ -19,15 +19,15 @@ Following global variables must be declared:
 		var proxyUrl = '/cgi-bin/proxy.py?url=';
 		var wmsGetCapabilities = proxyUrl + defaultWMSServer; 
     <script type="text/javascript" src="OpenEMapAdmin.js"></script>
-´´´
+```
 ## Development
 Requirements:
 * Node JS >0.10
-* Grunt (install with npm install grunt --save-dev)
-* Grunt CLI (install with npm -g install grunt-cli)
-* Bower (install with npm -g install bower)
+* Grunt (install with `npm install grunt --save-dev`)
+* Grunt CLI (install with `npm -g install grunt-cli`)
+* Bower (install with `npm -g install bower`)
 * Git command line client
-A fresh clone of the repository will require running npm install in its root. After that you can start devserver on http://localhost:8000 by running grunt devserver. A development example should be runnable at http://localhost:8000/debug.html. Changes to any source file will in the debug version automatically reload the page.
+A fresh clone of the repository will require running `npm install` in its root. After that you can start devserver on http://localhost:8000 by running `grunt devserver`. A development example should be runnable at http://localhost:8000/debug.html. Changes to any source file will in the debug version automatically reload the page.
 
 ## Building a release verison
 Done by running `grunt dist` in a working development clone. Requires Sencha Cmd installed and available on the path.
