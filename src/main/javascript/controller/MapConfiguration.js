@@ -211,7 +211,7 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 	renderConfiguration : function(){
 		var self = this;
 		Ext.Ajax.request({
-			url : appPath + '/configs',
+			url : appPath + '/adminconfigs',
 			method : 'GET',
 			success : function(evt){
 				var configs = JSON.parse(evt.responseText);
@@ -261,7 +261,7 @@ Ext.define('AdmClient.controller.MapConfiguration', {
 
 	loadConfiguration: function(id) {
 		Ext.Ajax.request({
-			url : appPath + '/configs/config/' + id,
+			url : appPath + '/adminconfigs/config/' + id,
 			method : 'GET',
 			success : function(evt){
 				var config = JSON.parse(evt.responseText);
