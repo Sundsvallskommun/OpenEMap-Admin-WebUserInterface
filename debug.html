@@ -11,7 +11,7 @@
     <!-- This will make the page reload automatically when source has changed and page is served using grunt devserver -->
     <script src="//localhost:35729/livereload.js"></script>
 <!--    <link rel="stylesheet" type="text/css" href="resources/images/icons/css/font-awesome.css">-->
-    <script type="text/javascript" src="bower_components/ext-4.2.1/ext-debug.js"></script>
+    <script type="text/javascript" src="bower_components/ext-4.2.1/ext-all-debug.js"></script>
     <script type="text/javascript" src="bower_components/ext-4.2.1/ext-theme-neptune.js"></script>
     <script type="text/javascript" src="bower_components/ext-4.2.1/locale/ext-lang-sv_SE.js"></script>
     <script type="text/javascript" src="bower_components/OpenLayers-2.13.1/OpenLayers.debug.js"></script>
@@ -20,9 +20,9 @@
     <script type="text/javascript">
         var appPath = '/openemapadmin'; 
         var defaultWMSServer = 'https://extmaptest.sundsvall.se/geoserver/wms?request=GetCapabilities&version=1.1.0';
-        var wfsServer = 'https://extmaptest.sundsvall.se/geoserver/wfs';
-        var wmsServer = 'https://extmaptest.sundsvall.se/geoserver/wms';
-		var proxyUrl = '/cgi-bin/proxy.py?url=';
+        var wfsServer = 'http://localhost:8000/geoserver/wfs';
+        var wmsServer = 'http://localhost:8000/geoserver/wms';
+		var proxyUrl = 'http://localhost:8000/openemapadmin/adminproxy?url=';
 		var wmsGetCapabilities = proxyUrl + defaultWMSServer; 
 		var imageBasePath = imageBasePath || '';
 		

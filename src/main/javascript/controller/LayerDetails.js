@@ -51,12 +51,12 @@ Ext.define('AdmClient.controller.LayerDetails', {
 		var layer = this.getLayerDetails().layer;
 		layer.metadata = {};
 		store.data.items.forEach(function(c){
-			if (c.data.visible || c.data.alias){
+			if (c.data.visible || c.data.alias || c.data.mainAttribute){
 				if (c.data.alias === "") return;
 				if (!layer.metadata.attributes){
 					layer.metadata.attributes = {};
 				}
-				layer.metadata.attributes[c.data.name] = {alias : c.data.alias};
+				layer.metadata.attributes[c.data.name] = {alias : c.data.alias, mainAttribute: c.data.mainAttribute !== 'undefined' ? c.data.mainAttribute : false };
 			}
 		});
 

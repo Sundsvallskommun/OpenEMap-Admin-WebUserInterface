@@ -25,7 +25,7 @@ module.exports = function(grunt) {
         tasks: ['jshint:gruntfile']
       },
       scripts: {
-        files: ['debug.html', 'src/main/javascript/**/*.js', 'proj4_defs.js'],
+        files: ['debug.html', 'src/main/javascript/**/*.js'],
         tasks: ['jshint:js'],
         options: {
           spawn: false,
@@ -176,38 +176,51 @@ module.exports = function(grunt) {
              ];
           }
         },
-        proxies: [
-			{
-				context: '/geoserver/wms',
-				host: 'extmaptest.sundsvall.se',
-				https: true,
-				port: 443
-			},
-			{
-				context: '/geoserver/wfs',
-				host: 'extmaptest.sundsvall.se',
-				https: true,
-				port: 443
-			},
-			{
-				context: '/openemapadmin',
-				host: 'kartatest.e-tjansteportalen.se',
-				https: true,
-				port: 443
-			},
-			{
-				context: '/cgi-bin',
-				host: 'kartatest.e-tjansteportalen.se',
-				https: true,
-				port: 443
-			},
-			{
-				context: '/print',
-				host: 'kartatest.e-tjansteportalen.se',
-				https: true,
-				port: 443
-			}		
-		]
+        proxies: [{
+            context: '/search/lm',
+            host: 'kartatest.e-tjansteportalen.se',
+            https: true,
+            port: 443
+        }, {
+            context: '/search/es',
+            host: 'kartatest.e-tjansteportalen.se',
+            https: true,
+            port: 443
+        }, {
+            context: '/geoserver/wfs?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=SundsvallsKommun:Busslinje_linje',
+            host: 'localhost',
+            https	: false,
+            port: 8000,
+            rewrite: {
+            	'^/geoserver/wfs?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=SundsvallsKommun:Busslinje_linje': '	/Busslinje_linje.xml'
+            }
+        }, {
+            context: '/geoserver/wms',
+            host: 'extmaptest.sundsvall.se',
+            https: true,
+            port: 443
+        }, {
+            context: '/print',
+            host: 'localhost',
+            https: false,
+            port: 8080
+        }, {
+            context: '/openemapadmin',
+            host: 'localhost',
+            https: false,
+            port: 80
+        }, {
+            context: '/openemapadmin-1.6.1',
+            host: 'kartatest.e-tjansteportalen.se',
+            https: true,
+            port: 443
+        }, {
+            context: '/cgi-bin/proxy.py?url=',
+            host: 'kartatest.e-tjansteportalen.se',
+            https: true,
+            protocol: 'https',
+            port: 443
+        }]
     },
     
     compress: {
@@ -222,7 +235,7 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.loadNpmTasks('grunt-auto-install');
+//  grunt.loadNpmTasks('grunt-auto-install');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-sencha-build');
@@ -232,8 +245,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-compress');
 
-  grunt.registerTask('default', ['auto_install', 'jshint']);
-  grunt.registerTask('build', ['default', 'sencha:release', 'sencha:debug', 'sencha:geoext_release', 'sencha:geoext_debug', 'sencha:openemap_release', 'sencha:openemap_debug'] );
+  grunt.registerTask('default', ['jshint']);
+  grunt.registerTask('build', ['default', 'sencha:release', 'sencha:debug'] );
+  grunt.registerTask('buildall', ['default', 'sencha:release', 'sencha:debug', 'sencha:geoext_release', 'sencha:geoext_debug', 'sencha:openemap_release', 'sencha:openemap_debug'] );
   grunt.registerTask('distcopy', ['copy:dist', 'compress']);
   grunt.registerTask('dist', ['clean:dist', 'build', 'copy:dist', 'compress']);
   grunt.registerTask('copytomodule', ['clean:module', 'copy:module']);

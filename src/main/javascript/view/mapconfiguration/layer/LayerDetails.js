@@ -73,10 +73,11 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 					
 			};
 			
-			var wfsUrl = proxyUrl + wfsServer + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + getTypeName(this.layer);
+			var wfsUrl = proxyUrl + (this.layer.wfs.url ? this.layer.wfs.url : wfsServer) + '?service=wfs&request=DescribeFeatureType&version=1.0.0&typeName=' + getTypeName(this.layer);
 			this.store = Ext.create('GeoExt.data.AttributeStore');
 			var proxy = this.store.getProxy();
 //			Ext.apply(proxy.proxyConfig, {headers: {"Content-Type": "application/xml; charset=UTF-8"}});
+
 			this.store.setUrl(wfsUrl);
 			this.store.load();
 		}
@@ -86,7 +87,8 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 			this.store = Ext.create('Ext.data.ArrayStore', {fields: [
 				{name: 'name'},
                 {name: 'alias'},
-                {name: 'visible', type: 'boolean', defaultValue: true}
+                {name: 'visible', type: 'boolean', defaultValue: true},
+                {name: 'mainAttribute', type:'boolean', defaultValue: false}
                 ]
             });
 
@@ -186,6 +188,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 						if (self.layer.metadata && self.layer.metadata.attributes && self.layer.metadata.attributes[l.data.name] instanceof Object){
 							l.data.alias = self.layer.metadata.attributes[l.data.name].alias;
 							l.data.visible = true;
+							l.data.mainAttribute = self.layer.metadata.attributes[l.data.name].mainAttribute !== undefined ? self.layer.metadata.attributes[l.data.name].mainAttribute : false;
 						}
 					});
 					store.update();
@@ -228,8 +231,25 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 							self.store.data.items[rowIdx].data.alias = self.store.data.items[rowIdx].data.alias || self.store.data.items[rowIdx].data.name;
 						}else{
 							self.store.data.items[rowIdx].data.alias = '';
+							self.store.data.items[rowIdx].data.mainAttribute = false;
 						}
 						self.store.update();
+					}
+				}
+			},{
+				header: 'Huvudattribut',
+				xtype: 'checkcolumn',
+				dataIndex: 'mainAttribute',
+				listeners :{
+					'checkchange': function(chkBox, rowIdx, checked, eOpts){
+						if (checked){
+							self.store.data.items[rowIdx].data.mainAttribute = true;
+							self.store.data.items[rowIdx].data.alias = self.store.data.items[rowIdx].data.alias || self.store.data.items[rowIdx].data.name;
+						} else {
+							self.store.data.items[rowIdx].data.mainAttribute = false;
+						}
+						self.store.update();
+						self.update()
 					}
 				}
 			}]
