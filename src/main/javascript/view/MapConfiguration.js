@@ -55,6 +55,11 @@ Ext.define('AdmClient.view.MapConfiguration', {
 				itemId : 'mapPanel',
 				disabled : true,
 				tbar : [ {
+					xtype : 'textfield',
+					disabled : true,
+					itemId : 'configId',
+					width: 50
+				}, {
 					xtype : 'button',
 					text : 'Pan',
 					itemId : 'pan',
@@ -69,19 +74,16 @@ Ext.define('AdmClient.view.MapConfiguration', {
 					icon : 'resources/images/figur-R.png',
 					iconCls : 'extent',
 					enableToggle : true
-				},('->'),{
-					xtype : 'textfield',
-					disabled : true,
-					itemId : 'configId'
 				},{
 					xtype: 'checkbox',
 					fieldLabel : 'Autoclear draw layer',
 					itemId : 'autoClearDrawLayer'
-						},{
+				},{
 					xtype : 'textfield',
 					itemId : 'attribution',
 					enableKeyEvents : true,
-					fieldLabel : 'Attribution'
+					fieldLabel : 'Attribution',
+					width: '100%' 
 				} ],
 				margin : 12
 			}, {
