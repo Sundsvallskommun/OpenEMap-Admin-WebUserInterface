@@ -93,7 +93,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
             });
 
 			this.wmsStore = Ext.create('GeoExt.data.WmsCapabilitiesLayerStore',{
-				url: wmsGetCapabilities
+				url: proxyUrl + defaultWMSServer
 			});
 
 			
@@ -127,23 +127,31 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 									if (arguments[0].responseXML) {
 										var format = new OpenLayers.Format.GML();
 										var feature = format.read(arguments[0].responseXML);
-										var fields = this.getAttributeCollection(feature[0].attributes);
-										
-	
-										if (this.layer.metadata && this.layer.metadata.attributes && this.layer.metadata.attributes instanceof Object) {
-											var attributesInLayer = this.layer.metadata.attributes;
-											var fieldsFilter = function(f){
-												return f[0] === attribute;
-											};
-											for (var attribute in attributesInLayer){
-												var item = fields.filter(fieldsFilter, f);
-												if (item.length > 0) {
-													item[0][1] = item[0][1] === '' ? attributesInLayer[attribute].alias : item[0][1];
-													item[0][2] = true;
+										if (feature.length > 0) {
+											var fields = this.getAttributeCollection(feature[0].attributes);
+											
+		
+											if (this.layer.metadata && this.layer.metadata.attributes && this.layer.metadata.attributes instanceof Object) {
+												var attributesInLayer = this.layer.metadata.attributes;
+												var fieldsFilter = function(f){
+													return f[0] === attribute;
+												};
+												for (var attribute in attributesInLayer){
+													var item = fields.filter(fieldsFilter, f);
+													if (item.length > 0) {
+														item[0][1] = item[0][1] === '' ? attributesInLayer[attribute].alias : item[0][1];
+														item[0][2] = true;
+													}
 												}
 											}
+											this.store.loadData(fields);
+										} else {
+											this.close();
+											Ext.Error.raise({
+												title: 'Kommunikationsproblem',
+												msg: 'Kan inte hämta information om lagret'
+											});
 										}
-										this.store.loadData(fields);
 									} else {
 										this.close();
 										Ext.Error.raise({
@@ -153,26 +161,31 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 									}
 								};
 
+								var requestUrl;
                             	for (var srsName in boundaryBox){
                             		var boundary = boundaryBox[srsName].bbox;
                             		var extent = new OpenLayers.Bounds.fromArray(boundary);
-
-                            		var requestUrl = proxyUrl + wmsServer + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
+                            		
+                            		requestUrl = proxyUrl + (this.layer.wms.url ? this.layer.wms.url : defaultWMSServer) + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
                             		 	'&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
+                            		break;
+                            	}
                             		Ext.Ajax.request({
                             		 	scope: this,
                             		 	url: requestUrl,
                             		 	success: success
                             		});
-                            	}
+//                            	}
 	                        }, this);
 	                    } else {
+							this.close();
 	                    	Ext.Error.raise({
 	                            msg: 'Cant get metadata for layer' + layerName,
 	                            option: this
 	                        });	            
 	                    }
                     } else {
+						this.close();
                     	Ext.Error.raise({
                             msg: 'Cant get metadata for layer' + layerName,
                             option: this
