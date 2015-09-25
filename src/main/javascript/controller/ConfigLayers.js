@@ -56,7 +56,7 @@ Ext.define('AdmClient.controller.ConfigLayers', {
                 keyup : this.onWMSServiceKeyup,
                 render: function(field) {
                     // Intial select
-                    this.loadWMSCapabilities(field.getValue());
+                    this.loadWMSCapabilities(proxyUrl + field.getValue());
                 }
             },
             '#newGroupLayer' :{
