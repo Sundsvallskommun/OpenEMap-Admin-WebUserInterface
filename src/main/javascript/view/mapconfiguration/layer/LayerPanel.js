@@ -62,7 +62,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 						height : 30,
 		            	width: 500,
 						enableKeyEvents : true,
-						value: typeof wmsGetCapabilities !== 'undefined' ? wmsGetCapabilities : ''
+						value: typeof defaultWMSServer !== 'undefined' ? defaultWMSServer : (wmsGetCapabilities !== undefined ? wmsGetCapabilities : '')
 					},
 					{
 			            xtype : 'treepanel',

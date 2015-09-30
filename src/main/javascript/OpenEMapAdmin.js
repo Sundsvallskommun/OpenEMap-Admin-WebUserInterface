@@ -24,12 +24,19 @@ Copyright Härnösands kommun(C) 2014
  *  
  * Call the method initOpenEMapAdmin(configPath, options)
  * ###[Integration example](https://github.com/Sundsvallskommun/OpenEMap-WebUserInterface/blob/master/README.md)
+ * globals
+ * appPath
+ * defaultWMSServer
+ * wfsServer
+ * proxyUrl
+ * imageBasePath
+ * wmsGetCapabilities deprecated from 1.7.0. Use defaultWMSServer instead. 
  */
-var version = "-1.6";
+var version = "-1.7.0";
 var openEMapScriptLocation;
-var appPath = '/openemapadmin'; 
-var defaultWMSServer = 'https://extmaptest.sundsvall.se/geoserver/wms?request=GetCapabilities&version=1.1.0';
-var wfsServer = 'https://extmaptest.sundsvall.se/geoserver/wfs';
+var appPath = appPath || '/openemapadmin'; 
+var defaultWMSServer = defaultWMSServer || 'https://extmaptest.sundsvall.se/geoserver/wms?request=GetCapabilities&version=1.1.0';
+var wfsServer = wfsServer || 'https://extmaptest.sundsvall.se/geoserver/wfs';
 var proxyUrl = proxyUrl || 'https://extmaptest.sundsvall.se/openemapadmin/adminproxy?url=';
 var imageBasePath = imageBasePath || '';
 
