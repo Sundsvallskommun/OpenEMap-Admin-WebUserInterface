@@ -136,11 +136,13 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 												var fieldsFilter = function(f){
 													return f[0] === attribute;
 												};
+												f = [];
 												for (var attribute in attributesInLayer){
 													var item = fields.filter(fieldsFilter, f);
 													if (item.length > 0) {
-														item[0][1] = item[0][1] === '' ? attributesInLayer[attribute].alias : item[0][1];
-														item[0][2] = true;
+														item[0][1] = item[0][1] === '' ? attributesInLayer[attribute].alias : item[0][1]; // Set alias
+														item[0][2] = true; // make it visible
+														item[0][3] = attributesInLayer[attribute].mainAttribute ? attributesInLayer[attribute].mainAttribute : false; // set mainAttribute
 													}
 												}
 											}
@@ -165,8 +167,10 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
                             	for (var srsName in boundaryBox){
                             		var boundary = boundaryBox[srsName].bbox;
                             		var extent = new OpenLayers.Bounds.fromArray(boundary);
+									var url = (this.layer.wms.url ? this.layer.wms.url : defaultWMS);
+									url = url.split('?')[0]; // returns anything before the first '?'
                             		
-                            		requestUrl = proxyUrl + (this.layer.wms.url ? this.layer.wms.url : defaultWMSServer) + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
+                            		requestUrl = proxyUrl + url + '?' + 'request=GetFeatureInfo&service=WMS&version=1.1.1&layers=' + layerName + '&styles=&srs=' + srsName + '&bbox=' + extent.toString() + 
                             		 	'&width=1&height=1&query_layers=' + layerName + '&info_format=application/vnd.ogc.gml&feature_count=1&x=0&y=0';
                             		break;
                             	}
@@ -262,7 +266,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerDetails', {
 							self.store.data.items[rowIdx].data.mainAttribute = false;
 						}
 						self.store.update();
-						self.update()
+						self.update();
 					}
 				}
 			}]
