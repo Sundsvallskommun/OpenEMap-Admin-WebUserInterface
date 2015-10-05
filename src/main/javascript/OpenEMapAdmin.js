@@ -30,9 +30,9 @@ Copyright Härnösands kommun(C) 2014
  * wfsServer
  * proxyUrl
  * imageBasePath
- * wmsGetCapabilities deprecated from 1.7.0. Use defaultWMSServer instead. 
+ * wmsGetCapabilities deprecated from 1.6.2. Use defaultWMSServer instead. 
  */
-var version = "-1.7.0";
+var version = "-1.6.2";
 var openEMapScriptLocation;
 var appPath = appPath || '/openemapadmin'; 
 var defaultWMSServer = defaultWMSServer || 'https://extmaptest.sundsvall.se/geoserver/wms?request=GetCapabilities&version=1.1.0';
