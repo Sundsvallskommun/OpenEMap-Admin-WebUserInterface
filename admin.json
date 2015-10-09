@@ -36,7 +36,7 @@
         {
             "name": "Karta",
             "wms": {
-                "url": "http://extmaptest.sundsvall.se/geoserver/gwc/service/wms",
+                "url": "https://extmaptest.sundsvall.se/geoserver/gwc/service/wms",
                 "params": {
                     "layers": "Lantmateriet:topowebbkartan_nedtonad",
                     "format": "image/png"
