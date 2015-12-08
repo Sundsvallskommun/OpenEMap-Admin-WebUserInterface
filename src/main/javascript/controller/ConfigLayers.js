@@ -98,7 +98,7 @@ Ext.define('AdmClient.controller.ConfigLayers', {
 
     onWMSServiceKeyup: function(combo, e, eOpts) {
         if(e.getKey() === e.ENTER) {
-            this.loadWMSCapabilities(combo.getValue());
+            this.loadWMSCapabilities(proxyUrl + combo.getValue());
         }
 
     },
