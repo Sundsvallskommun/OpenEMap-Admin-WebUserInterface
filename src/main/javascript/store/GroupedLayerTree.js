@@ -90,7 +90,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
      * @param {Ext.data.Model} data
      */
 	getLayerName: function(data) {
-    	if (data.wms && data.wms.params && (data.wms.params.LAYERS || data.wms.params.layers)) {
+		if (data.wms && data.wms.params && (data.wms.params.LAYERS || data.wms.params.layers)) {
     			return data.wms.params.LAYERS || data.wms.params.layers;
     	} else {
     		return data.name;
@@ -103,6 +103,7 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
 	        if (node.$className === 'GeoExt.data.WmsCapabilitiesLayerModel') {
 		    	node.set('allowDrag', true);
 	        	var layerName = this.getLayerName(node.data);
+	        	var title = node.get('title');
 	        	
     			// Add this node layers and subnodes to map. 
 //				store.cascadeBy(function(node) {
@@ -131,7 +132,10 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
 		    			}
 		    	    	node.set('isGroupLayer', false);
 		    	    	node.set('clickable', false);
-		    	    	
+		    	    	if (title !== '') {
+		    	    		// Use title as name if it exists
+    						node.set('name', title);
+				    	} 
 		    	    	// Add getLayer function to support GeoExt
 		    	    	var layer = node.get('layer');
 		    	    	node.getLayer = function() {

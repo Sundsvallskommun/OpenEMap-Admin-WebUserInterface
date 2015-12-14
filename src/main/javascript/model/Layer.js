@@ -29,6 +29,7 @@ Ext.define('AdmClient.model.Layer', {
     fields : [ 
     	'layerId', 
     	{name: 'name', defaultValue: ''}, 
+    	{name: 'title', defaultValue: ''}, 
     	{name: 'wms', defaultValue: null}, 
     	'group', 
     	'metadata',

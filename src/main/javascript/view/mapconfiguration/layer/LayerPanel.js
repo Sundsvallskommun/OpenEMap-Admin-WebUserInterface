@@ -77,7 +77,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 					        copy: true
 					    },
 			            store : Ext.create('AdmClient.store.WmsCapabilitiesLayerTree'),
-			            displayField: 'name'
+			            displayField: 'title'
 			        }
 				]
 			},
@@ -97,7 +97,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		                expanded: true
 		            }
 		        }),
-		        displayField: 'name',
+	            displayField: 'name',
 		        hideHeaders: false,
 		        tbar : [{
 		        	text : 'Nytt grupplager',
@@ -120,7 +120,7 @@ Ext.define('AdmClient.view.mapconfiguration.layer.LayerPanel', {
 		                tooltip: '&Auml;ndra namn',
 		                handler: function(grid, rowIndex, colIndex) {
 		                	var node = grid.getStore().getAt(rowIndex);
-		                	Ext.Msg.prompt('Name', 'Nytt lagernamn:', function(btn, text){
+		                	Ext.Msg.prompt('Namn', 'Nytt lagernamn:', function(btn, text){
     							if (btn == 'ok'){
         							node.set('name', text.trim());
         							node.store.save();
