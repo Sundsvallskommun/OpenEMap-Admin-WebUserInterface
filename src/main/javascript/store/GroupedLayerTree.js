@@ -124,6 +124,9 @@ Ext.define('AdmClient.store.GroupedLayerTree' ,{
 			    			if (node.raw.metadata && node.raw.metadata.metadataURLs && node.raw.metadata.metadataURLs.length > 0) {
 			    				wms.metadataURL = node.raw.metadata.metadataURLs[0]; 
 			    			}
+			    			if (typeof wms.params.tiled == 'undefined') {
+			    				wms.params.tiled = true;
+			    			}
 			    			node.set('wms', wms);
 			    		}
 		    			
